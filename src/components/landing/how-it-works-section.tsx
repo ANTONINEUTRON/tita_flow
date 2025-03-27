@@ -1,4 +1,4 @@
-import { howItWorks } from "@/data/landing-data";
+import { howItWorks } from "@/lib/data/landing-data";
 
 export function HowItWorksSection() {
   return (

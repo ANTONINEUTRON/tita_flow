@@ -23,7 +23,7 @@ import { MilestoneList } from "@/components/flows/milestone-list";
 import { WeightedDistributionList } from "@/components/flows/weighted-distribution-list";
 import { BasicInformation } from "@/components/flows/basic-information";
 import { CURRENCIES, RULE_TYPES } from "@/lib/flow-constants";
-import { useToast } from "@/hooks/use-toast";
+import { useToast } from "@/lib/hooks/use-toast";
 
 // Schema definition
 const raiseFlowSchema = z.object({

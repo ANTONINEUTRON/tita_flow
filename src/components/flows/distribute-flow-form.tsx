@@ -16,7 +16,7 @@ import { Separator } from "@/components/ui/separator";
 // Custom components
 import { BasicInformation } from "@/components/flows/basic-information";
 import { RULE_TYPES } from "@/lib/flow-constants";
-import { useToast } from "@/hooks/use-toast";
+import { useToast } from "@/lib/hooks/use-toast";
 
 // Schema definition
 const distributeFlowSchema = z.object({

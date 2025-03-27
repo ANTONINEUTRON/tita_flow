@@ -160,15 +160,17 @@ export default function DashboardPage() {
 
                 {/* Create new flow button */}
                 <div className="p-4">
-                    <Button
-                        className={cn(
-                            "w-full justify-center",
-                            !sidebarExpanded && "px-0"
-                        )}
-                    >
-                        <PlusCircleIcon className="h-4 w-4 mr-2" />
-                        {sidebarExpanded && "Create Flow"}
-                    </Button>
+                    <Link href="/app/create">
+                        <Button
+                            className={cn(
+                                "w-full justify-center",
+                                !sidebarExpanded && "px-0"
+                            )}
+                        >
+                            <PlusCircleIcon className="h-4 w-4 mr-2" />
+                            {sidebarExpanded && "Create Flow"}
+                        </Button>
+                    </Link>
                 </div>
 
                 {/* Navigation */}
@@ -257,13 +259,15 @@ export default function DashboardPage() {
 
             {/* FAB for creating flow - mobile only */}
             <div className="md:hidden fixed bottom-20 right-6 z-20">
-                <Button
-                    size="lg"
-                    className="h-14 w-14 rounded-full shadow-lg flex items-center justify-center p-0"
-                >
-                    <PlusCircleIcon className="h-6 w-6" />
-                    <span className="sr-only">Create New Flow</span>
-                </Button>
+                <Link href="/app/create">
+                    <Button
+                        size="lg"
+                        className="h-14 w-14 rounded-full shadow-lg flex items-center justify-center p-0"
+                    >
+                        <PlusCircleIcon className="h-6 w-6" />
+                        <span className="sr-only">Create New Flow</span>
+                    </Button>
+                </Link>
             </div>
 
             {/* Notification Sidebar */}

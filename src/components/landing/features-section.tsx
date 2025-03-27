@@ -1,4 +1,4 @@
-import { features } from "@/data/landing-data";
+import { features } from "@/lib/data/landing-data";
 
 export function FeaturesSection() {
   return (
