@@ -37,6 +37,9 @@ import { FlowDetailSkeleton } from "../../../components/flow_item/FlowSkeleton";
 import { FlowOverview } from "../../../components/flow_item/FlowOverview";
 import { FlowSidebar } from "../../../components/flow_item/sidebar";
 import { MobileFlowHeader, MobileBottomNav } from "../../../components/flow_item/mobile";
+import { ContributorsView } from "@/components/flow_item/ContributorsView";
+import { UpdatesView } from "@/components/flow_item/UpdatesView";
+import { ProposalsView } from "@/components/flow_item/ProposalsView";
 
 export default function FlowDetailPage() {
   const params = useParams();
@@ -45,6 +48,7 @@ export default function FlowDetailPage() {
   const [flow, setFlow] = useState<Flow | null>(null);
   const [loading, setLoading] = useState(true);
   const [activeView, setActiveView] = useState("overview");
+  const [currentUser, setCurrentUser] = useState<any>(null); 
 
   const flowId = params.id as string;
 
@@ -87,6 +91,26 @@ export default function FlowDetailPage() {
   
   const handleNavigation = (view: string) => {
     setActiveView(view);
+  };
+
+  const handleCreateUpdate = async (content: string, attachments: File[]): Promise<void> => {
+    // Logic for creating an update
+  };
+
+  const handleCommentOnUpdate = async (updateId: string, content: string): Promise<void> => {
+    // Logic for commenting on an update
+  };
+
+  const handleLikeUpdate = async (updateId: string): Promise<void> => {
+    // Logic for liking an update
+  };
+
+  const handleCreateProposal = async (title: string, description: string, options: string[], endDate: string): Promise<void> => {
+    // Logic for creating a proposal
+  };
+
+  const handleVoteOnProposal = async (proposalId: string, optionId: string): Promise<void> => {
+    // Logic for voting on a proposal
   };
 
   if (loading) {
@@ -224,8 +248,36 @@ export default function FlowDetailPage() {
             />
           )}
           
-          {/* Other views would be rendered here */}
-          {/* Contributors, Recipients, Updates, Proposals */}
+          {/* Contributors view */}
+          {activeView === "contributors" && (
+            <ContributorsView flow={flow} />
+          )}
+          
+          {/* Recipients view */}
+          {/* {activeView === "recipients" && flow.weightedDistribution && (
+            <RecipientsView flow={flow} />
+          )} */}
+          
+          {/* Updates view */}
+          {activeView === "updates" && (
+            <UpdatesView 
+              flow={flow}
+              currentUser={currentUser}
+              onCreateUpdate={handleCreateUpdate}
+              onComment={handleCommentOnUpdate}
+              onLike={handleLikeUpdate}
+            />
+          )}
+          
+          {/* Proposals view */}
+          {activeView === "proposals" && (
+            <ProposalsView
+              flow={flow}
+              currentUser={currentUser}
+              onCreateProposal={handleCreateProposal}
+              onVote={handleVoteOnProposal}
+            />
+          )}
         </div>
       </div>
 

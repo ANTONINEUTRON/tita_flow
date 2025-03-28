@@ -1,11 +1,10 @@
 "use client";
 
-import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
 import * as z from "zod";
-import { Coins, LucideArrowRight, Plus, Trash2 } from "lucide-react";
+import { Coins, LucideArrowRight, Plus, Trash2, AlertTriangle } from "lucide-react";
 
 // Shadcn UI components
 import { Button } from "@/components/ui/button";
@@ -17,6 +16,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Checkbox } from "@/components/ui/checkbox";
 import { Separator } from "@/components/ui/separator";
 import { ScrollArea } from "@/components/ui/scroll-area";
+import { Badge } from "@/components/ui/badge";
 
 // Custom components
 import { MilestoneList } from "@/components/flows/milestone-list";
@@ -54,6 +54,11 @@ const raiseFlowSchema = z.object({
       percentage: z.string().min(1, { message: "Percentage is required" }),
     })
   ).optional(),
+  votingMechanisms: z.object({
+    normal: z.boolean().optional(),
+    futarchy: z.boolean().optional(),
+    quadratic: z.boolean().optional(),
+  }).optional(),
 });
 
 type RaiseFlowFormProps = {
@@ -81,6 +86,11 @@ export default function RaiseFlowForm({ onCancel }: RaiseFlowFormProps) {
       },
       milestones: [],
       weightedDistribution: [],
+      votingMechanisms: {
+        normal: true,
+        futarchy: false,
+        quadratic: false,
+      },
     },
   });
 
@@ -230,6 +240,13 @@ export default function RaiseFlowForm({ onCancel }: RaiseFlowFormProps) {
 
 // Rules Configuration Component
 function RulesConfiguration({ form }: { form: any }) {
+  // Watch the milestone and weighted fields to conditionally show voting options
+  const showMilestoneVoting = form.watch("rules.milestone");
+  const showWeightedVoting = form.watch("rules.weighted");
+  
+  // Determine if we need to show any voting options
+  const showVotingOptions = showMilestoneVoting || showWeightedVoting;
+  
   return (
     <div className="space-y-4">
       <h3 className="text-lg font-medium">Rules Configuration</h3>
@@ -254,13 +271,13 @@ function RulesConfiguration({ form }: { form: any }) {
                   Direct Transfer
                 </FormLabel>
               </div>
-              <FormDescription>
-                Funds are transferred directly to you as a lump sum
+              <FormDescription className="pl-6">
+                Funds are transferred directly to your account as they are received.
               </FormDescription>
             </FormItem>
           )}
         />
-
+        
         <FormField
           control={form.control}
           name="rules.milestone"
@@ -270,20 +287,30 @@ function RulesConfiguration({ form }: { form: any }) {
                 <FormControl>
                   <Checkbox 
                     checked={field.value} 
-                    onCheckedChange={field.onChange}
+                    onCheckedChange={(checked) => {
+                      field.onChange(checked);
+                      // If unchecked, also clear any voting options
+                      if (!checked && !form.getValues("rules.weighted")) {
+                        form.setValue("votingMechanisms", {
+                          normal: true,
+                          futarchy: false,
+                          quadratic: false
+                        });
+                      }
+                    }}
                   />
                 </FormControl>
                 <FormLabel className="font-medium cursor-pointer">
                   Milestone Based
                 </FormLabel>
               </div>
-              <FormDescription>
-                Funds are released when predefined milestones are achieved
+              <FormDescription className="pl-6">
+                Funds are released when predefined milestones are completed and verified.
               </FormDescription>
             </FormItem>
           )}
         />
-
+        
         <FormField
           control={form.control}
           name="rules.weighted"
@@ -293,20 +320,125 @@ function RulesConfiguration({ form }: { form: any }) {
                 <FormControl>
                   <Checkbox 
                     checked={field.value} 
-                    onCheckedChange={field.onChange}
+                    onCheckedChange={(checked) => {
+                      field.onChange(checked);
+                      // If unchecked, also clear any voting options
+                      if (!checked && !form.getValues("rules.milestone")) {
+                        form.setValue("votingMechanisms", {
+                          normal: true,
+                          futarchy: false,
+                          quadratic: false
+                        });
+                      }
+                    }}
                   />
                 </FormControl>
                 <FormLabel className="font-medium cursor-pointer">
                   Weighted Distribution
                 </FormLabel>
               </div>
-              <FormDescription>
-                Funds are automatically distributed to specified parties
+              <FormDescription className="pl-6">
+                Funds are automatically distributed to multiple recipients based on percentages.
               </FormDescription>
             </FormItem>
           )}
         />
       </div>
+      
+      {/* Voting Mechanism Section - Only shown if milestone or weighted is selected */}
+      {showVotingOptions && (
+        <div className="mt-8 p-4 border rounded-lg bg-muted/40">
+          <h4 className="text-base font-medium mb-2">Voting Mechanisms</h4>
+          <p className="text-sm text-muted-foreground mb-4">
+            Select at least one voting mechanism for proposals related to {showMilestoneVoting ? 'milestones' : ''} 
+            {showMilestoneVoting && showWeightedVoting ? ' and ' : ''}
+            {showWeightedVoting ? 'weighted distribution' : ''}.
+          </p>
+          
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+            <FormField
+              control={form.control}
+              name="votingMechanisms.normal"
+              render={({ field }) => (
+                <FormItem className="space-y-2">
+                  <div className="flex items-center space-x-2">
+                    <FormControl>
+                      <Checkbox 
+                        checked={field.value} 
+                        onCheckedChange={field.onChange}
+                        // At least one voting mechanism must be selected
+                        disabled={field.value && 
+                          !form.getValues("votingMechanisms.futarchy") && 
+                          !form.getValues("votingMechanisms.quadratic")}
+                      />
+                    </FormControl>
+                    <FormLabel className="font-medium cursor-pointer">
+                      Normal Voting
+                    </FormLabel>
+                  </div>
+                  <FormDescription className="pl-6">
+                    Standard one-person-one-vote mechanism. Simple majority wins.
+                  </FormDescription>
+                </FormItem>
+              )}
+            />
+            
+            <FormField
+              control={form.control}
+              name="votingMechanisms.futarchy"
+              render={({ field }) => (
+                <FormItem className="space-y-2">
+                  <div className="flex items-center space-x-2">
+                    <FormControl>
+                      <Checkbox 
+                        checked={field.value} 
+                        onCheckedChange={field.onChange}
+                      />
+                    </FormControl>
+                    <FormLabel className="font-medium cursor-pointer flex items-center">
+                      Futarchy
+                      <Badge variant="outline" className="ml-2">Advanced</Badge>
+                    </FormLabel>
+                  </div>
+                  <FormDescription className="pl-6">
+                    Decision-making using prediction markets to determine which options would lead to the best outcomes.
+                  </FormDescription>
+                </FormItem>
+              )}
+            />
+            
+            <FormField
+              control={form.control}
+              name="votingMechanisms.quadratic"
+              render={({ field }) => (
+                <FormItem className="space-y-2">
+                  <div className="flex items-center space-x-2">
+                    <FormControl>
+                      <Checkbox 
+                        checked={field.value} 
+                        onCheckedChange={field.onChange}
+                      />
+                    </FormControl>
+                    <FormLabel className="font-medium cursor-pointer">
+                      Quadratic Voting
+                    </FormLabel>
+                  </div>
+                  <FormDescription className="pl-6">
+                    Voters can express strength of preference, with cost increasing quadratically with more votes.
+                  </FormDescription>
+                </FormItem>
+              )}
+            />
+          </div>
+          
+          <div className="mt-4 p-3 bg-amber-50 border border-amber-200 rounded-md text-amber-800 text-sm flex items-start gap-2">
+            <AlertTriangle className="h-4 w-4 mt-0.5 flex-shrink-0" />
+            <div>
+              <strong>Note:</strong> Selecting multiple voting mechanisms will allow proposal creators to choose which mechanism to use for each proposal. Normal voting is recommended for most cases.
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

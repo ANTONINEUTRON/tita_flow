@@ -110,6 +110,31 @@ export interface Proposal {
   totalVotes: number;
 }
 
+export interface FlowSettings {
+  communityProposals: boolean;  // Allow non-creators to create proposals
+  communityUpdates: boolean;    // Allow non-creators to post updates
+  communityComments: boolean;   // Allow comments on updates
+  publicContributions: boolean; // Show contributor names publicly
+  minimumContribution?: number; // Minimum contribution amount if set
+  requireEmail: boolean;        // Require email for contributions
+  termsUrl?: string;            // Custom terms and conditions URL
+  allowAnonymous: boolean;      // Allow anonymous contributions
+  notifications: {
+    creator: {
+      newContribution: boolean;
+      milestoneCompleted: boolean;
+      proposalCreated: boolean;
+      commentAdded: boolean;
+    };
+    contributors: {
+      statusUpdate: boolean;
+      newMilestone: boolean;
+      fundingComplete: boolean;
+      proposalCreated: boolean;
+    };
+  };
+}
+
 export interface Flow {
   id: string;
   type: FlowType;
@@ -141,6 +166,7 @@ export interface Flow {
   updates?: Update[];
   proposals?: Proposal[];
   media?: MediaItem[];
+  settings?: FlowSettings;  // Settings configuration for this flow
 }
 
 export type NavItem = {
