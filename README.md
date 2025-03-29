@@ -94,3 +94,26 @@ Build the web app
 ```shell
 pnpm build
 ```
+
+## Architecture Overview
+
+The system architecture is designed as follows:
+
+┌─────────────────┐     ┌─────────────────────────────────────┐     ┌───────────────────┐
+│                 │     │                                     │     │                   │
+│  Next.js App    │────▶│  Backend Services (API Layer)       │────▶│  Blockchain       │
+│  (Frontend)     │◀────│  - Express/Nest.js/Next.js API      │◀────│  Infrastructure   │
+│                 │     │                                     │     │                   │
+└─────────────────┘     └─────────────────────────────────────┘     └───────────────────┘
+         │                               │                                    │
+         │                               │                                    │
+         ▼                               ▼                                    ▼
+┌─────────────────┐     ┌─────────────────────────────────────┐     ┌───────────────────┐
+│                 │     │                                     │     │                   │
+│  Authentication │     │  Database                           │     │  Web3 Services    │
+│  - NextAuth.js  │     │  - PostgreSQL/MongoDB               │     │  - Smart Contracts│
+│  - Web3Auth     │     │  - Redis (for caching)              │     │  - IPFS           │
+│                 │     │                                     │     │                   │
+└─────────────────┘     └─────────────────────────────────────┘     └───────────────────┘
+
+
