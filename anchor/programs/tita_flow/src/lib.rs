@@ -2,17 +2,24 @@ use anchor_lang::prelude::*;
 
 declare_id!("4qgU6nZVrBQdYoaKHNBZju32cX3QqKhhDx23m3VCCuHp");
 
+pub mod instructions;
+
 pub mod states;
+
+pub mod errors;
+
+pub mod events;
+
 
 
 #[program]
 pub mod tita_flow {
     use super::*;
 
-    pub fn initialize_program(ctx: Context<Initialize>) -> Result<()> {
-        msg!("Greetings from: {:?}", ctx.program_id);
-        Ok(())
-    }
+    // pub fn initialize_program(ctx: Context<Initialize>) -> Result<()> {
+    //     msg!("Greetings from: {:?}", ctx.program_id);
+    //     Ok(())
+    // }
 
     pub fn create_flow(ctx: Context<Initialize>) -> Result<()> {
         msg!("Greetings from: {:?}", ctx.program_id);

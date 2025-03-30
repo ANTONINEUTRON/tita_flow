@@ -14,19 +14,86 @@ export type TitaFlow = {
   },
   "instructions": [
     {
-      "name": "initialize",
+      "name": "close",
       "discriminator": [
-        175,
-        175,
-        109,
-        31,
-        13,
-        152,
-        155,
-        237
+        98,
+        165,
+        201,
+        177,
+        108,
+        65,
+        206,
+        96
       ],
       "accounts": [],
       "args": []
+    },
+    {
+      "name": "contribute",
+      "discriminator": [
+        82,
+        33,
+        68,
+        131,
+        32,
+        0,
+        205,
+        95
+      ],
+      "accounts": [],
+      "args": []
+    },
+    {
+      "name": "createFlow",
+      "discriminator": [
+        139,
+        104,
+        255,
+        32,
+        61,
+        236,
+        41,
+        31
+      ],
+      "accounts": [],
+      "args": []
+    },
+    {
+      "name": "createProposal",
+      "discriminator": [
+        132,
+        116,
+        68,
+        174,
+        216,
+        160,
+        198,
+        22
+      ],
+      "accounts": [],
+      "args": []
+    },
+    {
+      "name": "vote",
+      "discriminator": [
+        227,
+        110,
+        155,
+        23,
+        136,
+        126,
+        172,
+        25
+      ],
+      "accounts": [],
+      "args": []
+    }
+  ],
+  "errors": [
+    {
+      "code": 6000,
+      "name": "invalidAmount",
+      "msg": "Invalid amount"
     }
   ]
 };
