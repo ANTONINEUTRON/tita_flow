@@ -1,17 +1,16 @@
-import { Flow } from "../../lib/types/types";
-import { formatCurrency, formatDate, getStatusBadge, getStatusColor } from "../../lib/utils";
+import { useState, useRef } from "react";
 import { 
-  Card, CardContent, CardDescription, CardHeader, CardTitle 
-} from "@/components/ui/card";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Button } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
-import { 
-  CheckCircle2, ChevronLeft, ChevronRight, Clock, Coins, DollarSign, 
-  Calendar, FileText, ExternalLink, Users 
+  Calendar, Users, DollarSign, CheckCircle2, ChevronLeft, ChevronRight, FileText, 
+  ExternalLink, Coins, PieChart, Percent
 } from "lucide-react";
-import { useRef, useState } from "react";
-import { cn } from "@/lib/utils";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
+import { Progress } from "@/components/ui/progress";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { cn, formatCurrency, formatDate, formatPercentage } from "@/lib/utils";
+import { Flow, WeightedRecipient } from "@/lib/types/types";
 
 interface FlowOverviewProps {
   flow: Flow;
@@ -30,13 +29,21 @@ export function FlowOverview({ flow, onViewMilestones, onViewRecipients }: FlowO
         <TabsList className="w-full">
           <TabsTrigger value="details" className="flex-1">Details</TabsTrigger>
           {flow.milestones && <TabsTrigger value="milestones" className="flex-1">Milestones</TabsTrigger>}
+          {flow.rules?.weighted && flow.weightedDistribution && (
+            <TabsTrigger value="recipients" className="flex-1">Recipients</TabsTrigger>
+          )}
         </TabsList>
         
         {/* Details Tab */}
         <TabsContent value="details" className="space-y-6 pt-4">
           <Card>
             <CardHeader>
-              <CardTitle>About This Flow</CardTitle>
+              <div className="flex">
+                <h1 className="text-3xl font-bold tracking-tight">{flow.title}</h1>
+                <div className="mx-2">
+                  <Badge className="mt-1">{flow.status}</Badge>
+                </div>
+              </div>
             </CardHeader>
             <CardContent>
               <p className="whitespace-pre-line">{flow.description}</p>
@@ -48,8 +55,8 @@ export function FlowOverview({ flow, onViewMilestones, onViewRecipients }: FlowO
             <Card>
               <CardHeader className="flex flex-row items-center justify-between pb-2">
                 <div>
-                  <CardTitle>Media</CardTitle>
-                  <CardDescription>Photos and videos related to this flow</CardDescription>
+                  {/* <CardTitle>Media</CardTitle> */}
+                  <CardDescription>Photos and videos</CardDescription>
                 </div>
                 <div className="flex items-center gap-1">
                   <Button
@@ -300,7 +307,7 @@ export function FlowOverview({ flow, onViewMilestones, onViewRecipients }: FlowO
                           <Button 
                             variant="link" 
                             className="px-0" 
-                            onClick={onViewRecipients}
+                            onClick={() => setActiveTab("recipients")}
                           >
                             View recipients
                           </Button>
@@ -375,7 +382,232 @@ export function FlowOverview({ flow, onViewMilestones, onViewRecipients }: FlowO
             </Card>
           </TabsContent>
         )}
+        
+        {/* Recipients Tab */}
+        {flow.rules?.weighted && flow.weightedDistribution && (
+          <TabsContent value="recipients" className="space-y-6 pt-4">
+            <Card>
+              <CardHeader>
+                <CardTitle>Recipients</CardTitle>
+                <CardDescription>
+                  Funds are distributed to these recipients based on their allocation percentage
+                </CardDescription>
+              </CardHeader>
+              <CardContent>
+                {/* Distribution Chart */}
+                <div className="mb-8">
+                  <h3 className="text-sm font-medium mb-2 flex items-center gap-2">
+                    <PieChart className="h-4 w-4" />
+                    Distribution Breakdown
+                  </h3>
+                  <div className="h-8 w-full flex rounded-full overflow-hidden">
+                    {flow.weightedDistribution.map((recipient, index) => (
+                      <div
+                        key={recipient.id}
+                        className="h-full transition-all duration-300 hover:opacity-80"
+                        style={{
+                          width: `${recipient.percentage}%`,
+                          backgroundColor: getRecipientColor(index),
+                        }}
+                        title={`${recipient.username}: ${recipient.percentage}%`}
+                      />
+                    ))}
+                  </div>
+                  <div className="flex justify-between mt-2 text-xs text-muted-foreground">
+                    <div>0%</div>
+                    <div>100%</div>
+                  </div>
+                </div>
+                
+                {/* Recipients List */}
+                <div className="space-y-4">
+                  {flow.weightedDistribution.map((recipient, index) => (
+                    <div key={recipient.id} className="border rounded-lg p-4 hover:bg-muted/30 transition-colors">
+                      <div className="flex items-start gap-4">
+                        <Avatar className="h-10 w-10">
+                          <AvatarImage src={recipient.avatarUrl} />
+                          <AvatarFallback style={{ backgroundColor: getRecipientColor(index) }}>
+                            {recipient.username.substring(0, 2).toUpperCase()}
+                          </AvatarFallback>
+                        </Avatar>
+                        
+                        <div className="flex-1 min-w-0">
+                          <div className="flex flex-wrap items-center justify-between gap-2 mb-1">
+                            <h4 className="font-medium">{recipient.username}</h4>
+                            <Badge variant="outline" className="flex items-center gap-1">
+                              <Percent className="h-3 w-3" />
+                              {recipient.percentage}%
+                            </Badge>
+                          </div>
+                          
+                          {/* <p className="text-sm text-muted-foreground mb-3">
+                            {recipient.description}
+                          </p> */}
+                          
+                          <div className="grid grid-cols-2 gap-2 text-sm">
+                            <div>
+                              <span className="text-muted-foreground">Wallet: </span>
+                              <span className="font-mono">{formatShortAddress(recipient.wallet)}</span>
+                            </div>
+                            {recipient.receivedAmount !== undefined && (
+                              <div className="text-right">
+                                <span className="text-muted-foreground">Received: </span>
+                                <span className="font-medium">
+                                  {formatCurrency(recipient.receivedAmount, flow.currencySymbol)}
+                                </span>
+                              </div>
+                            )}
+                          </div>
+                          
+                          {/* {recipient.receivedAmount !== undefined && recipient.amount !== undefined && (
+                            <div className="mt-3">
+                              <div className="flex justify-between text-xs mb-1">
+                                <span>Progress</span>
+                                <span>{Math.round((recipient.receivedAmount / recipient.amount) * 100)}%</span>
+                              </div>
+                              <Progress 
+                                value={(recipient.receivedAmount / recipient.amount) * 100} 
+                                className="h-2"
+                                style={{ 
+                                  backgroundColor: "hsl(var(--muted))",
+                                  "--progress-foreground": getRecipientColor(index)
+                                } as React.CSSProperties}
+                              />
+                            </div>
+                          )} */}
+                          
+                          {recipient.links && recipient.links.length > 0 && (
+                            <div className="mt-3 flex flex-wrap gap-2">
+                              {recipient.links.map((link, i) => (
+                                <Button 
+                                  key={i} 
+                                  variant="outline" 
+                                  size="sm" 
+                                  className="h-7 gap-1 text-xs"
+                                  asChild
+                                >
+                                  <a href={link.url} target="_blank" rel="noopener noreferrer">
+                                    {link.title}
+                                    <ExternalLink className="h-3 w-3" />
+                                  </a>
+                                </Button>
+                              ))}
+                            </div>
+                          )}
+                        </div>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </CardContent>
+            </Card>
+            
+            {/* Distribution History */}
+            {flow.distributionHistory && flow.distributionHistory.length > 0 && (
+              <Card>
+                <CardHeader>
+                  <CardTitle>Distribution History</CardTitle>
+                  <CardDescription>Record of funds distributed to recipients</CardDescription>
+                </CardHeader>
+                <CardContent>
+                  <div className="rounded-md border">
+                    <table className="min-w-full divide-y divide-border">
+                      <thead className="bg-muted/50">
+                        <tr>
+                          <th scope="col" className="px-4 py-3 text-left text-xs font-medium text-muted-foreground">Date</th>
+                          <th scope="col" className="px-4 py-3 text-left text-xs font-medium text-muted-foreground">Recipient</th>
+                          <th scope="col" className="px-4 py-3 text-right text-xs font-medium text-muted-foreground">Amount</th>
+                          <th scope="col" className="px-4 py-3 text-right text-xs font-medium text-muted-foreground">Transaction</th>
+                        </tr>
+                      </thead>
+                      <tbody className="bg-background divide-y divide-border">
+                        {flow.distributionHistory.map((distribution) => (
+                          <tr key={distribution.id}>
+                            <td className="px-4 py-3 whitespace-nowrap text-sm text-muted-foreground">
+                              {formatDate(distribution.date)}
+                            </td>
+                            <td className="px-4 py-3 whitespace-nowrap text-sm">
+                              {distribution.recipientName}
+                            </td>
+                            <td className="px-4 py-3 whitespace-nowrap text-sm font-medium text-right">
+                              {formatCurrency(distribution.amount, flow.currencySymbol)}
+                            </td>
+                            <td className="px-4 py-3 whitespace-nowrap text-sm text-right">
+                              <Button 
+                                variant="ghost" 
+                                size="sm" 
+                                className="h-7 px-2 text-muted-foreground hover:text-foreground"
+                                asChild
+                              >
+                                <a 
+                                  href={`https://explorer.solana.com/tx/${distribution.transactionHash}`} 
+                                  target="_blank"
+                                  rel="noopener noreferrer"
+                                >
+                                  {formatShortAddress(distribution.transactionHash)}
+                                  <ExternalLink className="h-3 w-3 ml-1" />
+                                </a>
+                              </Button>
+                            </td>
+                          </tr>
+                        ))}
+                      </tbody>
+                    </table>
+                  </div>
+                </CardContent>
+              </Card>
+            )}
+          </TabsContent>
+        )}
       </Tabs>
     </div>
   );
+}
+
+// Helper functions
+function getStatusBadge(status: string) {
+  switch (status) {
+    case 'active':
+      return <Badge>Active</Badge>;
+    case 'completed':
+      return <Badge variant="secondary">Completed</Badge>;
+    case 'cancelled':
+      return <Badge variant="destructive">Cancelled</Badge>;
+    case 'paused':
+      return <Badge variant="outline">Paused</Badge>;
+    default:
+      return <Badge variant="outline">Draft</Badge>;
+  }
+}
+
+function getStatusColor(status: string) {
+  switch (status) {
+    case 'completed':
+      return 'bg-green-500';
+    case 'active':
+      return 'bg-blue-500';
+    case 'cancelled':
+      return 'bg-red-500';
+    default:
+      return 'bg-gray-400';
+  }
+}
+
+function getRecipientColor(index: number): string {
+  const colors = [
+    '#3b82f6', // blue-500
+    '#10b981', // emerald-500
+    '#8b5cf6', // violet-500
+    '#f59e0b', // amber-500
+    '#ef4444', // red-500
+    '#06b6d4', // cyan-500
+    '#ec4899', // pink-500
+  ];
+  
+  return colors[index % colors.length];
+}
+
+function formatShortAddress(address: string): string {
+  if (!address) return '';
+  return `${address.substring(0, 6)}...${address.substring(address.length - 4)}`;
 }

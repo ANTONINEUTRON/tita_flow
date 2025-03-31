@@ -12,10 +12,9 @@ export function FlowHeader({ flow }: FlowHeaderProps) {
   return (
     <CardHeader className="pb-4">
       <div className="space-y-1">
-        <CardTitle className="text-2xl font-bold truncate" title={flow.title}>
+        {/* <CardTitle className="text-2xl font-bold truncate" title={flow.title}>
           {flow.title}
-        </CardTitle>
-        <Badge className="mt-1">{flow.status}</Badge>
+        </CardTitle> */}
         <div className="flex items-center text-muted-foreground text-sm mt-2">
           <Avatar className="h-5 w-5 mr-2">
             <AvatarImage src={flow.creator.avatarUrl} alt={flow.creator.name} />

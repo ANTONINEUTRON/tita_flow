@@ -106,6 +106,9 @@ export function getStatusBadge(status: FlowStatus | MilestoneStatus): JSX.Elemen
   return <Badge variant={variant}> {formatStatusText(status.toString())} </Badge>;
 }
 
+export function formatPercentage(value: number): string {
+  return `${(value * 100).toFixed(2)}%`;
+}
 
 export function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs))

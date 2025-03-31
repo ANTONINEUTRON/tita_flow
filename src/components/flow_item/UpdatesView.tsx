@@ -21,11 +21,11 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { EllipsisVertical } from "lucide-react";
-import { Flow } from "@/lib/types/types";
+import { DistributeFlow, Flow, Update } from "@/lib/types/types";
 import { formatDate } from "@/lib/utils";
 
 interface UpdatesViewProps {
-  flow: Flow;
+  flow: Flow | DistributeFlow;
   currentUser?: {
     id: string;
     name: string;
@@ -199,7 +199,7 @@ export function UpdatesView({
             </Button>
           </Card>
         ) : (
-          updates.map((update) => (
+          updates.map((update: Update) => (
             <Card key={update.id} className="overflow-hidden">
               <CardHeader className="pb-3">
                 <div className="flex justify-between">
@@ -216,7 +216,7 @@ export function UpdatesView({
                         )}
                       </div>
                       <p className="text-sm text-muted-foreground">
-                        {formatDate(update.timestamp)}
+                        {formatDate(update?.createdAt ?? "")}
                       </p>
                     </div>
                   </div>
@@ -305,7 +305,7 @@ export function UpdatesView({
                                     )}
                                   </div>
                                   <span className="text-xs text-muted-foreground">
-                                    {formatDate(comment.timestamp)}
+                                    {formatDate(comment?.createdAt ?? "")}
                                   </span>
                                 </div>
                                 <p className="text-sm">{comment.content}</p>

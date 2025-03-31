@@ -1,3 +1,4 @@
+import { CANCELLED } from "dns";
 import { LucideIcon } from "lucide-react";
 
 export enum FlowType {
@@ -10,7 +11,9 @@ export enum FlowStatus {
   ACTIVE = "active",
   FUNDED = "funded",
   COMPLETED = "completed",
-  EXPIRED = "expired"
+  EXPIRED = "expired",
+  CANCELLED = "cancelled",
+  PAUSED = "paused"
 }
 
 export enum MilestoneStatus {
@@ -43,6 +46,9 @@ export interface WeightedRecipient {
   username: string;
   avatarUrl?: string;
   percentage: number;
+  receivedAmount: number;
+  links?: { title: string; url: string; }[];
+  wallet: "fghhjjj...hhhjj";
 }
 
 export interface MediaItem {
@@ -62,12 +68,13 @@ export interface Update {
     avatarUrl?: string;
   };
   content: string;
-  timestamp: string;
+  createdAt?: string;
   attachments?: {
     name: string;
     url: string;
     type: string;
   }[];
+  likes?: number;
   comments?: Comment[];
 }
 
@@ -79,7 +86,7 @@ export interface Comment {
     avatarUrl?: string;
   };
   content: string;
-  timestamp: string;
+  createdAt?: string;
 }
 
 export interface ProposalOption {
@@ -160,6 +167,13 @@ export interface Flow {
     milestone: boolean;
     weighted: boolean;
   };
+  distributionHistory?: {
+    id: string;
+    date: string;
+    recipientName: string;
+    amount: number;
+    transactionHash: string;
+  }[];
   milestones?: Milestone[];
   contributors?: Contributor[];
   weightedDistribution?: WeightedRecipient[];
@@ -167,6 +181,70 @@ export interface Flow {
   proposals?: Proposal[];
   media?: MediaItem[];
   settings?: FlowSettings;  // Settings configuration for this flow
+  pendingApplications?: Application[];
+  acceptedRecipients?: Recipient[];
+}
+
+
+
+export interface DistributeFlow {
+  id: string;
+  status: FlowStatus;
+  title: string;
+  description: string;
+  raised: number;
+  currency: string;
+  currencySymbol: string;
+  goal: number;
+  media?: MediaItem[];
+  treasuryAddress: string;
+  acceptedRecipients?: Recipient[];
+  pendingApplications?: Application[];
+  creator: {
+    id: string;
+    name: string;
+    avatar?: string;
+    username: string;
+    bio?: string;
+  };
+  updates?: Update[];
+  applicationSuccessRate: number;
+  createdAt: string;
+  startDate: string;
+  endDate?: string;
+}
+
+
+export interface Application {
+  id: string;
+  flowId: string;
+  applicantId: string;
+  applicantName: string;
+  applicantWallet: string;
+  applicantAvatarUrl: string;
+  requestedAmount: number;
+  requestedPercentage: number;
+  summary: string;
+  proposal: string;
+  links: { title: string; url: string; }[];
+  status: "pending" | "approved" | "rejected";
+  appliedAt: string;
+  reviewedAt?: string;
+  reviewNotes?: string;
+}
+
+export interface Recipient {
+  id: string;
+  name: string;
+  description: string;
+  percentage: number;
+  amount: number;
+  received: number;
+  receiver: {
+    id: string;
+    name: string;
+    avatarUrl?: string;
+  };
 }
 
 export type NavItem = {

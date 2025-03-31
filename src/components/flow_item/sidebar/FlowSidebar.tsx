@@ -58,7 +58,7 @@ export function FlowSidebar({
         </CardContent>
 
         <CardFooter>
-          {flow.type === FlowType.RAISE ? (
+          {flow.type === FlowType.RAISE ? (// Instead check if 
             <Button className="w-full" onClick={onContribute}>
               <Coins className="mr-2 h-4 w-4" />
               Contribute to Flow

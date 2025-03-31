@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { useParams, useRouter } from "next/navigation";
 import Link from "next/link";
 import React from "react";
@@ -11,10 +11,13 @@ import {
   FileText,
   LayoutDashboard,
   MessageSquare,
-  MoreHorizontal,
   Share2,
   Users,
+  Users2,
   Vote,
+  ClipboardCheck,
+  LucideIcon,
+  MoreHorizontal,
 } from "lucide-react";
 
 // UI Components
@@ -31,7 +34,7 @@ import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { useToast } from "@/lib/hooks/use-toast";
 
 // Local imports
-import { Flow, FlowType, NavItem } from "../../../lib/types/types";
+import { Flow, FlowType, } from "../../../lib/types/types";
 import { fetchFlowData } from "../../../lib/data/flow_item_data";
 import { FlowDetailSkeleton } from "../../../components/flow_item/FlowSkeleton";
 import { FlowOverview } from "../../../components/flow_item/FlowOverview";
@@ -40,6 +43,18 @@ import { MobileFlowHeader, MobileBottomNav } from "../../../components/flow_item
 import { ContributorsView } from "@/components/flow_item/ContributorsView";
 import { UpdatesView } from "@/components/flow_item/UpdatesView";
 import { ProposalsView } from "@/components/flow_item/ProposalsView";
+import { formatCurrency, formatDate } from "@/lib/utils";
+import { RecipientsView } from "@/components/distribute/recipients-view";
+import ApplicationsView from "@/components/distribute/applications-view";
+
+// Update the NavItem interface
+interface NavItem {
+  title: string;
+  href: string;
+  icon: LucideIcon;
+  badge?: number;
+  highlight?: boolean; // Add this property
+}
 
 export default function FlowDetailPage() {
   const params = useParams();
@@ -48,7 +63,9 @@ export default function FlowDetailPage() {
   const [flow, setFlow] = useState<Flow | null>(null);
   const [loading, setLoading] = useState(true);
   const [activeView, setActiveView] = useState("overview");
-  const [currentUser, setCurrentUser] = useState<any>(null); 
+  const [currentUser, setCurrentUser] = useState<any>(null);
+  const [dialogContent, setDialogContent] = useState<any>(null);
+  const [isDialogOpen, setIsDialogOpen] = useState(false);
 
   const flowId = params.id as string;
 
@@ -81,6 +98,48 @@ export default function FlowDetailPage() {
     router.push(`/flow/${flowId}/apply`);
   };
 
+  const handleViewApplication = useCallback(() => {
+    if (!flow) return;
+    
+    // Find the user's application
+    const userApplication = flow.pendingApplications?.find(
+      (app) => app.applicantId === currentUser?.id
+    );
+
+    if (userApplication) {
+      // Open a dialog to view the application or navigate to application detail page
+      setDialogContent({
+        title: "Your Application",
+        content: (
+          <div className="space-y-4">
+            <p>
+              <strong>Status:</strong> {userApplication.status}
+            </p>
+            <p>
+              <strong>Requested Amount:</strong>{" "}
+              {formatCurrency(
+                userApplication.requestedAmount,
+                flow.currency
+              )}
+            </p>
+            <p>
+              <strong>Submitted:</strong> {formatDate(userApplication.appliedAt)}
+            </p>
+            <div>
+              <h4 className="font-medium mb-1">Your Proposal</h4>
+              <div className="prose prose-sm max-w-none">
+                <div
+                  dangerouslySetInnerHTML={{ __html: userApplication.proposal }}
+                />
+              </div>
+            </div>
+          </div>
+        ),
+      });
+      setIsDialogOpen(true);
+    }
+  }, [flow, currentUser, setDialogContent, setIsDialogOpen]);
+
   const handleShareFlow = () => {
     navigator.clipboard.writeText(window.location.href);
     toast({
@@ -88,7 +147,7 @@ export default function FlowDetailPage() {
       description: "Flow link copied to clipboard!",
     });
   };
-  
+
   const handleNavigation = (view: string) => {
     setActiveView(view);
   };
@@ -137,9 +196,9 @@ export default function FlowDetailPage() {
   }
 
   const progress = flow.goal ? Math.min(100, Math.round((flow.raised! / flow.goal) * 100)) : 0;
-  const remainingDays = flow.endDate ?
-    Math.max(0, Math.ceil((new Date(flow.endDate).getTime() - new Date().getTime()) / (1000 * 60 * 60 * 24))) :
-    null;
+  const remainingDays = flow.endDate
+    ? Math.max(0, Math.ceil((new Date(flow.endDate).getTime() - new Date().getTime()) / (1000 * 60 * 60 * 24)))
+    : null;
 
   // Navigation items
   const navItems: NavItem[] = [
@@ -149,22 +208,41 @@ export default function FlowDetailPage() {
     { title: "Proposals", href: "proposals", icon: Vote, badge: flow.proposals?.length || 0 },
   ];
 
-  if (flow.weightedDistribution) {
-    navItems.splice(2, 0, { title: "Recipients", href: "recipients", icon: Users });
-  }
-  
+  // Add dedicated sections for distribute flows
+  // if (flow.type === FlowType.DISTRIBUTE) {
+    // Add Applications tab after Recipients
+    // navItems.splice(2, 0, {
+    //   title: "Applications",
+    //   href: "applications",
+    //   icon: ClipboardCheck,
+    //   badge: flow.pendingApplications?.length || 0,
+    //   highlight: (flow.pendingApplications || []).length > 0 && currentUser?.isCreator, // Highlight for creators if there are pending applications
+    // });
+  // }
+  // For Raise flows with weighted distribution, add Recipients tab
+  // else if (flow.weightedDistribution) {
+    // navItems.splice(2, 0, {
+    //   title: "Recipients",
+    //   href: "recipients",
+    //   icon: Users2,
+    // });
+  // }
+
   // For mobile nav, we'll limit to 4 items max
   const mobileNavItems = [...navItems].slice(0, 4);
-  
+
+  // Determine if the user has applied
+  const hasApplied =
+    flow.type === FlowType.DISTRIBUTE &&
+    flow.pendingApplications?.some((app) => app.applicantId === currentUser?.id);
+
   // Action button text based on flow type
-  const actionButtonText = flow.type === FlowType.RAISE 
-    ? "Contribute" 
-    : "Apply";
-  
+  const actionButtonText =
+    flow.type === FlowType.RAISE ? "Contribute" : hasApplied ? "View Application" : "Apply";
+
   // Action handler based on flow type
-  const handlePrimaryAction = flow.type === FlowType.RAISE 
-    ? handleContribute 
-    : handleApply;
+  const handlePrimaryAction =
+    flow.type === FlowType.RAISE ? handleContribute : hasApplied ? handleViewApplication : handleApply;
 
   // Render page
   return (
@@ -231,36 +309,35 @@ export default function FlowDetailPage() {
         />
 
         {/* Mobile title and progress */}
-        <MobileFlowHeader 
-          flow={flow}
-          progress={progress}
-          remainingDays={remainingDays}
-        />
+        <MobileFlowHeader flow={flow} progress={progress} remainingDays={remainingDays} />
 
         {/* Main content area */}
         <div className="flex-1">
           {/* Overview content */}
           {activeView === "overview" && (
-            <FlowOverview 
-              flow={flow} 
-              onViewMilestones={() => setActiveView("milestones")} 
-              onViewRecipients={() => setActiveView("recipients")} 
+            <FlowOverview
+              flow={flow}
+              onViewMilestones={() => setActiveView("milestones")}
+              onViewRecipients={() => setActiveView("recipients")}
             />
           )}
-          
+
           {/* Contributors view */}
-          {activeView === "contributors" && (
-            <ContributorsView flow={flow} />
-          )}
-          
-          {/* Recipients view */}
-          {/* {activeView === "recipients" && flow.weightedDistribution && (
-            <RecipientsView flow={flow} />
+          {activeView === "contributors" && <ContributorsView flow={flow} />}
+
+          {/* Recipients view DISTRIBUTE*/}
+          {/* {activeView === "recipients" && (
+            <RecipientsView flow={flow} isCreator={currentUser?.isCreator} />
           )} */}
-          
+
+          {/* Applications view DISTRIBUTE*/}
+          {/* {activeView === "applications" && (
+            <ApplicationsView flow={flow} isCreator={currentUser?.isCreator} />
+          )} */}
+
           {/* Updates view */}
           {activeView === "updates" && (
-            <UpdatesView 
+            <UpdatesView
               flow={flow}
               currentUser={currentUser}
               onCreateUpdate={handleCreateUpdate}
@@ -268,7 +345,7 @@ export default function FlowDetailPage() {
               onLike={handleLikeUpdate}
             />
           )}
-          
+
           {/* Proposals view */}
           {activeView === "proposals" && (
             <ProposalsView
@@ -293,3 +370,4 @@ export default function FlowDetailPage() {
     </div>
   );
 }
+
