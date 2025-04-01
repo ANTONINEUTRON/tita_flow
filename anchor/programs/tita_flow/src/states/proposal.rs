@@ -14,6 +14,7 @@ pub struct Proposal {
     pub total_votes: u64,            // Total votes cast
     pub status: ProposalStatus,      // Current status
     pub voting_mechanism: VotingMechanism, // Voting type
+    pub bump: u8
 }
 
 
