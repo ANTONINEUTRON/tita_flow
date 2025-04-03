@@ -16,11 +16,9 @@ pub mod tita_flow {
 
     use super::*;
 
-    // pub fn initialize_program(ctx: Context<Initialize>) -> Result<()> {
-    //     msg!("Greetings from: {:?}", ctx.program_id);
-    //     Ok(())
-    // }
-
+    // Create a RAISE and DISTRIBUTE flow
+    // RAISE FLOW - for accepting contributions from different users
+    // DISTRIBUTE FLOW - can only have one donor, the grant it is tied to 
     pub fn create_flow(
         ctx: Context<CreateFlow>,
         flow_id: String,
@@ -45,7 +43,18 @@ pub mod tita_flow {
         Ok(())
     }
 
-    pub fn contribute(ctx: Context<Initialize>) -> Result<()> {
+    pub fn contribute_direct(ctx: Context<ContributeDirect>) -> Result<()> {
+        Ok(())
+    }
+
+
+    pub fn contribute_milestones(ctx: Context<Initialize>) -> Result<()> {
+        msg!("Greetings from: {:?}", ctx.program_id);
+        Ok(())
+    }
+
+
+    pub fn contribute_weighted(ctx: Context<Initialize>) -> Result<()> {
         msg!("Greetings from: {:?}", ctx.program_id);
         Ok(())
     }

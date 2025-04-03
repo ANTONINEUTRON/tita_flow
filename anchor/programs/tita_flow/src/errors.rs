@@ -23,4 +23,35 @@ pub enum TitaErrors {
     
     #[msg("Incompatible rules combination")]
     IncompatibleRules,
+
+    //contribute
+    #[msg("Flow has ended")]
+    FlowEnded,
+
+    #[msg("Flow is inactive")]
+    InactiveFlow,
+
+    #[msg("Invalid Owner")]
+    InvalidOwner,
+
+    #[msg("Invalid Mint")]
+    InvalidMint,
+
+    #[msg("Empty distribution")]
+    EmptyDistribution,
+
+    #[msg("Invalid amount")]
+    InvalidAmount,
+
+    #[msg("Math overflow")]
+    MathOverflow,
+
+    #[msg("Distribution exceeds contribution amount")]
+    DistributionExceedsContribution,
+
+    #[msg("Rule not supported")]
+    RuleNotSupported,
+
+    #[msg("Insufficient funds")]
+    InsufficientFunds
 }
