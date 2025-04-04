@@ -5,7 +5,9 @@ import {
   createMint, 
   getOrCreateAssociatedTokenAccount,
   mintTo,
-  getAccount
+  getAccount,
+  mintToChecked,
+  createAssociatedTokenAccount
 } from '@solana/spl-token';
 import { before, describe, it } from 'node:test';
 import assert from 'assert';
@@ -23,6 +25,7 @@ describe('TitaFlow', () => {
   let userTokenAccount: web3.PublicKey;
   let flowPda: web3.PublicKey;
   let vaultPda: web3.PublicKey;
+  let creatorTokenAccount: web3.PublicKey;
   const flowId = "test-flow-1";
   
   // Setup: Create token mint and accounts before tests
@@ -75,6 +78,37 @@ describe('TitaFlow', () => {
       program.programId
     );
     vaultPda = vaultAddress;
+
+    // Create token accounts for both user and creator
+    const userAta = await getOrCreateAssociatedTokenAccount(
+      provider.connection,
+      wallet.payer,
+      tokenMint,
+      wallet.publicKey
+    );
+    userTokenAccount = userAta.address;
+
+    // For simplicity, in the test we'll use the same wallet as creator
+    // In a real scenario, this would be a different wallet
+    const creatorAta = await getOrCreateAssociatedTokenAccount(
+      provider.connection,
+      wallet.payer,
+      tokenMint,
+      wallet.publicKey // Same as creator in this test
+    );
+    creatorTokenAccount = creatorAta.address;
+
+    // Mint some tokens to the user's account for testing
+    await mintToChecked(
+      provider.connection,
+      wallet.payer,
+      tokenMint,
+      userTokenAccount,
+      wallet.publicKey, // Mint authority (from the setup)
+      1_000_000_000, // 1000 tokens
+      6 // Decimals
+    );
+
   });
 
   describe('Flow Creation', () => {
@@ -109,8 +143,6 @@ describe('TitaFlow', () => {
           systemProgram: web3.SystemProgram.programId
         })
         .rpc();
-      
-      console.log("Flow created with transaction signature", tx);
 
       // Verify the flow was created correctly
       const flowAccount = await program.account.flow.fetch(flowPda);
@@ -185,4 +217,138 @@ describe('TitaFlow', () => {
       }
     });
   });
+
+
+
+  describe('Direct Contribution', () => {
+    // let userTokenAccount: web3.PublicKey;
+    // let flowPda: web3.PublicKey;
+    // let vaultPda: web3.PublicKey;
+    // const flowId = "test-direct-flow";
+    let contributionPda: web3.PublicKey;
+    let contributionBump: number;
+    const contributionAmount = new BN(100_000_000); // 100 tokens
+    
+
+    it('should successfully contribute directly to a flow', async () => {
+      // Generate a timestamp for the contribution PDA
+      const currentTimestamp = new BN(Math.floor(Date.now() / 1000));
+      
+      // Get the current contributor count and add 1 to match what the program does
+      const flowBefore = await program.account.flow.fetch(flowPda);
+      const contributorCount = flowBefore.contributorCount + 1; // Add 1 to match the program
+
+      // Now find the contribution PDA with correctly matching seeds
+      const [contributionAddress, bump] = web3.PublicKey.findProgramAddressSync(
+        [
+          Buffer.from("tita-contribution"),
+          flowPda.toBuffer(),
+          wallet.publicKey.toBuffer(),
+          new BN(contributorCount).toArrayLike(Buffer, 'le', 4) // Use proper 4-byte little-endian buffer
+        ],
+        program.programId
+      );
+      contributionPda = contributionAddress;
+      contributionBump = bump;
+
+      // Get initial balances
+      const userTokenAccountBefore = await getAccount(
+        provider.connection,
+        userTokenAccount
+      );
+      
+      const vaultBefore = await getAccount(
+        provider.connection,
+        vaultPda
+      );
+      
+      // Get initial flow state
+      const initialRaised = flowBefore.raised;
+      const initialContributorCount = flowBefore.contributorCount;
+      
+      // Execute the direct contribution
+      const tx = await program.methods
+        .contributeDirect(contributionAmount)
+        .accountsPartial({
+          contributor: wallet.publicKey,
+          flow: flowPda,
+          vault: vaultPda,
+          contribution: contributionPda,
+          userTokenAccount: userTokenAccount,
+          tokenMint: tokenMint,
+          tokenProgram: anchor.utils.token.TOKEN_PROGRAM_ID,
+          systemProgram: web3.SystemProgram.programId
+        })
+        .rpc();
+
+      // Verify user token account balance was reduced
+      const userTokenAccountAfter = await getAccount(
+        provider.connection,
+        userTokenAccount
+      );
+      assert.strictEqual(
+        BigInt(userTokenAccountBefore.amount) - BigInt(userTokenAccountAfter.amount),
+        BigInt(contributionAmount.toString()),
+        "User token account was not debited correctly"
+      );
+      
+      // Verify vault received the tokens
+      const vaultAfter = await getAccount(
+        provider.connection,
+        vaultPda
+      );
+      assert.strictEqual(
+        BigInt(vaultAfter.amount) - BigInt(vaultBefore.amount),
+        BigInt(contributionAmount.toString()),
+        "Vault did not receive the correct amount"
+      );
+      
+      // Verify flow state was updated
+      const flowAfter = await program.account.flow.fetch(flowPda);
+      assert.strictEqual(
+        flowAfter.raised.toString(),
+        initialRaised.add(contributionAmount).toString(),
+        "Flow raised amount was not updated correctly"
+      );
+      
+      assert.strictEqual(
+        flowAfter.contributorCount,
+        initialContributorCount + 1,
+        "Contributor count was not incremented"
+      );
+      
+      // Verify contribution account was created with correct data
+      const contributionAccount = await program.account.contribution.fetch(contributionPda);
+      assert.strictEqual(
+        contributionAccount.flow.toString(), 
+        flowPda.toString(),
+        "Contribution has incorrect flow reference"
+      );
+      
+      assert.strictEqual(
+        contributionAccount.contributor.toString(),
+        wallet.publicKey.toString(),
+        "Contribution has incorrect contributor"
+      );
+      
+      assert.strictEqual(
+        contributionAccount.amount.toString(),
+        contributionAmount.toString(),
+        "Contribution has incorrect amount"
+      );
+      
+      assert.strictEqual(
+        contributionAccount.tokenMint.toString(),
+        tokenMint.toString(),
+        "Contribution has incorrect token mint"
+      );
+      
+      assert.strictEqual(
+        contributionAccount.bump,
+        contributionBump,
+        "Contribution has incorrect bump"
+      );
+    });
+  });
+
 });

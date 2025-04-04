@@ -36,7 +36,6 @@ pub struct ContributeDirect<'info> {
     )]
     pub vault: InterfaceAccount<'info, TokenAccount>,
 
-
     #[account(
         init,
         payer = contributor,
@@ -45,7 +44,7 @@ pub struct ContributeDirect<'info> {
             b"tita-contribution",
             flow.key().as_ref(),
             contributor.key().as_ref(),
-            &Clock::get()?.unix_timestamp.to_le_bytes()
+            (flow.contributor_count + 1).to_le_bytes().as_ref()
         ],
         bump,
     )]
@@ -54,14 +53,8 @@ pub struct ContributeDirect<'info> {
 
     #[account(
         mut,
-        constraint = user_token_account.owner == contributor.key() @ TitaErrors::InvalidOwner,
-        constraint = user_token_account.mint == token_mint.key() @ TitaErrors::InvalidMint,
-        constraint = user_token_account.amount >= amount @ TitaErrors::InsufficientFunds,
     )]
     pub user_token_account: InterfaceAccount<'info, TokenAccount>,
-
-    #[account(mut)]
-    pub creator_token_account: InterfaceAccount<'info, TokenAccount>,
 
     pub token_mint: InterfaceAccount<'info, Mint>,
     pub token_program: Interface<'info, TokenInterface>,
@@ -80,7 +73,7 @@ impl<'info> ContributeDirect<'info> {
                 anchor_spl::token_interface::TransferChecked {
                     from: self.user_token_account.to_account_info(),
                     mint: self.token_mint.to_account_info(),
-                    to: self.creator_token_account.to_account_info(),
+                    to: self.vault.to_account_info(),
                     authority: self.contributor.to_account_info(),
                 },
             ),
@@ -89,6 +82,8 @@ impl<'info> ContributeDirect<'info> {
         );
 
         let flow = &mut self.flow;
+        flow.contributor_count += 1;
+        flow.raised += amount;
         
         //set contribution account
         let contribution = &mut self.contribution;

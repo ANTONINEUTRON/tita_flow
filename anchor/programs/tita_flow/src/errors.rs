@@ -53,5 +53,8 @@ pub enum TitaErrors {
     RuleNotSupported,
 
     #[msg("Insufficient funds")]
-    InsufficientFunds
+    InsufficientFunds,
+
+    #[msg("Token transfer failed")]
+    TokenTransferFailed
 }

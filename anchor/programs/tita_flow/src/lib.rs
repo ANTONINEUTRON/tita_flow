@@ -9,7 +9,6 @@ pub mod states;
 use crate::states::*;
 
 pub mod errors;
-use crate::errors::*;
 
 #[program]
 pub mod tita_flow {
@@ -43,7 +42,11 @@ pub mod tita_flow {
         Ok(())
     }
 
-    pub fn contribute_direct(ctx: Context<ContributeDirect>) -> Result<()> {
+    pub fn contribute_direct(
+        ctx: Context<ContributeDirect>,
+        amount: u64,
+    ) -> Result<()> {
+        let _ = ctx.accounts.contribute(amount, ctx.bumps.contribution)?;
         Ok(())
     }
 

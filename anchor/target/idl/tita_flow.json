@@ -23,16 +23,138 @@
       "args": []
     },
     {
-      "name": "contribute",
+      "name": "contribute_direct",
       "discriminator": [
-        82,
-        33,
-        68,
-        131,
-        32,
-        0,
-        205,
-        95
+        123,
+        85,
+        52,
+        210,
+        34,
+        70,
+        211,
+        182
+      ],
+      "accounts": [
+        {
+          "name": "contributor",
+          "writable": true,
+          "signer": true
+        },
+        {
+          "name": "flow",
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  116,
+                  105,
+                  116,
+                  97,
+                  45,
+                  102,
+                  108,
+                  111,
+                  119
+                ]
+              },
+              {
+                "kind": "account",
+                "path": "flow.flow_id",
+                "account": "Flow"
+              },
+              {
+                "kind": "account",
+                "path": "flow.creator",
+                "account": "Flow"
+              }
+            ]
+          }
+        },
+        {
+          "name": "vault",
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  116,
+                  105,
+                  116,
+                  97,
+                  45,
+                  118,
+                  97,
+                  117,
+                  108,
+                  116
+                ]
+              },
+              {
+                "kind": "account",
+                "path": "flow"
+              },
+              {
+                "kind": "account",
+                "path": "token_mint"
+              }
+            ]
+          }
+        },
+        {
+          "name": "contribution",
+          "writable": true
+        },
+        {
+          "name": "user_token_account",
+          "writable": true
+        },
+        {
+          "name": "token_mint"
+        },
+        {
+          "name": "token_program"
+        },
+        {
+          "name": "system_program",
+          "address": "11111111111111111111111111111111"
+        }
+      ],
+      "args": [
+        {
+          "name": "amount",
+          "type": "u64"
+        }
+      ]
+    },
+    {
+      "name": "contribute_milestones",
+      "discriminator": [
+        145,
+        43,
+        130,
+        207,
+        19,
+        132,
+        220,
+        200
+      ],
+      "accounts": [],
+      "args": []
+    },
+    {
+      "name": "contribute_weighted",
+      "discriminator": [
+        160,
+        238,
+        167,
+        151,
+        73,
+        165,
+        118,
+        178
       ],
       "accounts": [],
       "args": []
@@ -211,6 +333,19 @@
   ],
   "accounts": [
     {
+      "name": "Contribution",
+      "discriminator": [
+        182,
+        187,
+        14,
+        111,
+        72,
+        167,
+        242,
+        212
+      ]
+    },
+    {
       "name": "Flow",
       "discriminator": [
         126,
@@ -274,9 +409,96 @@
       "code": 6006,
       "name": "IncompatibleRules",
       "msg": "Incompatible rules combination"
+    },
+    {
+      "code": 6007,
+      "name": "FlowEnded",
+      "msg": "Flow has ended"
+    },
+    {
+      "code": 6008,
+      "name": "InactiveFlow",
+      "msg": "Flow is inactive"
+    },
+    {
+      "code": 6009,
+      "name": "InvalidOwner",
+      "msg": "Invalid Owner"
+    },
+    {
+      "code": 6010,
+      "name": "InvalidMint",
+      "msg": "Invalid Mint"
+    },
+    {
+      "code": 6011,
+      "name": "EmptyDistribution",
+      "msg": "Empty distribution"
+    },
+    {
+      "code": 6012,
+      "name": "InvalidAmount",
+      "msg": "Invalid amount"
+    },
+    {
+      "code": 6013,
+      "name": "MathOverflow",
+      "msg": "Math overflow"
+    },
+    {
+      "code": 6014,
+      "name": "DistributionExceedsContribution",
+      "msg": "Distribution exceeds contribution amount"
+    },
+    {
+      "code": 6015,
+      "name": "RuleNotSupported",
+      "msg": "Rule not supported"
+    },
+    {
+      "code": 6016,
+      "name": "InsufficientFunds",
+      "msg": "Insufficient funds"
+    },
+    {
+      "code": 6017,
+      "name": "TokenTransferFailed",
+      "msg": "Token transfer failed"
     }
   ],
   "types": [
+    {
+      "name": "Contribution",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "flow",
+            "type": "pubkey"
+          },
+          {
+            "name": "contributor",
+            "type": "pubkey"
+          },
+          {
+            "name": "amount",
+            "type": "u64"
+          },
+          {
+            "name": "timestamp",
+            "type": "i64"
+          },
+          {
+            "name": "token_mint",
+            "type": "pubkey"
+          },
+          {
+            "name": "bump",
+            "type": "u8"
+          }
+        ]
+      }
+    },
     {
       "name": "Flow",
       "type": {

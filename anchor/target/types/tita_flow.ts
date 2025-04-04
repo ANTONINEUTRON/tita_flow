@@ -29,16 +29,138 @@ export type TitaFlow = {
       "args": []
     },
     {
-      "name": "contribute",
+      "name": "contributeDirect",
       "discriminator": [
-        82,
-        33,
-        68,
-        131,
-        32,
-        0,
-        205,
-        95
+        123,
+        85,
+        52,
+        210,
+        34,
+        70,
+        211,
+        182
+      ],
+      "accounts": [
+        {
+          "name": "contributor",
+          "writable": true,
+          "signer": true
+        },
+        {
+          "name": "flow",
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  116,
+                  105,
+                  116,
+                  97,
+                  45,
+                  102,
+                  108,
+                  111,
+                  119
+                ]
+              },
+              {
+                "kind": "account",
+                "path": "flow.flow_id",
+                "account": "flow"
+              },
+              {
+                "kind": "account",
+                "path": "flow.creator",
+                "account": "flow"
+              }
+            ]
+          }
+        },
+        {
+          "name": "vault",
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  116,
+                  105,
+                  116,
+                  97,
+                  45,
+                  118,
+                  97,
+                  117,
+                  108,
+                  116
+                ]
+              },
+              {
+                "kind": "account",
+                "path": "flow"
+              },
+              {
+                "kind": "account",
+                "path": "tokenMint"
+              }
+            ]
+          }
+        },
+        {
+          "name": "contribution",
+          "writable": true
+        },
+        {
+          "name": "userTokenAccount",
+          "writable": true
+        },
+        {
+          "name": "tokenMint"
+        },
+        {
+          "name": "tokenProgram"
+        },
+        {
+          "name": "systemProgram",
+          "address": "11111111111111111111111111111111"
+        }
+      ],
+      "args": [
+        {
+          "name": "amount",
+          "type": "u64"
+        }
+      ]
+    },
+    {
+      "name": "contributeMilestones",
+      "discriminator": [
+        145,
+        43,
+        130,
+        207,
+        19,
+        132,
+        220,
+        200
+      ],
+      "accounts": [],
+      "args": []
+    },
+    {
+      "name": "contributeWeighted",
+      "discriminator": [
+        160,
+        238,
+        167,
+        151,
+        73,
+        165,
+        118,
+        178
       ],
       "accounts": [],
       "args": []
@@ -217,6 +339,19 @@ export type TitaFlow = {
   ],
   "accounts": [
     {
+      "name": "contribution",
+      "discriminator": [
+        182,
+        187,
+        14,
+        111,
+        72,
+        167,
+        242,
+        212
+      ]
+    },
+    {
       "name": "flow",
       "discriminator": [
         126,
@@ -280,9 +415,96 @@ export type TitaFlow = {
       "code": 6006,
       "name": "incompatibleRules",
       "msg": "Incompatible rules combination"
+    },
+    {
+      "code": 6007,
+      "name": "flowEnded",
+      "msg": "Flow has ended"
+    },
+    {
+      "code": 6008,
+      "name": "inactiveFlow",
+      "msg": "Flow is inactive"
+    },
+    {
+      "code": 6009,
+      "name": "invalidOwner",
+      "msg": "Invalid Owner"
+    },
+    {
+      "code": 6010,
+      "name": "invalidMint",
+      "msg": "Invalid Mint"
+    },
+    {
+      "code": 6011,
+      "name": "emptyDistribution",
+      "msg": "Empty distribution"
+    },
+    {
+      "code": 6012,
+      "name": "invalidAmount",
+      "msg": "Invalid amount"
+    },
+    {
+      "code": 6013,
+      "name": "mathOverflow",
+      "msg": "Math overflow"
+    },
+    {
+      "code": 6014,
+      "name": "distributionExceedsContribution",
+      "msg": "Distribution exceeds contribution amount"
+    },
+    {
+      "code": 6015,
+      "name": "ruleNotSupported",
+      "msg": "Rule not supported"
+    },
+    {
+      "code": 6016,
+      "name": "insufficientFunds",
+      "msg": "Insufficient funds"
+    },
+    {
+      "code": 6017,
+      "name": "tokenTransferFailed",
+      "msg": "Token transfer failed"
     }
   ],
   "types": [
+    {
+      "name": "contribution",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "flow",
+            "type": "pubkey"
+          },
+          {
+            "name": "contributor",
+            "type": "pubkey"
+          },
+          {
+            "name": "amount",
+            "type": "u64"
+          },
+          {
+            "name": "timestamp",
+            "type": "i64"
+          },
+          {
+            "name": "tokenMint",
+            "type": "pubkey"
+          },
+          {
+            "name": "bump",
+            "type": "u8"
+          }
+        ]
+      }
+    },
     {
       "name": "flow",
       "type": {
