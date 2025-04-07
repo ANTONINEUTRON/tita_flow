@@ -1,354 +1,518 @@
 import * as anchor from '@coral-xyz/anchor';
-import { Program, web3, BN, AnchorError } from '@coral-xyz/anchor';
+import { Program } from '@coral-xyz/anchor';
 import { TitaFlow } from '../target/types/tita_flow';
-import { 
-  createMint, 
+import * as web3 from '@solana/web3.js';
+import {
+  Keypair,
+  LAMPORTS_PER_SOL,
+  PublicKey,
+  SystemProgram,
+} from '@solana/web3.js';
+import {
+  createMint,
   getOrCreateAssociatedTokenAccount,
   mintTo,
-  getAccount,
-  mintToChecked,
   createAssociatedTokenAccount
 } from '@solana/spl-token';
-import { before, describe, it } from 'node:test';
+import { describe, it } from 'node:test';
 import assert from 'assert';
+import BN from 'bn.js';
 
-describe('TitaFlow', () => {
+// Constants
+const TITA_FLOW_SEED = Buffer.from("tita-flow");
+const TITA_VAULT_SEED = Buffer.from("tita-vault");
+
+describe('tita-flow', () => {
   // Configure the client to use the local cluster
   const provider = anchor.AnchorProvider.env();
   anchor.setProvider(provider);
 
   const program = anchor.workspace.TitaFlow as Program<TitaFlow>;
   const wallet = provider.wallet as anchor.Wallet;
-  
-  // Common test variables
-  let tokenMint: web3.PublicKey;
-  let userTokenAccount: web3.PublicKey;
-  let flowPda: web3.PublicKey;
-  let vaultPda: web3.PublicKey;
-  let creatorTokenAccount: web3.PublicKey;
-  const flowId = "test-flow-1";
-  
-  // Setup: Create token mint and accounts before tests
-  before(async () => {
-    // Create a new SPL token mint for testing
-    tokenMint = await createMint(
-      provider.connection,
-      wallet.payer,
-      wallet.publicKey,
-      null,
-      6 // 6 decimals
+
+  // Test state
+  let tokenMint: PublicKey;
+  let flowId: string;
+  let flowPda: PublicKey;
+  let vaultPda: PublicKey;
+
+  // Setup helper: Create token mint
+  const setupTokenMint = async (): Promise<PublicKey> => {
+    // Create new token mint
+    const mintAuthority = wallet.publicKey;
+    const freezeAuthority = null;
+    const decimals = 6;
+
+    // Create a mint
+    const mintKeypair = Keypair.generate();
+    const tokenMint = mintKeypair.publicKey;
+
+    // Fund the mint account creator
+    const lamports = await provider.connection.getMinimumBalanceForRentExemption(
+      82 // Size of mint account
+    );
+    
+    const createAccountTx = new web3.Transaction().add(
+      SystemProgram.createAccount({
+        fromPubkey: wallet.publicKey,
+        newAccountPubkey: tokenMint,
+        space: 82,
+        lamports,
+        programId: anchor.utils.token.TOKEN_PROGRAM_ID,
+      })
     );
 
-    // Create a token account for the wallet
-    const tokenAccount = await getOrCreateAssociatedTokenAccount(
-      provider.connection,
-      wallet.payer,
-      tokenMint,
-      wallet.publicKey
-    );
-    userTokenAccount = tokenAccount.address;
-
-    // Mint some tokens to the wallet
-    await mintTo(
-      provider.connection,
-      wallet.payer,
-      tokenMint,
-      userTokenAccount,
-      wallet.publicKey,
-      1_000_000_000 // 1,000 tokens
+    // Initialize the mint
+    const initMintTx = new web3.Transaction().add(
+      anchor.utils.token.createInitializeMintInstruction(
+        tokenMint,
+        decimals,
+        mintAuthority,
+        freezeAuthority,
+        anchor.utils.token.TOKEN_PROGRAM_ID
+      )
     );
 
-    // Derive PDAs for testing
-    const [flowAddress] = web3.PublicKey.findProgramAddressSync(
+    // Execute both transactions
+    await provider.sendAndConfirm(createAccountTx, [mintKeypair]);
+    await provider.sendAndConfirm(initMintTx);
+
+    return tokenMint;
+  };
+
+  // Setup helper: Find PDAs
+  const findPdas = (flowId: string, creator: PublicKey, tokenMint: PublicKey): [PublicKey, PublicKey] => {
+    // Find flow PDA
+    const [flowPda] = web3.PublicKey.findProgramAddressSync(
       [
-        Buffer.from("tita-flow"),
+        TITA_FLOW_SEED,
         Buffer.from(flowId),
-        wallet.publicKey.toBuffer()
+        creator.toBuffer()
       ],
       program.programId
     );
-    flowPda = flowAddress;
 
-    const [vaultAddress] = web3.PublicKey.findProgramAddressSync(
+    // Find vault PDA
+    const [vaultPda] = web3.PublicKey.findProgramAddressSync(
       [
-        Buffer.from("tita-vault"),
+        TITA_VAULT_SEED,
         flowPda.toBuffer(),
         tokenMint.toBuffer()
       ],
       program.programId
     );
-    vaultPda = vaultAddress;
 
-    // Create token accounts for both user and creator
-    const userAta = await getOrCreateAssociatedTokenAccount(
-      provider.connection,
-      wallet.payer,
-      tokenMint,
-      wallet.publicKey
-    );
-    userTokenAccount = userAta.address;
+    return [flowPda, vaultPda];
+  };
 
-    // For simplicity, in the test we'll use the same wallet as creator
-    // In a real scenario, this would be a different wallet
-    const creatorAta = await getOrCreateAssociatedTokenAccount(
-      provider.connection,
-      wallet.payer,
-      tokenMint,
-      wallet.publicKey // Same as creator in this test
-    );
-    creatorTokenAccount = creatorAta.address;
-
-    // Mint some tokens to the user's account for testing
-    await mintToChecked(
-      provider.connection,
-      wallet.payer,
-      tokenMint,
-      userTokenAccount,
-      wallet.publicKey, // Mint authority (from the setup)
-      1_000_000_000, // 1000 tokens
-      6 // Decimals
-    );
-
+  // Before all tests, set up the token mint
+  before(async () => {
+    tokenMint = await setupTokenMint();
+    flowId = "test-flow-" + Math.floor(Math.random() * 1000000);
+    [flowPda, vaultPda] = findPdas(flowId, wallet.publicKey, tokenMint);
   });
 
-  describe('Flow Creation', () => {
-    it('should successfully create a flow', async () => {
-      // Flow parameters
-      const params = {
-        flowType: { raise: {} }, // Enum value for a raise flow
-        goal: new BN(500_000_000), // 500 tokens
-        startTime: new BN(Math.floor(Date.now() / 1000)),
-        endTime: new BN(Math.floor(Date.now() / 1000) + 30 * 24 * 60 * 60), // 30 days later
-        rules: [{ direct: {} }],
-        voting_mechanism: [{ standard: {} }],
-      };
+  describe('Direct Flow Creation', () => {
+    it('should create a direct flow successfully', async () => {
+      const goal = new BN(1_000_000_000); // 1000 tokens (assuming 6 decimals)
+      const now = Math.floor(Date.now() / 1000);
+      const startTime = null; // Start now
+      const endTime = new BN(now + 30 * 24 * 60 * 60); // 30 days from now
 
-      // Execute the create flow instruction
-      const tx = await program.methods
-        .createFlow(
-          flowId, 
-          params.flowType, 
-          params.goal, 
-          params.startTime, 
-          params.endTime, 
-          params.rules, 
-          params.voting_mechanism
+      // Create the direct flow
+      await program.methods
+        .createDirectFlow(
+          flowId,
+          goal,
+          startTime,
+          endTime
         )
-        .accountsPartial({
+        .accounts({
           creator: wallet.publicKey,
           flow: flowPda,
           vault: vaultPda,
-          tokenMint: tokenMint,
+          tokenMint,
           tokenProgram: anchor.utils.token.TOKEN_PROGRAM_ID,
-          systemProgram: web3.SystemProgram.programId
+          systemProgram: SystemProgram.programId,
         })
         .rpc();
 
-      // Verify the flow was created correctly
+      // Fetch the flow account to verify it was created correctly
       const flowAccount = await program.account.flow.fetch(flowPda);
-      assert.strictEqual(flowAccount.creator.toString(), wallet.publicKey.toString(), "Flow creator doesn't match expected wallet");
-      assert.strictEqual(flowAccount.goal.toString(), params.goal.toString(), "Flow goal doesn't match expected amount");
-      assert.deepStrictEqual(flowAccount.flowType, params.flowType, "Flow type doesn't match expected type");
-      
-      // Verify the vault was created
-      const vaultAccount = await getAccount(
-        provider.connection,
-        vaultPda
+
+      // Verify flow data
+      assert.strictEqual(flowAccount.flowId, flowId, "Flow ID mismatch");
+      assert.strictEqual(
+        flowAccount.creator.toString(),
+        wallet.publicKey.toString(),
+        "Creator mismatch"
       );
-      assert.strictEqual(vaultAccount.mint.toString(), tokenMint.toString(), "Vault mint doesn't match expected token mint");
-      assert.strictEqual(vaultAccount.owner.toString(), flowPda.toString(), "Vault owner doesn't match flow PDA");
+      assert.strictEqual(
+        flowAccount.tokenMint.toString(),
+        tokenMint.toString(),
+        "Token mint mismatch"
+      );
+      assert.strictEqual(
+        flowAccount.goal.toString(),
+        goal.toString(),
+        "Goal amount mismatch"
+      );
+      assert.strictEqual(
+        flowAccount.raised.toString(),
+        "0",
+        "Initial raised amount should be 0"
+      );
+      assert.strictEqual(
+        flowAccount.endDate.toString(),
+        endTime.toString(),
+        "End date mismatch"
+      );
+      assert.strictEqual(
+        flowAccount.flowStatus.active !== undefined,
+        true,
+        "Flow status should be Active"
+      );
+      assert.strictEqual(
+        flowAccount.contributorCount,
+        0,
+        "Initial contributor count should be 0"
+      );
+      assert.strictEqual(
+        flowAccount.primaryVault.toString(),
+        vaultPda.toString(),
+        "Primary vault mismatch"
+      );
+
+      // Fetch the vault account to verify it was created correctly
+      const vaultAccount = await program.account.vault.fetch(vaultPda);
+
+      // Verify vault data
+      assert.strictEqual(
+        vaultAccount.flow.toString(),
+        flowPda.toString(),
+        "Vault flow reference mismatch"
+      );
+      assert.strictEqual(
+        vaultAccount.tokenMint.toString(),
+        tokenMint.toString(),
+        "Vault token mint mismatch"
+      );
+      assert.strictEqual(
+        vaultAccount.amount.toString(),
+        "0",
+        "Initial vault amount should be 0"
+      );
+      assert.strictEqual(
+        vaultAccount.vaultType.direct !== undefined,
+        true,
+        "Vault type should be Direct"
+      );
+      assert.strictEqual(
+        vaultAccount.milestoneDeadline,
+        null,
+        "Direct flow vault should not have milestone deadline"
+      );
+      assert.strictEqual(
+        vaultAccount.milestoneCompleted,
+        null,
+        "Direct flow vault should not have milestone completion status"
+      );
+      assert.strictEqual(
+        vaultAccount.recipient,
+        null,
+        "Direct flow vault should not have recipient"
+      );
+      assert.strictEqual(
+        vaultAccount.weight,
+        null,
+        "Direct flow vault should not have weight"
+      );
     });
 
-    it('should reject flow creation with invalid parameters', async () => {
-      const invalidParams = {
-        flowType: { raise: {} },
-        goal: new BN(0), // Invalid: goal can't be zero
-        startTime: new BN(Math.floor(Date.now() / 1000)),
-        endTime: new BN(Math.floor(Date.now() / 1000) - 1000), // Invalid: end time before start time
-        rules: [{ direct: {} }],
-        voting_mechanism: [{ standard: {} }],
-      };
+    it('should reject flow creation with empty flow ID', async () => {
+      const emptyFlowId = "";
+      const goal = new BN(1_000_000_000);
+      const now = Math.floor(Date.now() / 1000);
+      const startTime = null;
+      const endTime = new BN(now + 30 * 24 * 60 * 60);
+
+      // Find PDAs for this flow
+      const [invalidFlowPda, invalidVaultPda] = findPdas(
+        emptyFlowId,
+        wallet.publicKey,
+        tokenMint
+      );
 
       try {
         await program.methods
-          .createFlow(
-            "invalid-flow", 
-            invalidParams.flowType,
-            invalidParams.goal,
-            invalidParams.startTime,
-            invalidParams.endTime,
-            invalidParams.rules,
-            invalidParams.voting_mechanism
-          )
-          .accountsPartial({
+          .createDirectFlow(emptyFlowId, goal, startTime, endTime)
+          .accounts({
             creator: wallet.publicKey,
-            flow: flowPda, // Reusing PDA will also cause failure
-            vault: vaultPda,
+            flow: invalidFlowPda,
+            vault: invalidVaultPda,
             tokenMint,
             tokenProgram: anchor.utils.token.TOKEN_PROGRAM_ID,
-            systemProgram: web3.SystemProgram.programId
+            systemProgram: SystemProgram.programId,
           })
           .rpc();
-        assert.fail("Transaction should have failed");
+        
+        // If we reach here, the test failed
+        assert.fail("Creating flow with empty ID should fail");
       } catch (error) {
-        if (error instanceof AnchorError) {
-          
-          // Check against the actual error codes your program is using
-          const expectedErrorCodes = [
-            "InvalidGoalAmount",       // If you're testing zero goal amount
-            "InvalidTimeframe",        // If end_time < start_time
-            "NoRulesSpecified",        // If empty rules array
-            "EmptyFlowId",             // If flow_id is empty
-            "FlowIdTooLong",           // If flow_id is too long
-            "InvalidStartTime",        // If start time is in the past
-            "InvalidEndTime",          // If end time is in the past
-            "ConstraintSeeds"          // Anchor's built-in PDA constraint error
-          ];
-          
-          assert(
-            expectedErrorCodes.includes(error.error.errorCode.code), 
-            `Expected one of [${expectedErrorCodes.join(', ')}] but got ${error.error.errorCode.code}`
-          );
-        } else {
-          // If it's not an AnchorError, that's unexpected
-          console.error("Unexpected error type:", error);
-          throw error;
-        }
+        // Verify it's the expected error
+        assert.ok(
+          error.toString().includes("EmptyFlowId"),
+          "Expected EmptyFlowId error"
+        );
+      }
+    });
+
+    it('should reject flow creation with zero goal amount', async () => {
+      const zeroGoalFlowId = "zero-goal-" + Math.floor(Math.random() * 1000000);
+      const goal = new BN(0);
+      const now = Math.floor(Date.now() / 1000);
+      const startTime = null;
+      const endTime = new BN(now + 30 * 24 * 60 * 60);
+
+      // Find PDAs for this flow
+      const [invalidFlowPda, invalidVaultPda] = findPdas(
+        zeroGoalFlowId,
+        wallet.publicKey,
+        tokenMint
+      );
+
+      try {
+        await program.methods
+          .createDirectFlow(zeroGoalFlowId, goal, startTime, endTime)
+          .accounts({
+            creator: wallet.publicKey,
+            flow: invalidFlowPda,
+            vault: invalidVaultPda,
+            tokenMint,
+            tokenProgram: anchor.utils.token.TOKEN_PROGRAM_ID,
+            systemProgram: SystemProgram.programId,
+          })
+          .rpc();
+        
+        // If we reach here, the test failed
+        assert.fail("Creating flow with zero goal should fail");
+      } catch (error) {
+        // Verify it's the expected error
+        assert.ok(
+          error.toString().includes("InvalidGoalAmount"),
+          "Expected InvalidGoalAmount error"
+        );
+      }
+    });
+
+    it('should reject flow creation with end time in the past', async () => {
+      const pastEndFlowId = "past-end-" + Math.floor(Math.random() * 1000000);
+      const goal = new BN(1_000_000_000);
+      const now = Math.floor(Date.now() / 1000);
+      const startTime = null;
+      const endTime = new BN(now - 86400); // 1 day ago
+
+      // Find PDAs for this flow
+      const [invalidFlowPda, invalidVaultPda] = findPdas(
+        pastEndFlowId,
+        wallet.publicKey,
+        tokenMint
+      );
+
+      try {
+        await program.methods
+          .createDirectFlow(pastEndFlowId, goal, startTime, endTime)
+          .accounts({
+            creator: wallet.publicKey,
+            flow: invalidFlowPda,
+            vault: invalidVaultPda,
+            tokenMint,
+            tokenProgram: anchor.utils.token.TOKEN_PROGRAM_ID,
+            systemProgram: SystemProgram.programId,
+          })
+          .rpc();
+        
+        // If we reach here, the test failed
+        assert.fail("Creating flow with end time in the past should fail");
+      } catch (error) {
+        // Verify it's the expected error
+        assert.ok(
+          error.toString().includes("InvalidTimeframe"),
+          "Expected InvalidTimeframe error"
+        );
+      }
+    });
+
+    it('should reject flow creation with end time before start time', async () => {
+      const invalidTimeframeId = "invalid-time-" + Math.floor(Math.random() * 1000000);
+      const goal = new BN(1_000_000_000);
+      const now = Math.floor(Date.now() / 1000);
+      const startTime = new BN(now + 86400 * 2); // 2 days from now
+      const endTime = new BN(now + 86400); // 1 day from now (before start)
+
+      // Find PDAs for this flow
+      const [invalidFlowPda, invalidVaultPda] = findPdas(
+        invalidTimeframeId,
+        wallet.publicKey,
+        tokenMint
+      );
+
+      try {
+        await program.methods
+          .createDirectFlow(invalidTimeframeId, goal, startTime, endTime)
+          .accounts({
+            creator: wallet.publicKey,
+            flow: invalidFlowPda,
+            vault: invalidVaultPda,
+            tokenMint,
+            tokenProgram: anchor.utils.token.TOKEN_PROGRAM_ID,
+            systemProgram: SystemProgram.programId,
+          })
+          .rpc();
+        
+        // If we reach here, the test failed
+        assert.fail("Creating flow with end time before start time should fail");
+      } catch (error) {
+        // Verify it's the expected error
+        assert.ok(
+          error.toString().includes("InvalidTimeframe"),
+          "Expected InvalidTimeframe error"
+        );
+      }
+    });
+
+    it('should reject creating a flow with an ID that is too long', async () => {
+      const tooLongFlowId = "a".repeat(33); // 33 chars (over 32 limit)
+      const goal = new BN(1_000_000_000);
+      const now = Math.floor(Date.now() / 1000);
+      const startTime = null;
+      const endTime = new BN(now + 30 * 24 * 60 * 60);
+
+      // Find PDAs for this flow
+      const [invalidFlowPda, invalidVaultPda] = findPdas(
+        tooLongFlowId,
+        wallet.publicKey,
+        tokenMint
+      );
+
+      try {
+        await program.methods
+          .createDirectFlow(tooLongFlowId, goal, startTime, endTime)
+          .accounts({
+            creator: wallet.publicKey,
+            flow: invalidFlowPda,
+            vault: invalidVaultPda,
+            tokenMint,
+            tokenProgram: anchor.utils.token.TOKEN_PROGRAM_ID,
+            systemProgram: SystemProgram.programId,
+          })
+          .rpc();
+        
+        // If we reach here, the test failed
+        assert.fail("Creating flow with too long ID should fail");
+      } catch (error) {
+        // Verify it's the expected error
+        assert.ok(
+          error.toString().includes("FlowIdTooLong"),
+          "Expected FlowIdTooLong error"
+        );
       }
     });
   });
 
-
-
-  describe('Direct Contribution', () => {
-    // let userTokenAccount: web3.PublicKey;
-    // let flowPda: web3.PublicKey;
-    // let vaultPda: web3.PublicKey;
-    // const flowId = "test-direct-flow";
-    let contributionPda: web3.PublicKey;
-    let contributionBump: number;
-    const contributionAmount = new BN(100_000_000); // 100 tokens
+  describe('Flow Account Structure', () => {
+    it('should have the correct account structure', async () => {
+      // Fetch the flow account that was created in the first test
+      const flowAccount = await program.account.flow.fetch(flowPda);
+      
+      // Check the account structure matches the IDL
+      assert.ok(flowAccount.flowId !== undefined, "Missing flowId");
+      assert.ok(flowAccount.creator !== undefined, "Missing creator");
+      assert.ok(flowAccount.tokenMint !== undefined, "Missing tokenMint");
+      assert.ok(flowAccount.goal !== undefined, "Missing goal");
+      assert.ok(flowAccount.raised !== undefined, "Missing raised");
+      assert.ok(flowAccount.startDate !== undefined, "Missing startDate");
+      assert.ok(flowAccount.endDate !== undefined, "Missing endDate");
+      assert.ok(flowAccount.flowStatus !== undefined, "Missing flowStatus");
+      assert.ok(flowAccount.contributorCount !== undefined, "Missing contributorCount");
+      assert.ok(flowAccount.primaryVault !== undefined, "Missing primaryVault");
+      assert.ok(flowAccount.bump !== undefined, "Missing bump");
+    });
     
-
-    it('should successfully contribute directly to a flow', async () => {
-      // Generate a timestamp for the contribution PDA
-      const currentTimestamp = new BN(Math.floor(Date.now() / 1000));
+    it('should have the correct vault structure', async () => {
+      // Fetch the vault account that was created in the first test
+      const vaultAccount = await program.account.vault.fetch(vaultPda);
       
-      // Get the current contributor count and add 1 to match what the program does
-      const flowBefore = await program.account.flow.fetch(flowPda);
-      const contributorCount = flowBefore.contributorCount + 1; // Add 1 to match the program
-
-      // Now find the contribution PDA with correctly matching seeds
-      const [contributionAddress, bump] = web3.PublicKey.findProgramAddressSync(
-        [
-          Buffer.from("tita-contribution"),
-          flowPda.toBuffer(),
-          wallet.publicKey.toBuffer(),
-          new BN(contributorCount).toArrayLike(Buffer, 'le', 4) // Use proper 4-byte little-endian buffer
-        ],
-        program.programId
-      );
-      contributionPda = contributionAddress;
-      contributionBump = bump;
-
-      // Get initial balances
-      const userTokenAccountBefore = await getAccount(
-        provider.connection,
-        userTokenAccount
-      );
-      
-      const vaultBefore = await getAccount(
-        provider.connection,
-        vaultPda
-      );
-      
-      // Get initial flow state
-      const initialRaised = flowBefore.raised;
-      const initialContributorCount = flowBefore.contributorCount;
-      
-      // Execute the direct contribution
-      const tx = await program.methods
-        .contributeDirect(contributionAmount)
-        .accountsPartial({
-          contributor: wallet.publicKey,
-          flow: flowPda,
-          vault: vaultPda,
-          contribution: contributionPda,
-          userTokenAccount: userTokenAccount,
-          tokenMint: tokenMint,
-          tokenProgram: anchor.utils.token.TOKEN_PROGRAM_ID,
-          systemProgram: web3.SystemProgram.programId
-        })
-        .rpc();
-
-      // Verify user token account balance was reduced
-      const userTokenAccountAfter = await getAccount(
-        provider.connection,
-        userTokenAccount
-      );
-      assert.strictEqual(
-        BigInt(userTokenAccountBefore.amount) - BigInt(userTokenAccountAfter.amount),
-        BigInt(contributionAmount.toString()),
-        "User token account was not debited correctly"
-      );
-      
-      // Verify vault received the tokens
-      const vaultAfter = await getAccount(
-        provider.connection,
-        vaultPda
-      );
-      assert.strictEqual(
-        BigInt(vaultAfter.amount) - BigInt(vaultBefore.amount),
-        BigInt(contributionAmount.toString()),
-        "Vault did not receive the correct amount"
-      );
-      
-      // Verify flow state was updated
-      const flowAfter = await program.account.flow.fetch(flowPda);
-      assert.strictEqual(
-        flowAfter.raised.toString(),
-        initialRaised.add(contributionAmount).toString(),
-        "Flow raised amount was not updated correctly"
-      );
-      
-      assert.strictEqual(
-        flowAfter.contributorCount,
-        initialContributorCount + 1,
-        "Contributor count was not incremented"
-      );
-      
-      // Verify contribution account was created with correct data
-      const contributionAccount = await program.account.contribution.fetch(contributionPda);
-      assert.strictEqual(
-        contributionAccount.flow.toString(), 
-        flowPda.toString(),
-        "Contribution has incorrect flow reference"
-      );
-      
-      assert.strictEqual(
-        contributionAccount.contributor.toString(),
-        wallet.publicKey.toString(),
-        "Contribution has incorrect contributor"
-      );
-      
-      assert.strictEqual(
-        contributionAccount.amount.toString(),
-        contributionAmount.toString(),
-        "Contribution has incorrect amount"
-      );
-      
-      assert.strictEqual(
-        contributionAccount.tokenMint.toString(),
-        tokenMint.toString(),
-        "Contribution has incorrect token mint"
-      );
-      
-      assert.strictEqual(
-        contributionAccount.bump,
-        contributionBump,
-        "Contribution has incorrect bump"
-      );
+      // Check the account structure matches the IDL
+      assert.ok(vaultAccount.flow !== undefined, "Missing flow reference");
+      assert.ok(vaultAccount.tokenMint !== undefined, "Missing tokenMint");
+      assert.ok(vaultAccount.amount !== undefined, "Missing amount");
+      assert.ok(vaultAccount.vaultType !== undefined, "Missing vaultType");
+      assert.ok(vaultAccount.bump !== undefined, "Missing bump");
     });
   });
 
+  describe('Flow Query Tests', () => {
+    it('should find all flows created by the user', async () => {
+      // Query for flows created by the current wallet
+      const userFlows = await program.account.flow.all([
+        {
+          memcmp: {
+            offset: 8 + 32, // Skip discriminator (8) + flow_id (varies, but we're looking at creator field)
+            bytes: wallet.publicKey.toBase58(),
+          },
+        },
+      ]);
+      
+      // Make sure we find at least the flow we created
+      assert.ok(userFlows.length >= 1, "Should find at least one flow");
+      
+      // Check if our specific flow is in the results
+      const ourFlow = userFlows.find(f => f.account.flowId === flowId);
+      assert.ok(ourFlow, "Should find our specific flow");
+      
+      // Verify some details of our flow
+      assert.strictEqual(
+        ourFlow.account.creator.toString(),
+        wallet.publicKey.toString(),
+        "Creator should match"
+      );
+    });
+    
+    it('should find the vault for our flow', async () => {
+      // Query for vaults associated with our flow
+      const flowVaults = await program.account.vault.all([
+        {
+          memcmp: {
+            offset: 8, // Skip discriminator
+            bytes: flowPda.toBase58(),
+          },
+        },
+      ]);
+      
+      // We should find exactly one vault for our direct flow
+      assert.strictEqual(flowVaults.length, 1, "Should find exactly one vault");
+      
+      // Verify it's the right vault
+      const vault = flowVaults[0];
+      assert.strictEqual(
+        vault.publicKey.toString(),
+        vaultPda.toString(),
+        "Vault address should match"
+      );
+      
+      assert.strictEqual(
+        vault.account.flow.toString(),
+        flowPda.toString(),
+        "Vault should reference our flow"
+      );
+      
+      assert.strictEqual(
+        vault.account.tokenMint.toString(),
+        tokenMint.toString(),
+        "Vault should have our token mint"
+      );
+    });
+  });
 });
+

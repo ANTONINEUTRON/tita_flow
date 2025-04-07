@@ -8,74 +8,72 @@ use crate::instructions::*;
 pub mod states;
 use crate::states::*;
 
+pub mod constants;
+use crate::constants::*;
+
 pub mod errors;
 
 #[program]
 pub mod tita_flow {
-
     use super::*;
 
     // Create a RAISE and DISTRIBUTE flow
     // RAISE FLOW - for accepting contributions from different users
     // DISTRIBUTE FLOW - can only have one donor, the grant it is tied to 
-    pub fn create_flow(
-        ctx: Context<CreateFlow>,
+    pub fn create_direct_flow(
+        ctx: Context<CreateDirectFlow>,
         flow_id: String,
-        flow_type: FlowType,
         goal: u64,
         start_time: Option<i64>,
-        end_time: Option<i64>,
-        rules: Vec<RuleType>,
-        voting_mechanisms: Vec<VotingMechanism>,
+        end_time: Option<i64>
     ) -> Result<()> {
-        let _ = ctx.accounts.init_flow(
+        let _ = ctx.accounts.create(
             flow_id,
-            flow_type,
             goal,
             start_time,
             end_time,
-            rules,
-            voting_mechanisms,
-            ctx.bumps.flow,
+            ctx.accounts.flow.bump,
+            ctx.accounts.vault.bump
         )?;
 
         Ok(())
     }
-
-    pub fn contribute_direct(
-        ctx: Context<ContributeDirect>,
-        amount: u64,
-    ) -> Result<()> {
-        let _ = ctx.accounts.contribute(amount, ctx.bumps.contribution)?;
-        Ok(())
-    }
-
-
-    pub fn contribute_milestones(ctx: Context<Initialize>) -> Result<()> {
-        msg!("Greetings from: {:?}", ctx.program_id);
-        Ok(())
-    }
+    
+    // pub fn create_milestone_flow(
+    //     ctx: Context<CreateMilestoneFlow>,
+    //     flow_id: String,
+    //     goal: u64,
+    //     start_time: Option<i64>,
+    //     end_time: Option<i64>,
+    //     milestones: Vec<MilestoneConfig>
+    // ) -> Result<()> {
+    //     Ok(())
+    // }
 
 
-    pub fn contribute_weighted(ctx: Context<Initialize>) -> Result<()> {
-        msg!("Greetings from: {:?}", ctx.program_id);
-        Ok(())
-    }
+    // pub fn create_weighted_flow(
+    //     ctx: Context<CreateWeightedFlow>,
+    //     flow_id: String,
+    //     goal: u64,
+    //     start_time: Option<i64>,
+    //     end_time: Option<i64>,
+    //     allocations: Vec<WeightedAllocation>
+    // ) -> Result<()> {
+    //     Ok(())
+    // }
 
-    pub fn create_proposal(ctx: Context<Initialize>) -> Result<()> {
-        msg!("Greetings from: {:?}", ctx.program_id);
-        Ok(())
-    }
+    // pub fn contribute(
+    //     ctx: Context<Initialize>,
+    //     amount: u64,
+    // ) -> Result<()> {
+    //     // let _ = ctx.accounts.contribute(amount, ctx.bumps.contribution)?;
+    //     Ok(())
+    // }
 
-    pub fn vote(ctx: Context<Initialize>) -> Result<()> {
-        msg!("Greetings from: {:?}", ctx.program_id);
-        Ok(())
-    }
-
-    pub fn close(ctx: Context<Initialize>) -> Result<()> {
-        msg!("Greetings from: {:?}", ctx.program_id);
-        Ok(())
-    }
+    // pub fn withdraw(ctx: Context<Initialize>) -> Result<()> {
+    //     msg!("Greetings from: {:?}", ctx.program_id);
+    //     Ok(())
+    // }
 }
 
 #[derive(Accounts)]

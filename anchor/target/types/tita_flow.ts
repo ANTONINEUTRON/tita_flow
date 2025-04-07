@@ -14,168 +14,16 @@ export type TitaFlow = {
   },
   "instructions": [
     {
-      "name": "close",
+      "name": "createDirectFlow",
       "discriminator": [
-        98,
-        165,
-        201,
-        177,
-        108,
-        65,
-        206,
-        96
-      ],
-      "accounts": [],
-      "args": []
-    },
-    {
-      "name": "contributeDirect",
-      "discriminator": [
-        123,
-        85,
-        52,
-        210,
-        34,
-        70,
-        211,
-        182
-      ],
-      "accounts": [
-        {
-          "name": "contributor",
-          "writable": true,
-          "signer": true
-        },
-        {
-          "name": "flow",
-          "writable": true,
-          "pda": {
-            "seeds": [
-              {
-                "kind": "const",
-                "value": [
-                  116,
-                  105,
-                  116,
-                  97,
-                  45,
-                  102,
-                  108,
-                  111,
-                  119
-                ]
-              },
-              {
-                "kind": "account",
-                "path": "flow.flow_id",
-                "account": "flow"
-              },
-              {
-                "kind": "account",
-                "path": "flow.creator",
-                "account": "flow"
-              }
-            ]
-          }
-        },
-        {
-          "name": "vault",
-          "writable": true,
-          "pda": {
-            "seeds": [
-              {
-                "kind": "const",
-                "value": [
-                  116,
-                  105,
-                  116,
-                  97,
-                  45,
-                  118,
-                  97,
-                  117,
-                  108,
-                  116
-                ]
-              },
-              {
-                "kind": "account",
-                "path": "flow"
-              },
-              {
-                "kind": "account",
-                "path": "tokenMint"
-              }
-            ]
-          }
-        },
-        {
-          "name": "contribution",
-          "writable": true
-        },
-        {
-          "name": "userTokenAccount",
-          "writable": true
-        },
-        {
-          "name": "tokenMint"
-        },
-        {
-          "name": "tokenProgram"
-        },
-        {
-          "name": "systemProgram",
-          "address": "11111111111111111111111111111111"
-        }
-      ],
-      "args": [
-        {
-          "name": "amount",
-          "type": "u64"
-        }
-      ]
-    },
-    {
-      "name": "contributeMilestones",
-      "discriminator": [
-        145,
-        43,
-        130,
-        207,
-        19,
-        132,
-        220,
-        200
-      ],
-      "accounts": [],
-      "args": []
-    },
-    {
-      "name": "contributeWeighted",
-      "discriminator": [
-        160,
-        238,
-        167,
-        151,
-        73,
-        165,
-        118,
-        178
-      ],
-      "accounts": [],
-      "args": []
-    },
-    {
-      "name": "createFlow",
-      "discriminator": [
-        139,
-        104,
-        255,
-        32,
-        61,
-        236,
-        41,
-        31
+        231,
+        143,
+        245,
+        122,
+        39,
+        63,
+        134,
+        128
       ],
       "accounts": [
         {
@@ -261,14 +109,6 @@ export type TitaFlow = {
           "type": "string"
         },
         {
-          "name": "flowType",
-          "type": {
-            "defined": {
-              "name": "flowType"
-            }
-          }
-        },
-        {
           "name": "goal",
           "type": "u64"
         },
@@ -283,74 +123,11 @@ export type TitaFlow = {
           "type": {
             "option": "i64"
           }
-        },
-        {
-          "name": "rules",
-          "type": {
-            "vec": {
-              "defined": {
-                "name": "ruleType"
-              }
-            }
-          }
-        },
-        {
-          "name": "votingMechanisms",
-          "type": {
-            "vec": {
-              "defined": {
-                "name": "votingMechanism"
-              }
-            }
-          }
         }
       ]
-    },
-    {
-      "name": "createProposal",
-      "discriminator": [
-        132,
-        116,
-        68,
-        174,
-        216,
-        160,
-        198,
-        22
-      ],
-      "accounts": [],
-      "args": []
-    },
-    {
-      "name": "vote",
-      "discriminator": [
-        227,
-        110,
-        155,
-        23,
-        136,
-        126,
-        172,
-        25
-      ],
-      "accounts": [],
-      "args": []
     }
   ],
   "accounts": [
-    {
-      "name": "contribution",
-      "discriminator": [
-        182,
-        187,
-        14,
-        111,
-        72,
-        167,
-        242,
-        212
-      ]
-    },
     {
       "name": "flow",
       "discriminator": [
@@ -363,11 +140,50 @@ export type TitaFlow = {
         167,
         203
       ]
+    },
+    {
+      "name": "vault",
+      "discriminator": [
+        211,
+        8,
+        232,
+        43,
+        2,
+        152,
+        117,
+        119
+      ]
     }
   ],
   "events": [
     {
-      "name": "flowCreatedEvent",
+      "name": "tita_flow::instructions::create_direct_flow::FlowCreatedEvent",
+      "discriminator": [
+        97,
+        126,
+        21,
+        187,
+        40,
+        199,
+        96,
+        104
+      ]
+    },
+    {
+      "name": "tita_flow::instructions::create_milestone_flow::FlowCreatedEvent",
+      "discriminator": [
+        97,
+        126,
+        21,
+        187,
+        40,
+        199,
+        96,
+        104
+      ]
+    },
+    {
+      "name": "tita_flow::instructions::create_weighted_flow::FlowCreatedEvent",
       "discriminator": [
         97,
         126,
@@ -388,123 +204,121 @@ export type TitaFlow = {
     },
     {
       "code": 6001,
+      "name": "flowIdTooLong",
+      "msg": "Flow ID exceeds maximum length"
+    },
+    {
+      "code": 6002,
       "name": "invalidGoalAmount",
       "msg": "Invalid goal amount"
     },
     {
-      "code": 6002,
+      "code": 6003,
       "name": "invalidStartTime",
       "msg": "Invalid start time"
     },
     {
-      "code": 6003,
-      "name": "invalidEndTime",
-      "msg": "Invalid end time"
-    },
-    {
       "code": 6004,
       "name": "invalidTimeframe",
-      "msg": "Invalid timeframe"
+      "msg": "Invalid end time or timeframe"
     },
     {
       "code": 6005,
-      "name": "noRulesSpecified",
-      "msg": "No rules specified"
-    },
-    {
-      "code": 6006,
-      "name": "incompatibleRules",
-      "msg": "Incompatible rules combination"
-    },
-    {
-      "code": 6007,
       "name": "flowEnded",
       "msg": "Flow has ended"
     },
     {
-      "code": 6008,
+      "code": 6006,
       "name": "inactiveFlow",
       "msg": "Flow is inactive"
     },
     {
+      "code": 6007,
+      "name": "noMilestonesSpecified",
+      "msg": "No milestones specified"
+    },
+    {
+      "code": 6008,
+      "name": "tooManyMilestones",
+      "msg": "Too many milestones specified (max 10)"
+    },
+    {
       "code": 6009,
-      "name": "invalidOwner",
-      "msg": "Invalid Owner"
+      "name": "emptyMilestoneDescription",
+      "msg": "Empty milestone description"
     },
     {
       "code": 6010,
-      "name": "invalidMint",
-      "msg": "Invalid Mint"
+      "name": "milestoneDescriptionTooLong",
+      "msg": "Milestone description too long"
     },
     {
       "code": 6011,
-      "name": "emptyDistribution",
-      "msg": "Empty distribution"
+      "name": "invalidMilestoneDeadline",
+      "msg": "Invalid milestone deadline"
     },
     {
       "code": 6012,
-      "name": "invalidAmount",
-      "msg": "Invalid amount"
+      "name": "invalidMilestoneWeight",
+      "msg": "Invalid milestone weight"
     },
     {
       "code": 6013,
-      "name": "mathOverflow",
-      "msg": "Math overflow"
+      "name": "milestoneWeightsIncorrect",
+      "msg": "Milestone weights do not add up to 100% (10000 basis points)"
     },
     {
       "code": 6014,
-      "name": "distributionExceedsContribution",
-      "msg": "Distribution exceeds contribution amount"
+      "name": "milestoneAccountsMismatch",
+      "msg": "Number of milestone accounts does not match milestone configurations"
     },
     {
       "code": 6015,
-      "name": "ruleNotSupported",
-      "msg": "Rule not supported"
+      "name": "noAllocationsSpecified",
+      "msg": "No allocations specified"
     },
     {
       "code": 6016,
-      "name": "insufficientFunds",
-      "msg": "Insufficient funds"
+      "name": "tooManyAllocations",
+      "msg": "Too many allocations specified (max 10)"
     },
     {
       "code": 6017,
-      "name": "tokenTransferFailed",
-      "msg": "Token transfer failed"
+      "name": "emptyAllocationDescription",
+      "msg": "Empty allocation description"
+    },
+    {
+      "code": 6018,
+      "name": "allocationDescriptionTooLong",
+      "msg": "Allocation description too long"
+    },
+    {
+      "code": 6019,
+      "name": "invalidAllocationWeight",
+      "msg": "Invalid allocation weight"
+    },
+    {
+      "code": 6020,
+      "name": "allocationWeightsIncorrect",
+      "msg": "Allocation weights do not add up to 100% (10000 basis points)"
+    },
+    {
+      "code": 6021,
+      "name": "allocationAccountsMismatch",
+      "msg": "Number of allocation accounts does not match allocation configurations"
+    },
+    {
+      "code": 6022,
+      "name": "invalidVaultAddress",
+      "msg": "Invalid vault address"
+    },
+    {
+      "code": 6023,
+      "name": "mathOverflow",
+      "msg": "Math overflow"
     }
   ],
   "types": [
-    {
-      "name": "contribution",
-      "type": {
-        "kind": "struct",
-        "fields": [
-          {
-            "name": "flow",
-            "type": "pubkey"
-          },
-          {
-            "name": "contributor",
-            "type": "pubkey"
-          },
-          {
-            "name": "amount",
-            "type": "u64"
-          },
-          {
-            "name": "timestamp",
-            "type": "i64"
-          },
-          {
-            "name": "tokenMint",
-            "type": "pubkey"
-          },
-          {
-            "name": "bump",
-            "type": "u8"
-          }
-        ]
-      }
-    },
     {
       "name": "flow",
       "type": {
@@ -516,6 +330,10 @@ export type TitaFlow = {
           },
           {
             "name": "creator",
+            "type": "pubkey"
+          },
+          {
+            "name": "tokenMint",
             "type": "pubkey"
           },
           {
@@ -539,26 +357,6 @@ export type TitaFlow = {
             }
           },
           {
-            "name": "contributorCount",
-            "type": "u32"
-          },
-          {
-            "name": "milestoneCount",
-            "type": "u32"
-          },
-          {
-            "name": "proposalCount",
-            "type": "u32"
-          },
-          {
-            "name": "flowType",
-            "type": {
-              "defined": {
-                "name": "flowType"
-              }
-            }
-          },
-          {
             "name": "flowStatus",
             "type": {
               "defined": {
@@ -567,64 +365,16 @@ export type TitaFlow = {
             }
           },
           {
-            "name": "tokenMint",
+            "name": "contributorCount",
+            "type": "u32"
+          },
+          {
+            "name": "primaryVault",
             "type": "pubkey"
-          },
-          {
-            "name": "rules",
-            "type": {
-              "vec": {
-                "defined": {
-                  "name": "ruleType"
-                }
-              }
-            }
-          },
-          {
-            "name": "votingMechanisms",
-            "type": {
-              "vec": {
-                "defined": {
-                  "name": "votingMechanism"
-                }
-              }
-            }
           },
           {
             "name": "bump",
             "type": "u8"
-          }
-        ]
-      }
-    },
-    {
-      "name": "flowCreatedEvent",
-      "type": {
-        "kind": "struct",
-        "fields": [
-          {
-            "name": "flowId",
-            "type": "string"
-          },
-          {
-            "name": "creator",
-            "type": "pubkey"
-          },
-          {
-            "name": "flowType",
-            "type": {
-              "defined": {
-                "name": "flowType"
-              }
-            }
-          },
-          {
-            "name": "goal",
-            "type": "u64"
-          },
-          {
-            "name": "timestamp",
-            "type": "i64"
           }
         ]
       }
@@ -647,21 +397,63 @@ export type TitaFlow = {
       }
     },
     {
-      "name": "flowType",
+      "name": "vault",
       "type": {
-        "kind": "enum",
-        "variants": [
+        "kind": "struct",
+        "fields": [
           {
-            "name": "raise"
+            "name": "flow",
+            "type": "pubkey"
           },
           {
-            "name": "distribute"
+            "name": "tokenMint",
+            "type": "pubkey"
+          },
+          {
+            "name": "amount",
+            "type": "u64"
+          },
+          {
+            "name": "vaultType",
+            "type": {
+              "defined": {
+                "name": "vaultType"
+              }
+            }
+          },
+          {
+            "name": "milestoneDeadline",
+            "type": {
+              "option": "i64"
+            }
+          },
+          {
+            "name": "milestoneCompleted",
+            "type": {
+              "option": "bool"
+            }
+          },
+          {
+            "name": "recipient",
+            "type": {
+              "option": "pubkey"
+            }
+          },
+          {
+            "name": "weight",
+            "type": {
+              "option": "u32"
+            }
+          },
+          {
+            "name": "bump",
+            "type": "u8"
           }
         ]
       }
     },
     {
-      "name": "ruleType",
+      "name": "vaultType",
       "type": {
         "kind": "enum",
         "variants": [
@@ -678,18 +470,148 @@ export type TitaFlow = {
       }
     },
     {
-      "name": "votingMechanism",
+      "name": "tita_flow::instructions::create_direct_flow::FlowCreatedEvent",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "flowId",
+            "type": "string"
+          },
+          {
+            "name": "creator",
+            "type": "pubkey"
+          },
+          {
+            "name": "flowType",
+            "type": {
+              "defined": {
+                "name": "tita_flow::instructions::create_direct_flow::FlowType"
+              }
+            }
+          },
+          {
+            "name": "goal",
+            "type": "u64"
+          },
+          {
+            "name": "timestamp",
+            "type": "i64"
+          }
+        ]
+      }
+    },
+    {
+      "name": "tita_flow::instructions::create_direct_flow::FlowType",
       "type": {
         "kind": "enum",
         "variants": [
           {
-            "name": "standard"
+            "name": "direct"
           },
           {
-            "name": "futarchy"
+            "name": "milestone"
           },
           {
-            "name": "quadratic"
+            "name": "weighted"
+          }
+        ]
+      }
+    },
+    {
+      "name": "tita_flow::instructions::create_milestone_flow::FlowCreatedEvent",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "flowId",
+            "type": "string"
+          },
+          {
+            "name": "creator",
+            "type": "pubkey"
+          },
+          {
+            "name": "flowType",
+            "type": {
+              "defined": {
+                "name": "tita_flow::instructions::create_milestone_flow::FlowType"
+              }
+            }
+          },
+          {
+            "name": "goal",
+            "type": "u64"
+          },
+          {
+            "name": "timestamp",
+            "type": "i64"
+          }
+        ]
+      }
+    },
+    {
+      "name": "tita_flow::instructions::create_milestone_flow::FlowType",
+      "type": {
+        "kind": "enum",
+        "variants": [
+          {
+            "name": "direct"
+          },
+          {
+            "name": "milestone"
+          },
+          {
+            "name": "weighted"
+          }
+        ]
+      }
+    },
+    {
+      "name": "tita_flow::instructions::create_weighted_flow::FlowCreatedEvent",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "flowId",
+            "type": "string"
+          },
+          {
+            "name": "creator",
+            "type": "pubkey"
+          },
+          {
+            "name": "flowType",
+            "type": {
+              "defined": {
+                "name": "tita_flow::instructions::create_weighted_flow::FlowType"
+              }
+            }
+          },
+          {
+            "name": "goal",
+            "type": "u64"
+          },
+          {
+            "name": "timestamp",
+            "type": "i64"
+          }
+        ]
+      }
+    },
+    {
+      "name": "tita_flow::instructions::create_weighted_flow::FlowType",
+      "type": {
+        "kind": "enum",
+        "variants": [
+          {
+            "name": "direct"
+          },
+          {
+            "name": "milestone"
+          },
+          {
+            "name": "weighted"
           }
         ]
       }

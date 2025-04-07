@@ -8,168 +8,16 @@
   },
   "instructions": [
     {
-      "name": "close",
+      "name": "create_direct_flow",
       "discriminator": [
-        98,
-        165,
-        201,
-        177,
-        108,
-        65,
-        206,
-        96
-      ],
-      "accounts": [],
-      "args": []
-    },
-    {
-      "name": "contribute_direct",
-      "discriminator": [
-        123,
-        85,
-        52,
-        210,
-        34,
-        70,
-        211,
-        182
-      ],
-      "accounts": [
-        {
-          "name": "contributor",
-          "writable": true,
-          "signer": true
-        },
-        {
-          "name": "flow",
-          "writable": true,
-          "pda": {
-            "seeds": [
-              {
-                "kind": "const",
-                "value": [
-                  116,
-                  105,
-                  116,
-                  97,
-                  45,
-                  102,
-                  108,
-                  111,
-                  119
-                ]
-              },
-              {
-                "kind": "account",
-                "path": "flow.flow_id",
-                "account": "Flow"
-              },
-              {
-                "kind": "account",
-                "path": "flow.creator",
-                "account": "Flow"
-              }
-            ]
-          }
-        },
-        {
-          "name": "vault",
-          "writable": true,
-          "pda": {
-            "seeds": [
-              {
-                "kind": "const",
-                "value": [
-                  116,
-                  105,
-                  116,
-                  97,
-                  45,
-                  118,
-                  97,
-                  117,
-                  108,
-                  116
-                ]
-              },
-              {
-                "kind": "account",
-                "path": "flow"
-              },
-              {
-                "kind": "account",
-                "path": "token_mint"
-              }
-            ]
-          }
-        },
-        {
-          "name": "contribution",
-          "writable": true
-        },
-        {
-          "name": "user_token_account",
-          "writable": true
-        },
-        {
-          "name": "token_mint"
-        },
-        {
-          "name": "token_program"
-        },
-        {
-          "name": "system_program",
-          "address": "11111111111111111111111111111111"
-        }
-      ],
-      "args": [
-        {
-          "name": "amount",
-          "type": "u64"
-        }
-      ]
-    },
-    {
-      "name": "contribute_milestones",
-      "discriminator": [
-        145,
-        43,
-        130,
-        207,
-        19,
-        132,
-        220,
-        200
-      ],
-      "accounts": [],
-      "args": []
-    },
-    {
-      "name": "contribute_weighted",
-      "discriminator": [
-        160,
-        238,
-        167,
-        151,
-        73,
-        165,
-        118,
-        178
-      ],
-      "accounts": [],
-      "args": []
-    },
-    {
-      "name": "create_flow",
-      "discriminator": [
-        139,
-        104,
-        255,
-        32,
-        61,
-        236,
-        41,
-        31
+        231,
+        143,
+        245,
+        122,
+        39,
+        63,
+        134,
+        128
       ],
       "accounts": [
         {
@@ -255,14 +103,6 @@
           "type": "string"
         },
         {
-          "name": "flow_type",
-          "type": {
-            "defined": {
-              "name": "FlowType"
-            }
-          }
-        },
-        {
           "name": "goal",
           "type": "u64"
         },
@@ -277,74 +117,11 @@
           "type": {
             "option": "i64"
           }
-        },
-        {
-          "name": "rules",
-          "type": {
-            "vec": {
-              "defined": {
-                "name": "RuleType"
-              }
-            }
-          }
-        },
-        {
-          "name": "voting_mechanisms",
-          "type": {
-            "vec": {
-              "defined": {
-                "name": "VotingMechanism"
-              }
-            }
-          }
         }
       ]
-    },
-    {
-      "name": "create_proposal",
-      "discriminator": [
-        132,
-        116,
-        68,
-        174,
-        216,
-        160,
-        198,
-        22
-      ],
-      "accounts": [],
-      "args": []
-    },
-    {
-      "name": "vote",
-      "discriminator": [
-        227,
-        110,
-        155,
-        23,
-        136,
-        126,
-        172,
-        25
-      ],
-      "accounts": [],
-      "args": []
     }
   ],
   "accounts": [
-    {
-      "name": "Contribution",
-      "discriminator": [
-        182,
-        187,
-        14,
-        111,
-        72,
-        167,
-        242,
-        212
-      ]
-    },
     {
       "name": "Flow",
       "discriminator": [
@@ -357,11 +134,50 @@
         167,
         203
       ]
+    },
+    {
+      "name": "Vault",
+      "discriminator": [
+        211,
+        8,
+        232,
+        43,
+        2,
+        152,
+        117,
+        119
+      ]
     }
   ],
   "events": [
     {
-      "name": "FlowCreatedEvent",
+      "name": "tita_flow::instructions::create_direct_flow::FlowCreatedEvent",
+      "discriminator": [
+        97,
+        126,
+        21,
+        187,
+        40,
+        199,
+        96,
+        104
+      ]
+    },
+    {
+      "name": "tita_flow::instructions::create_milestone_flow::FlowCreatedEvent",
+      "discriminator": [
+        97,
+        126,
+        21,
+        187,
+        40,
+        199,
+        96,
+        104
+      ]
+    },
+    {
+      "name": "tita_flow::instructions::create_weighted_flow::FlowCreatedEvent",
       "discriminator": [
         97,
         126,
@@ -382,123 +198,121 @@
     },
     {
       "code": 6001,
+      "name": "FlowIdTooLong",
+      "msg": "Flow ID exceeds maximum length"
+    },
+    {
+      "code": 6002,
       "name": "InvalidGoalAmount",
       "msg": "Invalid goal amount"
     },
     {
-      "code": 6002,
+      "code": 6003,
       "name": "InvalidStartTime",
       "msg": "Invalid start time"
     },
     {
-      "code": 6003,
-      "name": "InvalidEndTime",
-      "msg": "Invalid end time"
-    },
-    {
       "code": 6004,
       "name": "InvalidTimeframe",
-      "msg": "Invalid timeframe"
+      "msg": "Invalid end time or timeframe"
     },
     {
       "code": 6005,
-      "name": "NoRulesSpecified",
-      "msg": "No rules specified"
-    },
-    {
-      "code": 6006,
-      "name": "IncompatibleRules",
-      "msg": "Incompatible rules combination"
-    },
-    {
-      "code": 6007,
       "name": "FlowEnded",
       "msg": "Flow has ended"
     },
     {
-      "code": 6008,
+      "code": 6006,
       "name": "InactiveFlow",
       "msg": "Flow is inactive"
     },
     {
+      "code": 6007,
+      "name": "NoMilestonesSpecified",
+      "msg": "No milestones specified"
+    },
+    {
+      "code": 6008,
+      "name": "TooManyMilestones",
+      "msg": "Too many milestones specified (max 10)"
+    },
+    {
       "code": 6009,
-      "name": "InvalidOwner",
-      "msg": "Invalid Owner"
+      "name": "EmptyMilestoneDescription",
+      "msg": "Empty milestone description"
     },
     {
       "code": 6010,
-      "name": "InvalidMint",
-      "msg": "Invalid Mint"
+      "name": "MilestoneDescriptionTooLong",
+      "msg": "Milestone description too long"
     },
     {
       "code": 6011,
-      "name": "EmptyDistribution",
-      "msg": "Empty distribution"
+      "name": "InvalidMilestoneDeadline",
+      "msg": "Invalid milestone deadline"
     },
     {
       "code": 6012,
-      "name": "InvalidAmount",
-      "msg": "Invalid amount"
+      "name": "InvalidMilestoneWeight",
+      "msg": "Invalid milestone weight"
     },
     {
       "code": 6013,
-      "name": "MathOverflow",
-      "msg": "Math overflow"
+      "name": "MilestoneWeightsIncorrect",
+      "msg": "Milestone weights do not add up to 100% (10000 basis points)"
     },
     {
       "code": 6014,
-      "name": "DistributionExceedsContribution",
-      "msg": "Distribution exceeds contribution amount"
+      "name": "MilestoneAccountsMismatch",
+      "msg": "Number of milestone accounts does not match milestone configurations"
     },
     {
       "code": 6015,
-      "name": "RuleNotSupported",
-      "msg": "Rule not supported"
+      "name": "NoAllocationsSpecified",
+      "msg": "No allocations specified"
     },
     {
       "code": 6016,
-      "name": "InsufficientFunds",
-      "msg": "Insufficient funds"
+      "name": "TooManyAllocations",
+      "msg": "Too many allocations specified (max 10)"
     },
     {
       "code": 6017,
-      "name": "TokenTransferFailed",
-      "msg": "Token transfer failed"
+      "name": "EmptyAllocationDescription",
+      "msg": "Empty allocation description"
+    },
+    {
+      "code": 6018,
+      "name": "AllocationDescriptionTooLong",
+      "msg": "Allocation description too long"
+    },
+    {
+      "code": 6019,
+      "name": "InvalidAllocationWeight",
+      "msg": "Invalid allocation weight"
+    },
+    {
+      "code": 6020,
+      "name": "AllocationWeightsIncorrect",
+      "msg": "Allocation weights do not add up to 100% (10000 basis points)"
+    },
+    {
+      "code": 6021,
+      "name": "AllocationAccountsMismatch",
+      "msg": "Number of allocation accounts does not match allocation configurations"
+    },
+    {
+      "code": 6022,
+      "name": "InvalidVaultAddress",
+      "msg": "Invalid vault address"
+    },
+    {
+      "code": 6023,
+      "name": "MathOverflow",
+      "msg": "Math overflow"
     }
   ],
   "types": [
-    {
-      "name": "Contribution",
-      "type": {
-        "kind": "struct",
-        "fields": [
-          {
-            "name": "flow",
-            "type": "pubkey"
-          },
-          {
-            "name": "contributor",
-            "type": "pubkey"
-          },
-          {
-            "name": "amount",
-            "type": "u64"
-          },
-          {
-            "name": "timestamp",
-            "type": "i64"
-          },
-          {
-            "name": "token_mint",
-            "type": "pubkey"
-          },
-          {
-            "name": "bump",
-            "type": "u8"
-          }
-        ]
-      }
-    },
     {
       "name": "Flow",
       "type": {
@@ -510,6 +324,10 @@
           },
           {
             "name": "creator",
+            "type": "pubkey"
+          },
+          {
+            "name": "token_mint",
             "type": "pubkey"
           },
           {
@@ -533,26 +351,6 @@
             }
           },
           {
-            "name": "contributor_count",
-            "type": "u32"
-          },
-          {
-            "name": "milestone_count",
-            "type": "u32"
-          },
-          {
-            "name": "proposal_count",
-            "type": "u32"
-          },
-          {
-            "name": "flow_type",
-            "type": {
-              "defined": {
-                "name": "FlowType"
-              }
-            }
-          },
-          {
             "name": "flow_status",
             "type": {
               "defined": {
@@ -561,64 +359,16 @@
             }
           },
           {
-            "name": "token_mint",
+            "name": "contributor_count",
+            "type": "u32"
+          },
+          {
+            "name": "primary_vault",
             "type": "pubkey"
-          },
-          {
-            "name": "rules",
-            "type": {
-              "vec": {
-                "defined": {
-                  "name": "RuleType"
-                }
-              }
-            }
-          },
-          {
-            "name": "voting_mechanisms",
-            "type": {
-              "vec": {
-                "defined": {
-                  "name": "VotingMechanism"
-                }
-              }
-            }
           },
           {
             "name": "bump",
             "type": "u8"
-          }
-        ]
-      }
-    },
-    {
-      "name": "FlowCreatedEvent",
-      "type": {
-        "kind": "struct",
-        "fields": [
-          {
-            "name": "flow_id",
-            "type": "string"
-          },
-          {
-            "name": "creator",
-            "type": "pubkey"
-          },
-          {
-            "name": "flow_type",
-            "type": {
-              "defined": {
-                "name": "FlowType"
-              }
-            }
-          },
-          {
-            "name": "goal",
-            "type": "u64"
-          },
-          {
-            "name": "timestamp",
-            "type": "i64"
           }
         ]
       }
@@ -641,21 +391,63 @@
       }
     },
     {
-      "name": "FlowType",
+      "name": "Vault",
       "type": {
-        "kind": "enum",
-        "variants": [
+        "kind": "struct",
+        "fields": [
           {
-            "name": "Raise"
+            "name": "flow",
+            "type": "pubkey"
           },
           {
-            "name": "Distribute"
+            "name": "token_mint",
+            "type": "pubkey"
+          },
+          {
+            "name": "amount",
+            "type": "u64"
+          },
+          {
+            "name": "vault_type",
+            "type": {
+              "defined": {
+                "name": "VaultType"
+              }
+            }
+          },
+          {
+            "name": "milestone_deadline",
+            "type": {
+              "option": "i64"
+            }
+          },
+          {
+            "name": "milestone_completed",
+            "type": {
+              "option": "bool"
+            }
+          },
+          {
+            "name": "recipient",
+            "type": {
+              "option": "pubkey"
+            }
+          },
+          {
+            "name": "weight",
+            "type": {
+              "option": "u32"
+            }
+          },
+          {
+            "name": "bump",
+            "type": "u8"
           }
         ]
       }
     },
     {
-      "name": "RuleType",
+      "name": "VaultType",
       "type": {
         "kind": "enum",
         "variants": [
@@ -672,18 +464,148 @@
       }
     },
     {
-      "name": "VotingMechanism",
+      "name": "tita_flow::instructions::create_direct_flow::FlowCreatedEvent",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "flow_id",
+            "type": "string"
+          },
+          {
+            "name": "creator",
+            "type": "pubkey"
+          },
+          {
+            "name": "flow_type",
+            "type": {
+              "defined": {
+                "name": "tita_flow::instructions::create_direct_flow::FlowType"
+              }
+            }
+          },
+          {
+            "name": "goal",
+            "type": "u64"
+          },
+          {
+            "name": "timestamp",
+            "type": "i64"
+          }
+        ]
+      }
+    },
+    {
+      "name": "tita_flow::instructions::create_direct_flow::FlowType",
       "type": {
         "kind": "enum",
         "variants": [
           {
-            "name": "Standard"
+            "name": "Direct"
           },
           {
-            "name": "Futarchy"
+            "name": "Milestone"
           },
           {
-            "name": "Quadratic"
+            "name": "Weighted"
+          }
+        ]
+      }
+    },
+    {
+      "name": "tita_flow::instructions::create_milestone_flow::FlowCreatedEvent",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "flow_id",
+            "type": "string"
+          },
+          {
+            "name": "creator",
+            "type": "pubkey"
+          },
+          {
+            "name": "flow_type",
+            "type": {
+              "defined": {
+                "name": "tita_flow::instructions::create_milestone_flow::FlowType"
+              }
+            }
+          },
+          {
+            "name": "goal",
+            "type": "u64"
+          },
+          {
+            "name": "timestamp",
+            "type": "i64"
+          }
+        ]
+      }
+    },
+    {
+      "name": "tita_flow::instructions::create_milestone_flow::FlowType",
+      "type": {
+        "kind": "enum",
+        "variants": [
+          {
+            "name": "Direct"
+          },
+          {
+            "name": "Milestone"
+          },
+          {
+            "name": "Weighted"
+          }
+        ]
+      }
+    },
+    {
+      "name": "tita_flow::instructions::create_weighted_flow::FlowCreatedEvent",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "flow_id",
+            "type": "string"
+          },
+          {
+            "name": "creator",
+            "type": "pubkey"
+          },
+          {
+            "name": "flow_type",
+            "type": {
+              "defined": {
+                "name": "tita_flow::instructions::create_weighted_flow::FlowType"
+              }
+            }
+          },
+          {
+            "name": "goal",
+            "type": "u64"
+          },
+          {
+            "name": "timestamp",
+            "type": "i64"
+          }
+        ]
+      }
+    },
+    {
+      "name": "tita_flow::instructions::create_weighted_flow::FlowType",
+      "type": {
+        "kind": "enum",
+        "variants": [
+          {
+            "name": "Direct"
+          },
+          {
+            "name": "Milestone"
+          },
+          {
+            "name": "Weighted"
           }
         ]
       }
