@@ -50,7 +50,10 @@ pub struct ContributeMilestones<'info> {
 }
 
 impl<'info> ContributeMilestones<'info> {
-    pub fn contribute(&mut self, amount: u64) -> Result<()>{
+    pub fn contribute(
+        &mut self, 
+        amount: u64,
+    ) -> Result<()>{
         
         
         Ok(())

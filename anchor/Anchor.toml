@@ -6,7 +6,6 @@ resolution = true
 skip-lint = false
 
 [programs.localnet]
-basic = "6z68wfurCMYkZG51s1Et9BJEd9nJGUusjHXNt4dGbNNF"
 tita_flow = "4qgU6nZVrBQdYoaKHNBZju32cX3QqKhhDx23m3VCCuHp"
 
 [registry]
