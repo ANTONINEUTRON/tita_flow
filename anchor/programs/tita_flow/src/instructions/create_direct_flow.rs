@@ -29,10 +29,6 @@ pub struct CreateDirectFlow<'info> {
         bump,
         constraint = !flow_id.is_empty() @ TitaErrors::EmptyFlowId,
         constraint = goal > 0 @ TitaErrors::InvalidGoalAmount,
-        constraint = start_time.is_none() || start_time.unwrap() >= Clock::get()?.unix_timestamp @ TitaErrors::InvalidStartTime,
-        constraint = end_time.is_none() || 
-                    (end_time.unwrap() > Clock::get()?.unix_timestamp && 
-                     (start_time.is_none() || end_time.unwrap() > start_time.unwrap())) @ TitaErrors::InvalidTimeframe,
     )]
     pub flow: Account<'info, Flow>,
     
@@ -64,6 +60,33 @@ impl<'info> CreateDirectFlow<'info> {
         flow_bump: u8,
         vault_bump: u8
     ) -> Result<()> {
+        // Validate time parameters if provided
+        let current_time = Clock::get()?.unix_timestamp;
+        
+        // If start time is specified, ensure it's not in the past
+        if let Some(start) = start_time {
+            require!(
+                current_time < start,
+                TitaErrors::InvalidStartTime
+            );
+        }
+        
+        // If both start and end times are specified, ensure end is after start
+        if let (Some(start), Some(end)) = (start_time, end_time) {
+            require!(
+                end > start,
+                TitaErrors::InvalidTimeframe
+            );
+        }
+        
+        // If end time is specified, ensure it's in the future
+        if let Some(end) = end_time {
+            require!(
+                end > current_time,
+                TitaErrors::InvalidTimeframe
+            );
+        }
+
         // Initialize flow account
     let flow = &mut self.flow;
     flow.flow_id = flow_id;
