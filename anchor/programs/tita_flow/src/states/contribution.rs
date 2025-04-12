@@ -3,11 +3,12 @@ use anchor_lang::prelude::*;
 #[account]
 #[derive(InitSpace)]
 pub struct Contribution {       
-    pub flow: Pubkey,
-    pub contributor: Pubkey,
-    pub amount: u64,
-    pub timestamp: i64,
-    pub vault: Pubkey,          // Which vault received the contribution
-    pub token_mint: Pubkey,
+    pub flow: Pubkey,                // Reference to the flow
+    pub contributor: Pubkey,         // Who made the contribution
+    pub total_amount: u64,           // Total amount contributed
+    pub first_contribution: i64,     // Timestamp of first contribution
+    pub last_contribution: i64,      // Timestamp of last contribution
+    pub contribution_count: u32,     // Number of separate contribution transactions
+    pub token_mint: Pubkey,          // Token mint used for contribution
     pub bump: u8,
 }

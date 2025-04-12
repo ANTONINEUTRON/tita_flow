@@ -1,9 +1,7 @@
 use anchor_lang::prelude::*;
-use anchor_spl::token_interface::{Mint, TokenInterface};
+use anchor_spl::token_interface::{Mint, TokenAccount, TokenInterface};
 use crate::{
-    errors::TitaErrors,
-    states::{Flow, FlowStatus, Milestone},
-    constants::TITA_FLOW_SEED,
+    constants::{TITA_FLOW_SEED, TITA_FLOW_TA_SEED}, errors::TitaErrors, states::{Flow, FlowStatus, Milestone}
 };
 
 #[derive(Accounts)]
@@ -33,6 +31,22 @@ pub struct CreateFlow<'info> {
         constraint = goal > 0 @ TitaErrors::InvalidGoalAmount,
     )]
     pub flow: Account<'info, Flow>,
+
+
+    #[account(
+        init,
+        payer = creator,
+        seeds = [
+            TITA_FLOW_TA_SEED,
+            flow.key().as_ref(),
+            token_mint.key().as_ref()
+        ],
+        bump,
+        token::mint = token_mint,
+        token::authority = flow, // PDA will be the authority
+    )]
+    pub flow_token_account: InterfaceAccount<'info, TokenAccount>,
+    
     
     pub token_mint: InterfaceAccount<'info, Mint>,
     pub token_program: Interface<'info, TokenInterface>,

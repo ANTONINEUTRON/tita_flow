@@ -37,5 +37,20 @@ pub enum TitaErrors {
     MathOverflow,
 
     #[msg("Milestone total mismatch")]
-    MilestoneTotalMismatch
+    MilestoneTotalMismatch,
+
+    #[msg(Invalid Contribution Amount)]
+    InvalidContributionAmount,
+
+    #[msg("Flow not active")]
+    FlowNotActive,
+
+    #[msg("Invalid token mint")]
+    InvalidTokenMint,
+
+    #[msg("Invalid token owner")]
+    InvalidTokenAccount,
+
+    #[msg("Invalid token owner")]
+    InvalidTokenOwner
 }
