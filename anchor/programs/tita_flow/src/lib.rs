@@ -20,35 +20,26 @@ pub mod tita_flow {
     // Create a RAISE and DISTRIBUTE flow
     // RAISE FLOW - for accepting contributions from different users
     // DISTRIBUTE FLOW - can only have one donor, the grant it is tied to 
-    pub fn create_direct_flow(
-        ctx: Context<CreateDirectFlow>,
+    pub fn create_flow(
+        ctx: Context<CreateFlow>,
         flow_id: String,
         goal: u64,
         start_time: Option<i64>,
-        end_time: Option<i64>
+        end_time: Option<i64>,
+        milestones: Option<Vec<Milestone>>
     ) -> Result<()> {
         let _ = ctx.accounts.create(
             flow_id,
             goal,
             start_time,
             end_time,
-            ctx.accounts.flow.bump,
-            ctx.accounts.vault.bump
+            milestones,
+            ctx.accounts.flow.bump
         )?;
 
         Ok(())
     }
     
-    // pub fn create_milestone_flow(
-    //     ctx: Context<CreateMilestoneFlow>,
-    //     flow_id: String,
-    //     goal: u64,
-    //     start_time: Option<i64>,
-    //     end_time: Option<i64>,
-    //     milestones: Vec<MilestoneConfig>
-    // ) -> Result<()> {
-    //     Ok(())
-    // }
 
 
     // pub fn create_weighted_flow(

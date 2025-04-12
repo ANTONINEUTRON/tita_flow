@@ -1,14 +1,4 @@
-use std::mem::discriminant;
-
 use anchor_lang::prelude::*;
-
-use super::{Vault, VaultType, VotingMechanism};
-
-#[derive(AnchorSerialize, AnchorDeserialize, Clone, Copy, PartialEq, Eq, InitSpace)]
-pub enum FlowType {
-    Raise,
-    Distribute,
-}
 
 #[derive(AnchorSerialize, AnchorDeserialize, Clone, Copy, PartialEq, Eq, InitSpace)]
 pub enum FlowStatus {
@@ -17,13 +7,13 @@ pub enum FlowStatus {
     Canceled,
 }
 
-#[derive(AnchorSerialize, AnchorDeserialize, Clone, Copy, PartialEq, Eq, InitSpace)]
-pub enum RuleType {
-    Direct,
-    Milestone,
-    Weighted,
+#[derive(AnchorSerialize, AnchorDeserialize, Clone, InitSpace)]
+pub struct Milestone {
+    pub id: u32,               // Unique identifier for the milestone
+    pub amount: u64,            // Amount allocated to this milestone
+    pub deadline: i64,          // When this milestone is due
+    pub completed: bool,        // Whether the milestone is completed
 }
-
 
 #[account]
 #[derive(InitSpace)]
@@ -38,30 +28,7 @@ pub struct Flow {
     pub end_date: Option<i64>,   // When flow ends
     pub flow_status: FlowStatus, // Active/Completed/Canceled
     pub contributor_count: u32,  // Number of contributors
-    pub primary_vault: Pubkey,   // Primary vault (always exists)
+    #[max_len(10)]              // Maximum 10 milestones
+    pub milestones: Option<Vec<Milestone>>, // Milestone data (only used if flow_type is Milestone)
     pub bump: u8
-}
-
-impl Flow {
-    pub fn get_flow_type(&self, vaults: Vec<&Vault>) -> RuleType {
-        if vaults.len() == 1 {
-            return RuleType::Direct;
-        }
-        
-        let has_milestones = vaults.iter().any(|v| 
-            matches!(v.vault_type, VaultType::Milestone)
-        );
-        
-        let has_weighted = vaults.iter().any(|v| 
-            matches!(v.vault_type, VaultType::Weighted)
-        );
-        
-        if has_milestones {
-            RuleType::Milestone
-        } else if has_weighted {
-            RuleType::Weighted
-        } else {
-            RuleType::Direct // Default
-        }
-    }
 }
