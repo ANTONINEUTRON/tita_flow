@@ -13,8 +13,6 @@ import { PublicKey } from '@solana/web3.js';
 
 // Constants
 const TITA_FLOW_SEED = Buffer.from("tita-flow");
-const TITA_VAULT_SEED = Buffer.from("tita-vault");
-
 
 describe('tita_flow', () => {
   // Configure the client to use the local cluster.
@@ -65,7 +63,7 @@ describe('tita_flow', () => {
     );
   });
 
-  it('should initialize flow and vault accounts', async () => {
+  it('should initialize direct flow  account', async () => {
     // Find the flow PDA
     [flowPda] = await PublicKey.findProgramAddressSync(
       [
@@ -83,6 +81,63 @@ describe('tita_flow', () => {
       startTime,
       endTime,
       null // no milestones = direct flow=
+    ).accountsPartial({
+        creator: creator.publicKey,
+        flow: flowPda,
+        tokenMint: tokenMint,
+        tokenProgram: TOKEN_PROGRAM_ID,
+        systemProgram: anchor.web3.SystemProgram.programId,
+      })
+      .signers([creator])
+      .rpc();
+
+    // Fetch the created flow account
+    const flowAccount = await program.account.flow.fetch(flowPda);
+
+    // Verify flow account data
+    assert.strictEqual(flowAccount.flowId, flowId);
+    assert.ok(flowAccount.creator.equals(creator.publicKey));
+    assert.ok(flowAccount.tokenMint.equals(tokenMint));
+    assert.ok(flowAccount.goal.eq(goal));
+    assert.ok(flowAccount.raised.eq(new anchor.BN(0)));
+    assert.strictEqual(flowAccount.startDate?.toNumber(), startTime.toNumber());
+    assert.strictEqual(flowAccount.endDate?.toNumber(), endTime.toNumber());
+    assert.deepStrictEqual(flowAccount.flowStatus, { active: {} });
+    assert.strictEqual(flowAccount.contributorCount, 0);
+  });
+
+  it('should initialize milestone flow account', async () => {
+    let milestoneFlowId = "test-milestone-flow-1";
+    // Find the flow PDA
+    [flowPda] = await PublicKey.findProgramAddressSync(
+      [
+        TITA_FLOW_SEED,
+        Buffer.from(milestoneFlowId),
+        creator.publicKey.toBuffer(),
+      ],
+      program.programId
+    );
+
+    // Create the flow
+    await program.methods.createFlow(
+      milestoneFlowId,
+      goal,
+      startTime,
+      endTime,
+      [
+        {
+          id: 1,
+          amount: new anchor.BN(500000), // 500,000 tokens
+          deadline: new anchor.BN(now + 3600), // 1 hour later
+          completed: false,
+        },
+        {
+          id: 2,
+          amount: new anchor.BN(500000), // 500,000 tokens
+          deadline: new anchor.BN(now + 7200), // 2 hours later
+          completed: false,
+        },
+      ] // milestones
     )
       .accountsPartial({
         creator: creator.publicKey,
@@ -98,7 +153,7 @@ describe('tita_flow', () => {
     const flowAccount = await program.account.flow.fetch(flowPda);
 
     // Verify flow account data
-    assert.strictEqual(flowAccount.flowId, flowId);
+    assert.strictEqual(flowAccount.flowId, milestoneFlowId);
     assert.ok(flowAccount.creator.equals(creator.publicKey));
     assert.ok(flowAccount.tokenMint.equals(tokenMint));
     assert.ok(flowAccount.goal.eq(goal));
