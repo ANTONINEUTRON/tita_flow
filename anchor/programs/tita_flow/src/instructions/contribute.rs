@@ -1,5 +1,5 @@
 use anchor_lang::prelude::*;
-use anchor_spl::token_interface::{Mint, TokenAccount, TokenInterface};
+use anchor_spl::{ token_interface::{Mint, TokenAccount, TokenInterface, transfer_checked}};
 
 use crate::{
     constants::TITA_CONTRIBUTION_SEED,
@@ -31,7 +31,6 @@ pub struct Contribute<'info> {
     )]
     pub contribution: Account<'info, Contribution>,
 
-
     #[account(
         mut,
         constraint = contributor_token_account.mint == token_mint.key() @ TitaErrors::InvalidTokenAccount,
@@ -45,7 +44,6 @@ pub struct Contribute<'info> {
     )]
     pub flow_token_account: InterfaceAccount<'info, TokenAccount>,
     
-
     pub token_mint: InterfaceAccount<'info, Mint>,
     pub token_program: Interface<'info, TokenInterface>,
     pub system_program: Program<'info, System>,
@@ -63,22 +61,26 @@ impl<'info> Contribute<'info> {
         }
         
         // Check if flow is accepting contributions (start time)
-        if let Some(start_date) = self.flow.start_date {
-            let current_time = Clock::get()?.unix_timestamp;
-            require!(current_time >= start_date, TitaErrors::FlowNotStarted);
-        }
+        // if let Some(start_date) = self.flow.start_date {
+        //     let current_time = Clock::get()?.unix_timestamp;
+        //     require!(current_time >= start_date, TitaErrors::FlowNotStarted);
+        // }
         
-        // Transfer tokens from contributor to flow token account
-        let cpi_accounts = Transfer {
-            from: self.contributor_token_account.to_account_info(),
-            to: self.flow_token_account.to_account_info(),
-            authority: self.contributor.to_account_info(),
-        };
-        
-        let cpi_program = self.token_program.to_account_info();
-        let cpi_ctx = CpiContext::new(cpi_program, cpi_accounts);
-        token::transfer(cpi_ctx, amount)?;
-        
+        // Transfer tokens to token account
+        transfer_checked(
+            CpiContext::new(
+                self.token_program.to_account_info(),
+                anchor_spl::token_interface::TransferChecked {
+                    from: self.contributor_token_account.to_account_info(),
+                    mint: self.token_mint.to_account_info(),
+                    to: self.flow_token_account.to_account_info(),
+                    authority: self.contributor.to_account_info(),
+                },
+            ),
+            amount,
+            self.token_mint.decimals,
+        )?;
+
         // Initialize contribution if new
         let current_timestamp = Clock::get()?.unix_timestamp;
         

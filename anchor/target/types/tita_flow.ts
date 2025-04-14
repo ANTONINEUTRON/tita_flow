@@ -14,6 +14,92 @@ export type TitaFlow = {
   },
   "instructions": [
     {
+      "name": "contribute",
+      "discriminator": [
+        82,
+        33,
+        68,
+        131,
+        32,
+        0,
+        205,
+        95
+      ],
+      "accounts": [
+        {
+          "name": "contributor",
+          "writable": true,
+          "signer": true
+        },
+        {
+          "name": "flow",
+          "writable": true
+        },
+        {
+          "name": "contribution",
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  116,
+                  105,
+                  116,
+                  97,
+                  45,
+                  99,
+                  111,
+                  110,
+                  116,
+                  114,
+                  105,
+                  98,
+                  117,
+                  116,
+                  105,
+                  111,
+                  110
+                ]
+              },
+              {
+                "kind": "account",
+                "path": "flow"
+              },
+              {
+                "kind": "account",
+                "path": "contributor"
+              }
+            ]
+          }
+        },
+        {
+          "name": "contributorTokenAccount",
+          "writable": true
+        },
+        {
+          "name": "flowTokenAccount",
+          "writable": true
+        },
+        {
+          "name": "tokenMint"
+        },
+        {
+          "name": "tokenProgram"
+        },
+        {
+          "name": "systemProgram",
+          "address": "11111111111111111111111111111111"
+        }
+      ],
+      "args": [
+        {
+          "name": "amount",
+          "type": "u64"
+        }
+      ]
+    },
+    {
       "name": "createFlow",
       "discriminator": [
         139,
@@ -57,6 +143,39 @@ export type TitaFlow = {
               {
                 "kind": "account",
                 "path": "creator"
+              }
+            ]
+          }
+        },
+        {
+          "name": "flowTokenAccount",
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  116,
+                  105,
+                  116,
+                  97,
+                  45,
+                  102,
+                  108,
+                  111,
+                  119,
+                  45,
+                  116,
+                  97
+                ]
+              },
+              {
+                "kind": "account",
+                "path": "flow"
+              },
+              {
+                "kind": "account",
+                "path": "tokenMint"
               }
             ]
           }
@@ -110,6 +229,19 @@ export type TitaFlow = {
   ],
   "accounts": [
     {
+      "name": "contribution",
+      "discriminator": [
+        182,
+        187,
+        14,
+        111,
+        72,
+        167,
+        242,
+        212
+      ]
+    },
+    {
       "name": "flow",
       "discriminator": [
         126,
@@ -124,6 +256,19 @@ export type TitaFlow = {
     }
   ],
   "events": [
+    {
+      "name": "contributionEvent",
+      "discriminator": [
+        66,
+        160,
+        5,
+        247,
+        2,
+        131,
+        249,
+        150
+      ]
+    },
     {
       "name": "flowCreatedEvent",
       "discriminator": [
@@ -198,9 +343,112 @@ export type TitaFlow = {
       "code": 6011,
       "name": "milestoneTotalMismatch",
       "msg": "Milestone total mismatch"
+    },
+    {
+      "code": 6012,
+      "name": "invalidContributionAmount",
+      "msg": "invalid"
+    },
+    {
+      "code": 6013,
+      "name": "flowNotActive",
+      "msg": "Flow not active"
+    },
+    {
+      "code": 6014,
+      "name": "invalidTokenMint",
+      "msg": "Invalid token mint"
+    },
+    {
+      "code": 6015,
+      "name": "invalidTokenAccount",
+      "msg": "Invalid token owner"
+    },
+    {
+      "code": 6016,
+      "name": "invalidTokenOwner",
+      "msg": "Invalid token owner"
+    },
+    {
+      "code": 6017,
+      "name": "flowEnded",
+      "msg": "Flow ended"
+    },
+    {
+      "code": 6018,
+      "name": "flowNotStarted",
+      "msg": "Flow not started"
     }
   ],
   "types": [
+    {
+      "name": "contribution",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "flow",
+            "type": "pubkey"
+          },
+          {
+            "name": "contributor",
+            "type": "pubkey"
+          },
+          {
+            "name": "totalAmount",
+            "type": "u64"
+          },
+          {
+            "name": "firstContribution",
+            "type": "i64"
+          },
+          {
+            "name": "lastContribution",
+            "type": "i64"
+          },
+          {
+            "name": "contributionCount",
+            "type": "u32"
+          },
+          {
+            "name": "tokenMint",
+            "type": "pubkey"
+          },
+          {
+            "name": "bump",
+            "type": "u8"
+          }
+        ]
+      }
+    },
+    {
+      "name": "contributionEvent",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "flow",
+            "type": "pubkey"
+          },
+          {
+            "name": "contributor",
+            "type": "pubkey"
+          },
+          {
+            "name": "amount",
+            "type": "u64"
+          },
+          {
+            "name": "totalContributed",
+            "type": "u64"
+          },
+          {
+            "name": "timestamp",
+            "type": "i64"
+          }
+        ]
+      }
+    },
     {
       "name": "flow",
       "type": {

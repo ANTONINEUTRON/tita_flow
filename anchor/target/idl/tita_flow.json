@@ -8,6 +8,92 @@
   },
   "instructions": [
     {
+      "name": "contribute",
+      "discriminator": [
+        82,
+        33,
+        68,
+        131,
+        32,
+        0,
+        205,
+        95
+      ],
+      "accounts": [
+        {
+          "name": "contributor",
+          "writable": true,
+          "signer": true
+        },
+        {
+          "name": "flow",
+          "writable": true
+        },
+        {
+          "name": "contribution",
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  116,
+                  105,
+                  116,
+                  97,
+                  45,
+                  99,
+                  111,
+                  110,
+                  116,
+                  114,
+                  105,
+                  98,
+                  117,
+                  116,
+                  105,
+                  111,
+                  110
+                ]
+              },
+              {
+                "kind": "account",
+                "path": "flow"
+              },
+              {
+                "kind": "account",
+                "path": "contributor"
+              }
+            ]
+          }
+        },
+        {
+          "name": "contributor_token_account",
+          "writable": true
+        },
+        {
+          "name": "flow_token_account",
+          "writable": true
+        },
+        {
+          "name": "token_mint"
+        },
+        {
+          "name": "token_program"
+        },
+        {
+          "name": "system_program",
+          "address": "11111111111111111111111111111111"
+        }
+      ],
+      "args": [
+        {
+          "name": "amount",
+          "type": "u64"
+        }
+      ]
+    },
+    {
       "name": "create_flow",
       "discriminator": [
         139,
@@ -51,6 +137,39 @@
               {
                 "kind": "account",
                 "path": "creator"
+              }
+            ]
+          }
+        },
+        {
+          "name": "flow_token_account",
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  116,
+                  105,
+                  116,
+                  97,
+                  45,
+                  102,
+                  108,
+                  111,
+                  119,
+                  45,
+                  116,
+                  97
+                ]
+              },
+              {
+                "kind": "account",
+                "path": "flow"
+              },
+              {
+                "kind": "account",
+                "path": "token_mint"
               }
             ]
           }
@@ -104,6 +223,19 @@
   ],
   "accounts": [
     {
+      "name": "Contribution",
+      "discriminator": [
+        182,
+        187,
+        14,
+        111,
+        72,
+        167,
+        242,
+        212
+      ]
+    },
+    {
       "name": "Flow",
       "discriminator": [
         126,
@@ -118,6 +250,19 @@
     }
   ],
   "events": [
+    {
+      "name": "ContributionEvent",
+      "discriminator": [
+        66,
+        160,
+        5,
+        247,
+        2,
+        131,
+        249,
+        150
+      ]
+    },
     {
       "name": "FlowCreatedEvent",
       "discriminator": [
@@ -192,9 +337,112 @@
       "code": 6011,
       "name": "MilestoneTotalMismatch",
       "msg": "Milestone total mismatch"
+    },
+    {
+      "code": 6012,
+      "name": "InvalidContributionAmount",
+      "msg": "Invalid"
+    },
+    {
+      "code": 6013,
+      "name": "FlowNotActive",
+      "msg": "Flow not active"
+    },
+    {
+      "code": 6014,
+      "name": "InvalidTokenMint",
+      "msg": "Invalid token mint"
+    },
+    {
+      "code": 6015,
+      "name": "InvalidTokenAccount",
+      "msg": "Invalid token owner"
+    },
+    {
+      "code": 6016,
+      "name": "InvalidTokenOwner",
+      "msg": "Invalid token owner"
+    },
+    {
+      "code": 6017,
+      "name": "FlowEnded",
+      "msg": "Flow ended"
+    },
+    {
+      "code": 6018,
+      "name": "FlowNotStarted",
+      "msg": "Flow not started"
     }
   ],
   "types": [
+    {
+      "name": "Contribution",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "flow",
+            "type": "pubkey"
+          },
+          {
+            "name": "contributor",
+            "type": "pubkey"
+          },
+          {
+            "name": "total_amount",
+            "type": "u64"
+          },
+          {
+            "name": "first_contribution",
+            "type": "i64"
+          },
+          {
+            "name": "last_contribution",
+            "type": "i64"
+          },
+          {
+            "name": "contribution_count",
+            "type": "u32"
+          },
+          {
+            "name": "token_mint",
+            "type": "pubkey"
+          },
+          {
+            "name": "bump",
+            "type": "u8"
+          }
+        ]
+      }
+    },
+    {
+      "name": "ContributionEvent",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "flow",
+            "type": "pubkey"
+          },
+          {
+            "name": "contributor",
+            "type": "pubkey"
+          },
+          {
+            "name": "amount",
+            "type": "u64"
+          },
+          {
+            "name": "total_contributed",
+            "type": "u64"
+          },
+          {
+            "name": "timestamp",
+            "type": "i64"
+          }
+        ]
+      }
+    },
     {
       "name": "Flow",
       "type": {

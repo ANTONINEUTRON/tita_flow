@@ -52,5 +52,13 @@ pub enum TitaErrors {
     InvalidTokenAccount,
 
     #[msg("Invalid token owner")]
-    InvalidTokenOwner
+    InvalidTokenOwner,
+
+    #[msg("Flow ended")]
+    FlowEnded,
+
+    #[msg("Flow not started")]
+    FlowNotStarted,
+
+    
 }

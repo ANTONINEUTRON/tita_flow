@@ -53,19 +53,16 @@ pub mod tita_flow {
     //     Ok(())
     // }
 
-    // pub fn contribute(
-    //     ctx: Context<Initialize>,
-    //     amount: u64,
-    // ) -> Result<()> {
-    //     // let _ = ctx.accounts.contribute(amount, ctx.bumps.contribution)?;
-    //     Ok(())
-    // }
+    pub fn contribute(
+        ctx: Context<Contribute>,
+        amount: u64,
+    ) -> Result<()> {
+        let _ = ctx.accounts.contribute(amount, ctx.bumps.contribution)?;
+        Ok(())
+    }
 
     // pub fn withdraw(ctx: Context<Initialize>) -> Result<()> {
     //     msg!("Greetings from: {:?}", ctx.program_id);
     //     Ok(())
     // }
 }
-
-#[derive(Accounts)]
-pub struct Initialize {}
