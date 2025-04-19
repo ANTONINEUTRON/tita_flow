@@ -219,6 +219,105 @@
           }
         }
       ]
+    },
+    {
+      "name": "create_proposal",
+      "discriminator": [
+        132,
+        116,
+        68,
+        174,
+        216,
+        160,
+        198,
+        22
+      ],
+      "accounts": [
+        {
+          "name": "proposer",
+          "writable": true,
+          "signer": true
+        },
+        {
+          "name": "flow",
+          "writable": true
+        },
+        {
+          "name": "proposal",
+          "writable": true
+        },
+        {
+          "name": "system_program",
+          "address": "11111111111111111111111111111111"
+        }
+      ],
+      "args": [
+        {
+          "name": "proposal_type",
+          "type": {
+            "defined": {
+              "name": "ProposalType"
+            }
+          }
+        },
+        {
+          "name": "voting_duration",
+          "type": "i64"
+        },
+        {
+          "name": "quorum_percentage",
+          "type": "u16"
+        },
+        {
+          "name": "approval_percentage",
+          "type": "u16"
+        }
+      ]
+    },
+    {
+      "name": "vote",
+      "discriminator": [
+        227,
+        110,
+        155,
+        23,
+        136,
+        126,
+        172,
+        25
+      ],
+      "accounts": [
+        {
+          "name": "voter",
+          "writable": true,
+          "signer": true
+        },
+        {
+          "name": "proposal",
+          "writable": true
+        },
+        {
+          "name": "flow",
+          "writable": true
+        },
+        {
+          "name": "contribution"
+        },
+        {
+          "name": "system_program",
+          "address": "11111111111111111111111111111111"
+        }
+      ],
+      "args": [
+        {
+          "name": "vote_type",
+          "type": {
+            "defined": {
+              "name": "VoteType"
+            }
+          }
+        }
+      ]
     }
   ],
   "accounts": [
@@ -246,6 +345,19 @@
         153,
         167,
         203
+      ]
+    },
+    {
+      "name": "Proposal",
+      "discriminator": [
+        26,
+        94,
+        189,
+        187,
+        116,
+        136,
+        53,
+        33
       ]
     }
   ],
@@ -341,7 +453,7 @@
     {
       "code": 6012,
       "name": "InvalidContributionAmount",
-      "msg": "Invalid"
+      "msg": "Invalid Contribution Amount"
     },
     {
       "code": 6013,
@@ -372,6 +484,101 @@
       "code": 6018,
       "name": "FlowNotStarted",
       "msg": "Flow not started"
+    },
+    {
+      "code": 6019,
+      "name": "VotingNotActive",
+      "msg": "Proposal is not in active voting state"
+    },
+    {
+      "code": 6020,
+      "name": "ProposalAlreadyExecuted",
+      "msg": "Proposal has already been executed"
+    },
+    {
+      "code": 6021,
+      "name": "UnauthorizedCancellation",
+      "msg": "Unauthorized cancellation"
+    },
+    {
+      "code": 6022,
+      "name": "ActiveProposalExists",
+      "msg": "This flow already has an active proposal"
+    },
+    {
+      "code": 6023,
+      "name": "ProposalNotActive",
+      "msg": "This proposal is not currently active for voting"
+    },
+    {
+      "code": 6024,
+      "name": "InvalidFlow",
+      "msg": "The provided flow doesn't match the proposal's flow"
+    },
+    {
+      "code": 6025,
+      "name": "InvalidProposal",
+      "msg": "This is not the active proposal for this flow"
+    },
+    {
+      "code": 6026,
+      "name": "InvalidContribution",
+      "msg": "The provided contribution doesn't belong to this flow"
+    },
+    {
+      "code": 6027,
+      "name": "UnauthorizedVoter",
+      "msg": "You are not authorized to vote with this contribution account"
+    },
+    {
+      "code": 6028,
+      "name": "VotingNotStarted",
+      "msg": "The voting period has not started yet"
+    },
+    {
+      "code": 6029,
+      "name": "VotingEnded",
+      "msg": "The voting period has already ended"
+    },
+    {
+      "code": 6030,
+      "name": "ZeroVotingPower",
+      "msg": "You cannot vote with zero voting power"
+    },
+    {
+      "code": 6031,
+      "name": "AlreadyVoted",
+      "msg": "You have already voted on this proposal"
+    },
+    {
+      "code": 6032,
+      "name": "NotMilestoneFlow",
+      "msg": "This flow doesn't have any milestones to complete"
+    },
+    {
+      "code": 6033,
+      "name": "MilestoneNotFound",
+      "msg": "The specified milestone wasn't found in this flow"
+    },
+    {
+      "code": 6034,
+      "name": "MilestoneAlreadyCompleted",
+      "msg": "This milestone has already been completed"
+    },
+    {
+      "code": 6035,
+      "name": "CannotCancelFlow",
+      "msg": "The flow cannot be cancelled in its current state"
+    },
+    {
+      "code": 6036,
+      "name": "InvalidMilestoneAdjustment",
+      "msg": "The proposed milestone adjustments would exceed the flow's goal"
+    },
+    {
+      "code": 6037,
+      "name": "InvalidFlowExtension",
+      "msg": "The proposed flow extension date must be after the current end date"
     }
   ],
   "types": [
@@ -505,6 +712,24 @@
             }
           },
           {
+            "name": "proposal_count",
+            "type": "u8"
+          },
+          {
+            "name": "voting_power_model",
+            "type": {
+              "defined": {
+                "name": "VotingPowerModel"
+              }
+            }
+          },
+          {
+            "name": "active_proposal",
+            "type": {
+              "option": "pubkey"
+            }
+          },
+          {
             "name": "bump",
             "type": "u8"
           }
@@ -576,6 +801,199 @@
           {
             "name": "completed",
             "type": "bool"
+          },
+          {
+            "name": "withdrawn",
+            "type": "bool"
+          }
+        ]
+      }
+    },
+    {
+      "name": "Proposal",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "flow",
+            "type": "pubkey"
+          },
+          {
+            "name": "proposer",
+            "type": "pubkey"
+          },
+          {
+            "name": "proposal_type",
+            "type": {
+              "defined": {
+                "name": "ProposalType"
+              }
+            }
+          },
+          {
+            "name": "status",
+            "type": {
+              "defined": {
+                "name": "ProposalStatus"
+              }
+            }
+          },
+          {
+            "name": "created_at",
+            "type": "i64"
+          },
+          {
+            "name": "voting_starts_at",
+            "type": "i64"
+          },
+          {
+            "name": "voting_ends_at",
+            "type": "i64"
+          },
+          {
+            "name": "votes_for",
+            "type": "u64"
+          },
+          {
+            "name": "votes_against",
+            "type": "u64"
+          },
+          {
+            "name": "votes_abstain",
+            "type": "u64"
+          },
+          {
+            "name": "total_eligible_votes",
+            "type": "u64"
+          },
+          {
+            "name": "executed_at",
+            "type": {
+              "option": "i64"
+            }
+          },
+          {
+            "name": "quorum_percentage",
+            "type": "u16"
+          },
+          {
+            "name": "approval_percentage",
+            "type": "u16"
+          },
+          {
+            "name": "last_vote_check",
+            "type": "i64"
+          },
+          {
+            "name": "bump",
+            "type": "u8"
+          }
+        ]
+      }
+    },
+    {
+      "name": "ProposalStatus",
+      "type": {
+        "kind": "enum",
+        "variants": [
+          {
+            "name": "Active"
+          },
+          {
+            "name": "Passed"
+          },
+          {
+            "name": "Failed"
+          },
+          {
+            "name": "Executed"
+          },
+          {
+            "name": "Canceled"
+          }
+        ]
+      }
+    },
+    {
+      "name": "ProposalType",
+      "type": {
+        "kind": "enum",
+        "variants": [
+          {
+            "name": "MilestoneCompletion",
+            "fields": [
+              {
+                "name": "milestone_id",
+                "type": "u32"
+              }
+            ]
+          },
+          {
+            "name": "FlowCancellation"
+          },
+          {
+            "name": "MilestoneAdjustment",
+            "fields": [
+              {
+                "name": "milestone_id",
+                "type": "u32"
+              },
+              {
+                "name": "new_amount",
+                "type": {
+                  "option": "u64"
+                }
+              },
+              {
+                "name": "new_deadline",
+                "type": {
+                  "option": "i64"
+                }
+              }
+            ]
+          },
+          {
+            "name": "FlowFundingExtension",
+            "fields": [
+              {
+                "name": "new_end_date",
+                "type": "i64"
+              }
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "name": "VoteType",
+      "type": {
+        "kind": "enum",
+        "variants": [
+          {
+            "name": "For"
+          },
+          {
+            "name": "Against"
+          },
+          {
+            "name": "Abstain"
+          }
+        ]
+      }
+    },
+    {
+      "name": "VotingPowerModel",
+      "type": {
+        "kind": "enum",
+        "variants": [
+          {
+            "name": "TokenWeighted"
+          },
+          {
+            "name": "QuadraticVoting"
+          },
+          {
+            "name": "IndividualVoting"
           }
         ]
       }

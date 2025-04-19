@@ -32,7 +32,6 @@ pub struct CreateFlow<'info> {
     )]
     pub flow: Account<'info, Flow>,
 
-
     #[account(
         init,
         payer = creator,
@@ -46,7 +45,6 @@ pub struct CreateFlow<'info> {
         token::authority = flow, // PDA will be the authority
     )]
     pub flow_token_account: InterfaceAccount<'info, TokenAccount>,
-    
     
     pub token_mint: InterfaceAccount<'info, Mint>,
     pub token_program: Interface<'info, TokenInterface>,

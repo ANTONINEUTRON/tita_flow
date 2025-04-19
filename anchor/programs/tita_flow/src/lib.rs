@@ -60,9 +60,30 @@ pub mod tita_flow {
         let _ = ctx.accounts.contribute(amount, ctx.bumps.contribution)?;
         Ok(())
     }
+    
+    pub fn create_proposal(
+        ctx: Context<CreateProposal>,
+        proposal_type: ProposalType,
+        voting_duration: i64,
+        quorum_percentage: u16,
+        approval_percentage: u16,
+    ) -> Result<()> {
+        let _ = ctx.accounts.create_proposal(
+            proposal_type,
+            voting_duration,
+            quorum_percentage,
+            approval_percentage,
+            ctx.accounts.proposal.bump
+        )?;
 
-    // pub fn withdraw(ctx: Context<Initialize>) -> Result<()> {
-    //     msg!("Greetings from: {:?}", ctx.program_id);
-    //     Ok(())
-    // }
+        Ok(())
+    }
+
+    pub fn vote(
+        ctx: Context<VoteOnProposal>,
+        vote_type: VoteType,
+    ) -> Result<()> {
+        let _ = ctx.accounts.vote(vote_type)?;
+        Ok(())
+    }
 }

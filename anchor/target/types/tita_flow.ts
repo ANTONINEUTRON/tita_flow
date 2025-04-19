@@ -225,6 +225,105 @@ export type TitaFlow = {
           }
         }
       ]
+    },
+    {
+      "name": "createProposal",
+      "discriminator": [
+        132,
+        116,
+        68,
+        174,
+        216,
+        160,
+        198,
+        22
+      ],
+      "accounts": [
+        {
+          "name": "proposer",
+          "writable": true,
+          "signer": true
+        },
+        {
+          "name": "flow",
+          "writable": true
+        },
+        {
+          "name": "proposal",
+          "writable": true
+        },
+        {
+          "name": "systemProgram",
+          "address": "11111111111111111111111111111111"
+        }
+      ],
+      "args": [
+        {
+          "name": "proposalType",
+          "type": {
+            "defined": {
+              "name": "proposalType"
+            }
+          }
+        },
+        {
+          "name": "votingDuration",
+          "type": "i64"
+        },
+        {
+          "name": "quorumPercentage",
+          "type": "u16"
+        },
+        {
+          "name": "approvalPercentage",
+          "type": "u16"
+        }
+      ]
+    },
+    {
+      "name": "vote",
+      "discriminator": [
+        227,
+        110,
+        155,
+        23,
+        136,
+        126,
+        172,
+        25
+      ],
+      "accounts": [
+        {
+          "name": "voter",
+          "writable": true,
+          "signer": true
+        },
+        {
+          "name": "proposal",
+          "writable": true
+        },
+        {
+          "name": "flow",
+          "writable": true
+        },
+        {
+          "name": "contribution"
+        },
+        {
+          "name": "systemProgram",
+          "address": "11111111111111111111111111111111"
+        }
+      ],
+      "args": [
+        {
+          "name": "voteType",
+          "type": {
+            "defined": {
+              "name": "voteType"
+            }
+          }
+        }
+      ]
     }
   ],
   "accounts": [
@@ -252,6 +351,19 @@ export type TitaFlow = {
         153,
         167,
         203
+      ]
+    },
+    {
+      "name": "proposal",
+      "discriminator": [
+        26,
+        94,
+        189,
+        187,
+        116,
+        136,
+        53,
+        33
       ]
     }
   ],
@@ -347,7 +459,7 @@ export type TitaFlow = {
     {
       "code": 6012,
       "name": "invalidContributionAmount",
-      "msg": "invalid"
+      "msg": "Invalid Contribution Amount"
     },
     {
       "code": 6013,
@@ -378,6 +490,101 @@ export type TitaFlow = {
       "code": 6018,
       "name": "flowNotStarted",
       "msg": "Flow not started"
+    },
+    {
+      "code": 6019,
+      "name": "votingNotActive",
+      "msg": "Proposal is not in active voting state"
+    },
+    {
+      "code": 6020,
+      "name": "proposalAlreadyExecuted",
+      "msg": "Proposal has already been executed"
+    },
+    {
+      "code": 6021,
+      "name": "unauthorizedCancellation",
+      "msg": "Unauthorized cancellation"
+    },
+    {
+      "code": 6022,
+      "name": "activeProposalExists",
+      "msg": "This flow already has an active proposal"
+    },
+    {
+      "code": 6023,
+      "name": "proposalNotActive",
+      "msg": "This proposal is not currently active for voting"
+    },
+    {
+      "code": 6024,
+      "name": "invalidFlow",
+      "msg": "The provided flow doesn't match the proposal's flow"
+    },
+    {
+      "code": 6025,
+      "name": "invalidProposal",
+      "msg": "This is not the active proposal for this flow"
+    },
+    {
+      "code": 6026,
+      "name": "invalidContribution",
+      "msg": "The provided contribution doesn't belong to this flow"
+    },
+    {
+      "code": 6027,
+      "name": "unauthorizedVoter",
+      "msg": "You are not authorized to vote with this contribution account"
+    },
+    {
+      "code": 6028,
+      "name": "votingNotStarted",
+      "msg": "The voting period has not started yet"
+    },
+    {
+      "code": 6029,
+      "name": "votingEnded",
+      "msg": "The voting period has already ended"
+    },
+    {
+      "code": 6030,
+      "name": "zeroVotingPower",
+      "msg": "You cannot vote with zero voting power"
+    },
+    {
+      "code": 6031,
+      "name": "alreadyVoted",
+      "msg": "You have already voted on this proposal"
+    },
+    {
+      "code": 6032,
+      "name": "notMilestoneFlow",
+      "msg": "This flow doesn't have any milestones to complete"
+    },
+    {
+      "code": 6033,
+      "name": "milestoneNotFound",
+      "msg": "The specified milestone wasn't found in this flow"
+    },
+    {
+      "code": 6034,
+      "name": "milestoneAlreadyCompleted",
+      "msg": "This milestone has already been completed"
+    },
+    {
+      "code": 6035,
+      "name": "cannotCancelFlow",
+      "msg": "The flow cannot be cancelled in its current state"
+    },
+    {
+      "code": 6036,
+      "name": "invalidMilestoneAdjustment",
+      "msg": "The proposed milestone adjustments would exceed the flow's goal"
+    },
+    {
+      "code": 6037,
+      "name": "invalidFlowExtension",
+      "msg": "The proposed flow extension date must be after the current end date"
     }
   ],
   "types": [
@@ -511,6 +718,24 @@ export type TitaFlow = {
             }
           },
           {
+            "name": "proposalCount",
+            "type": "u8"
+          },
+          {
+            "name": "votingPowerModel",
+            "type": {
+              "defined": {
+                "name": "votingPowerModel"
+              }
+            }
+          },
+          {
+            "name": "activeProposal",
+            "type": {
+              "option": "pubkey"
+            }
+          },
+          {
             "name": "bump",
             "type": "u8"
           }
@@ -582,6 +807,199 @@ export type TitaFlow = {
           {
             "name": "completed",
             "type": "bool"
+          },
+          {
+            "name": "withdrawn",
+            "type": "bool"
+          }
+        ]
+      }
+    },
+    {
+      "name": "proposal",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "flow",
+            "type": "pubkey"
+          },
+          {
+            "name": "proposer",
+            "type": "pubkey"
+          },
+          {
+            "name": "proposalType",
+            "type": {
+              "defined": {
+                "name": "proposalType"
+              }
+            }
+          },
+          {
+            "name": "status",
+            "type": {
+              "defined": {
+                "name": "proposalStatus"
+              }
+            }
+          },
+          {
+            "name": "createdAt",
+            "type": "i64"
+          },
+          {
+            "name": "votingStartsAt",
+            "type": "i64"
+          },
+          {
+            "name": "votingEndsAt",
+            "type": "i64"
+          },
+          {
+            "name": "votesFor",
+            "type": "u64"
+          },
+          {
+            "name": "votesAgainst",
+            "type": "u64"
+          },
+          {
+            "name": "votesAbstain",
+            "type": "u64"
+          },
+          {
+            "name": "totalEligibleVotes",
+            "type": "u64"
+          },
+          {
+            "name": "executedAt",
+            "type": {
+              "option": "i64"
+            }
+          },
+          {
+            "name": "quorumPercentage",
+            "type": "u16"
+          },
+          {
+            "name": "approvalPercentage",
+            "type": "u16"
+          },
+          {
+            "name": "lastVoteCheck",
+            "type": "i64"
+          },
+          {
+            "name": "bump",
+            "type": "u8"
+          }
+        ]
+      }
+    },
+    {
+      "name": "proposalStatus",
+      "type": {
+        "kind": "enum",
+        "variants": [
+          {
+            "name": "active"
+          },
+          {
+            "name": "passed"
+          },
+          {
+            "name": "failed"
+          },
+          {
+            "name": "executed"
+          },
+          {
+            "name": "canceled"
+          }
+        ]
+      }
+    },
+    {
+      "name": "proposalType",
+      "type": {
+        "kind": "enum",
+        "variants": [
+          {
+            "name": "milestoneCompletion",
+            "fields": [
+              {
+                "name": "milestoneId",
+                "type": "u32"
+              }
+            ]
+          },
+          {
+            "name": "flowCancellation"
+          },
+          {
+            "name": "milestoneAdjustment",
+            "fields": [
+              {
+                "name": "milestoneId",
+                "type": "u32"
+              },
+              {
+                "name": "newAmount",
+                "type": {
+                  "option": "u64"
+                }
+              },
+              {
+                "name": "newDeadline",
+                "type": {
+                  "option": "i64"
+                }
+              }
+            ]
+          },
+          {
+            "name": "flowFundingExtension",
+            "fields": [
+              {
+                "name": "newEndDate",
+                "type": "i64"
+              }
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "name": "voteType",
+      "type": {
+        "kind": "enum",
+        "variants": [
+          {
+            "name": "for"
+          },
+          {
+            "name": "against"
+          },
+          {
+            "name": "abstain"
+          }
+        ]
+      }
+    },
+    {
+      "name": "votingPowerModel",
+      "type": {
+        "kind": "enum",
+        "variants": [
+          {
+            "name": "tokenWeighted"
+          },
+          {
+            "name": "quadraticVoting"
+          },
+          {
+            "name": "individualVoting"
           }
         ]
       }

@@ -10,3 +10,6 @@ pub use vault::*;
 
 pub mod contribution;
 pub use contribution::*;
+
+pub mod proposal;
+pub use proposal::*;

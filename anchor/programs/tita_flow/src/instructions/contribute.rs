@@ -1,5 +1,5 @@
 use anchor_lang::prelude::*;
-use anchor_spl::{ token_interface::{Mint, TokenAccount, TokenInterface, transfer_checked}};
+use anchor_spl::token_interface::{Mint, TokenAccount, TokenInterface, transfer_checked};
 
 use crate::{
     constants::TITA_CONTRIBUTION_SEED,

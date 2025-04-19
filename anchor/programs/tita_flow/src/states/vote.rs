@@ -1,19 +1,22 @@
 use anchor_lang::prelude::*;
 
+use super::VoteType;
+
 #[derive(AnchorSerialize, AnchorDeserialize, Clone, Copy, PartialEq, Eq, InitSpace)]
 pub enum VotingMechanism {
-    Standard,
+    Standard,//simple vote based on contribution weight
     Futarchy,
     Quadratic,
+    TimeWeighted,
 }
 
 #[account]
 #[derive(InitSpace)]
 pub struct Vote {
-    pub proposal: Pubkey,            // Proposal account
-    pub voter: Pubkey,               // Voter's wallet address
-    pub option_id: u8,               // Chosen option
-    pub weight: u64,                 // Vote weight
-    pub timestamp: i64,
-    pub bump: u8,  
+    pub proposal: Pubkey,            // The proposal being voted on
+    pub voter: Pubkey,               // The account casting the vote
+    pub vote_type: VoteType,         // How they voted
+    pub voting_power: u64,           // How much voting power they had
+    pub voted_at: i64,               // When the vote was cast
+    pub bump: u8,
 }
