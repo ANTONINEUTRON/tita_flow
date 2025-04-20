@@ -573,16 +573,21 @@ export type TitaFlow = {
     },
     {
       "code": 6035,
+      "name": "milestoneCantBeWithdrawnAtCreation",
+      "msg": "The milestone can't be marked as withdrawn at the flow creation"
+    },
+    {
+      "code": 6036,
       "name": "cannotCancelFlow",
       "msg": "The flow cannot be cancelled in its current state"
     },
     {
-      "code": 6036,
+      "code": 6037,
       "name": "invalidMilestoneAdjustment",
       "msg": "The proposed milestone adjustments would exceed the flow's goal"
     },
     {
-      "code": 6037,
+      "code": 6038,
       "name": "invalidFlowExtension",
       "msg": "The proposed flow extension date must be after the current end date"
     }

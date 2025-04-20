@@ -567,16 +567,21 @@
     },
     {
       "code": 6035,
+      "name": "MilestoneCantBeWithdrawnAtCreation",
+      "msg": "The milestone can't be marked as withdrawn at the flow creation"
+    },
+    {
+      "code": 6036,
       "name": "CannotCancelFlow",
       "msg": "The flow cannot be cancelled in its current state"
     },
     {
-      "code": 6036,
+      "code": 6037,
       "name": "InvalidMilestoneAdjustment",
       "msg": "The proposed milestone adjustments would exceed the flow's goal"
     },
     {
-      "code": 6037,
+      "code": 6038,
       "name": "InvalidFlowExtension",
       "msg": "The proposed flow extension date must be after the current end date"
     }

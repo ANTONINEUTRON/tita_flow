@@ -117,6 +117,12 @@ impl<'info> CreateFlow<'info> {
                     milestone.deadline > current_time,
                     TitaErrors::InvalidMilestoneDeadline
                 );
+
+                //ensure milestone withdrawn is false
+                require!(
+                    !milestone.withdrawn,
+                    TitaErrors::MilestoneCantBeWithdrawnAtCreation
+                );
                 
                 // If end time is specified, ensure milestone deadline is before end time
                 if let Some(end) = end_time {

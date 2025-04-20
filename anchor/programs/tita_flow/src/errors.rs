@@ -106,6 +106,9 @@ pub enum TitaErrors {
     
     #[msg("This milestone has already been completed")]
     MilestoneAlreadyCompleted,
+
+    #[msg("The milestone can't be marked as withdrawn at the flow creation")]
+    MilestoneCantBeWithdrawnAtCreation,
     
     #[msg("The flow cannot be cancelled in its current state")]
     CannotCancelFlow,
