@@ -26,6 +26,7 @@ pub mod tita_flow {
         goal: u64,
         start_time: Option<i64>,
         end_time: Option<i64>,
+        voting_power_model: VotingPowerModel,
         milestones: Option<Vec<Milestone>>
     ) -> Result<()> {
         let _ = ctx.accounts.create(
@@ -34,24 +35,12 @@ pub mod tita_flow {
             start_time,
             end_time,
             milestones,
+            voting_power_model,
             ctx.accounts.flow.bump
         )?;
 
         Ok(())
     }
-    
-
-
-    // pub fn create_weighted_flow(
-    //     ctx: Context<CreateWeightedFlow>,
-    //     flow_id: String,
-    //     goal: u64,
-    //     start_time: Option<i64>,
-    //     end_time: Option<i64>,
-    //     allocations: Vec<WeightedAllocation>
-    // ) -> Result<()> {
-    //     Ok(())
-    // }
 
     pub fn contribute(
         ctx: Context<Contribute>,
@@ -86,4 +75,25 @@ pub mod tita_flow {
         let _ = ctx.accounts.vote(vote_type)?;
         Ok(())
     }
+
+    pub fn withdraw(
+        ctx: Context<Withdraw>,
+        amount: u64,
+    ) -> Result<()> {
+        let _ = ctx.accounts.withdraw(amount)?;
+        Ok(())
+    }
+
+    pub fn refund(ctx: Context<WithdrawContribution>)-> Result<()>{
+        let  _ = ctx.accounts.withdraw_contribution();
+
+        Ok(())
+    }
+    
+    // pub fn cancel_proposal(
+    //     ctx: Context<CancelProposal>,
+    // ) -> Result<()> {
+    //     let _ = ctx.accounts.cancel_proposal()?;
+    //     Ok(())
+    // }
 }

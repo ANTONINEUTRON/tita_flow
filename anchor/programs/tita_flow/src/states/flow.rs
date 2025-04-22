@@ -13,7 +13,6 @@ pub struct Milestone {
     pub amount: u64,            // Amount allocated to this milestone
     pub deadline: i64,          // When this milestone is due
     pub completed: bool,        // Whether the milestone is completed
-    pub withdrawn: bool,
 }
 
 
@@ -38,8 +37,16 @@ pub struct Flow {
     pub flow_id: String,         // Unique identifier
     pub creator: Pubkey,         // Flow creator
     pub token_mint: Pubkey,      // Token being used
+
     pub goal: u64,               // Target amount
     pub raised: u64,             // Total raised so far
+
+    pub balance: u64,          // Amount in the flow
+    pub available: u64,           // Amount available for withdrawal
+    pub withdrawn: u64,           // Amount withdrawn
+
+    pub flow_ta: Pubkey,         // Flow treasury account
+    
     pub start_date: Option<i64>, // When flow funding starts
     pub end_date: Option<i64>,   // When flow funding ends
     pub flow_status: FlowStatus, // Active/Completed/Canceled
@@ -50,6 +57,9 @@ pub struct Flow {
     pub proposal_count: u8,         // Unique identifier for the proposal
     pub voting_power_model: VotingPowerModel, // Selected voting power calculation model
     pub active_proposal: Option<Pubkey>,
+
+    pub total_refunded: u64, // Total amount refunded
+    pub refunds_count: u32, // Number of refunds made
 
     pub bump: u8
 }

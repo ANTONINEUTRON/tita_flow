@@ -181,14 +181,12 @@ describe('tita_flow', () => {
           amount: new anchor.BN(500000), // 500,000 tokens
           deadline: new anchor.BN(now + 3600), // 1 hour later
           completed: false,
-          withdrawn: false,
         },
         {
           id: 2,
           amount: new anchor.BN(500000), // 500,000 tokens
           deadline: new anchor.BN(now + 7200), // 2 hours later
           completed: false,
-          withdrawn: false,
         },
       ] // milestones
     )

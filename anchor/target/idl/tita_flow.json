@@ -207,6 +207,14 @@
           }
         },
         {
+          "name": "voting_power_model",
+          "type": {
+            "defined": {
+              "name": "VotingPowerModel"
+            }
+          }
+        },
+        {
           "name": "milestones",
           "type": {
             "option": {
@@ -275,6 +283,53 @@
       ]
     },
     {
+      "name": "refund",
+      "discriminator": [
+        2,
+        96,
+        183,
+        251,
+        63,
+        208,
+        46,
+        46
+      ],
+      "accounts": [
+        {
+          "name": "contributor",
+          "writable": true,
+          "signer": true
+        },
+        {
+          "name": "flow",
+          "writable": true
+        },
+        {
+          "name": "contribution",
+          "writable": true
+        },
+        {
+          "name": "flow_token_account",
+          "writable": true
+        },
+        {
+          "name": "contributor_token_account",
+          "writable": true
+        },
+        {
+          "name": "token_mint"
+        },
+        {
+          "name": "token_program"
+        },
+        {
+          "name": "system_program",
+          "address": "11111111111111111111111111111111"
+        }
+      ],
+      "args": []
+    },
+    {
       "name": "vote",
       "discriminator": [
         227,
@@ -316,6 +371,54 @@
               "name": "VoteType"
             }
           }
+        }
+      ]
+    },
+    {
+      "name": "withdraw",
+      "discriminator": [
+        183,
+        18,
+        70,
+        156,
+        148,
+        109,
+        161,
+        34
+      ],
+      "accounts": [
+        {
+          "name": "creator",
+          "writable": true,
+          "signer": true
+        },
+        {
+          "name": "flow",
+          "writable": true
+        },
+        {
+          "name": "flow_token_account",
+          "writable": true
+        },
+        {
+          "name": "recipient_token_account",
+          "writable": true
+        },
+        {
+          "name": "token_mint"
+        },
+        {
+          "name": "token_program"
+        },
+        {
+          "name": "system_program",
+          "address": "11111111111111111111111111111111"
+        }
+      ],
+      "args": [
+        {
+          "name": "amount",
+          "type": "u64"
         }
       ]
     }
@@ -567,8 +670,8 @@
     },
     {
       "code": 6035,
-      "name": "MilestoneCantBeWithdrawnAtCreation",
-      "msg": "The milestone can't be marked as withdrawn at the flow creation"
+      "name": "MilestoneCantBeCompletedAtCreation",
+      "msg": "The milestone can't be marked as completed at the flow creation"
     },
     {
       "code": 6036,
@@ -584,6 +687,51 @@
       "code": 6038,
       "name": "InvalidFlowExtension",
       "msg": "The proposed flow extension date must be after the current end date"
+    },
+    {
+      "code": 6039,
+      "name": "UnauthorizedWithdrawal",
+      "msg": "Unauthorized withdrawal"
+    },
+    {
+      "code": 6040,
+      "name": "FlowCanceled",
+      "msg": "Flow is cancelled"
+    },
+    {
+      "code": 6041,
+      "name": "InsufficientFunds",
+      "msg": "Insufficient funds"
+    },
+    {
+      "code": 6042,
+      "name": "FlowNotCanceled",
+      "msg": "Flow not canceled"
+    },
+    {
+      "code": 6043,
+      "name": "UnauthorizedContributor",
+      "msg": "Unauthorized contributor"
+    },
+    {
+      "code": 6044,
+      "name": "AlreadyRefunded",
+      "msg": "(Already refunded)"
+    },
+    {
+      "code": 6045,
+      "name": "InvalidFlowTokenAccount",
+      "msg": "Invalid flow token account"
+    },
+    {
+      "code": 6046,
+      "name": "RefundTooSmall",
+      "msg": " Refund too small"
+    },
+    {
+      "code": 6047,
+      "name": "InsufficientTreasuryFunds",
+      "msg": "Insufficient treasury funds"
     }
   ],
   "types": [
@@ -619,6 +767,20 @@
           {
             "name": "token_mint",
             "type": "pubkey"
+          },
+          {
+            "name": "refunded",
+            "type": "bool"
+          },
+          {
+            "name": "refund_amount",
+            "type": "u64"
+          },
+          {
+            "name": "refunded_at",
+            "type": {
+              "option": "i64"
+            }
           },
           {
             "name": "bump",
@@ -681,6 +843,22 @@
             "type": "u64"
           },
           {
+            "name": "balance",
+            "type": "u64"
+          },
+          {
+            "name": "available",
+            "type": "u64"
+          },
+          {
+            "name": "withdrawn",
+            "type": "u64"
+          },
+          {
+            "name": "flow_ta",
+            "type": "pubkey"
+          },
+          {
             "name": "start_date",
             "type": {
               "option": "i64"
@@ -733,6 +911,14 @@
             "type": {
               "option": "pubkey"
             }
+          },
+          {
+            "name": "total_refunded",
+            "type": "u64"
+          },
+          {
+            "name": "refunds_count",
+            "type": "u32"
           },
           {
             "name": "bump",
@@ -805,10 +991,6 @@
           },
           {
             "name": "completed",
-            "type": "bool"
-          },
-          {
-            "name": "withdrawn",
             "type": "bool"
           }
         ]

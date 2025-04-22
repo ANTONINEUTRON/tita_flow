@@ -107,8 +107,8 @@ pub enum TitaErrors {
     #[msg("This milestone has already been completed")]
     MilestoneAlreadyCompleted,
 
-    #[msg("The milestone can't be marked as withdrawn at the flow creation")]
-    MilestoneCantBeWithdrawnAtCreation,
+    #[msg("The milestone can't be marked as completed at the flow creation")]
+    MilestoneCantBeCompletedAtCreation,
     
     #[msg("The flow cannot be cancelled in its current state")]
     CannotCancelFlow,
@@ -118,4 +118,31 @@ pub enum TitaErrors {
     
     #[msg("The proposed flow extension date must be after the current end date")]
     InvalidFlowExtension,
+
+    #[msg("Unauthorized withdrawal")]
+    UnauthorizedWithdrawal,
+
+    #[msg("Flow is cancelled")]
+    FlowCanceled,
+
+    #[msg("Insufficient funds")]
+    InsufficientFunds,
+
+    #[msg("Flow not canceled")]
+    FlowNotCanceled,
+
+    #[msg("Unauthorized contributor")]
+    UnauthorizedContributor,
+
+    #[msg(("Already refunded"))]
+    AlreadyRefunded,
+
+    #[msg("Invalid flow token account")]
+    InvalidFlowTokenAccount,
+
+    #[msg(" Refund too small")]
+    RefundTooSmall,
+
+    #[msg("Insufficient treasury funds")]
+    InsufficientTreasuryFunds,
 }

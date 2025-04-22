@@ -213,6 +213,14 @@ export type TitaFlow = {
           }
         },
         {
+          "name": "votingPowerModel",
+          "type": {
+            "defined": {
+              "name": "votingPowerModel"
+            }
+          }
+        },
+        {
           "name": "milestones",
           "type": {
             "option": {
@@ -281,6 +289,53 @@ export type TitaFlow = {
       ]
     },
     {
+      "name": "refund",
+      "discriminator": [
+        2,
+        96,
+        183,
+        251,
+        63,
+        208,
+        46,
+        46
+      ],
+      "accounts": [
+        {
+          "name": "contributor",
+          "writable": true,
+          "signer": true
+        },
+        {
+          "name": "flow",
+          "writable": true
+        },
+        {
+          "name": "contribution",
+          "writable": true
+        },
+        {
+          "name": "flowTokenAccount",
+          "writable": true
+        },
+        {
+          "name": "contributorTokenAccount",
+          "writable": true
+        },
+        {
+          "name": "tokenMint"
+        },
+        {
+          "name": "tokenProgram"
+        },
+        {
+          "name": "systemProgram",
+          "address": "11111111111111111111111111111111"
+        }
+      ],
+      "args": []
+    },
+    {
       "name": "vote",
       "discriminator": [
         227,
@@ -322,6 +377,54 @@ export type TitaFlow = {
               "name": "voteType"
             }
           }
+        }
+      ]
+    },
+    {
+      "name": "withdraw",
+      "discriminator": [
+        183,
+        18,
+        70,
+        156,
+        148,
+        109,
+        161,
+        34
+      ],
+      "accounts": [
+        {
+          "name": "creator",
+          "writable": true,
+          "signer": true
+        },
+        {
+          "name": "flow",
+          "writable": true
+        },
+        {
+          "name": "flowTokenAccount",
+          "writable": true
+        },
+        {
+          "name": "recipientTokenAccount",
+          "writable": true
+        },
+        {
+          "name": "tokenMint"
+        },
+        {
+          "name": "tokenProgram"
+        },
+        {
+          "name": "systemProgram",
+          "address": "11111111111111111111111111111111"
+        }
+      ],
+      "args": [
+        {
+          "name": "amount",
+          "type": "u64"
         }
       ]
     }
@@ -573,8 +676,8 @@ export type TitaFlow = {
     },
     {
       "code": 6035,
-      "name": "milestoneCantBeWithdrawnAtCreation",
-      "msg": "The milestone can't be marked as withdrawn at the flow creation"
+      "name": "milestoneCantBeCompletedAtCreation",
+      "msg": "The milestone can't be marked as completed at the flow creation"
     },
     {
       "code": 6036,
@@ -590,6 +693,51 @@ export type TitaFlow = {
       "code": 6038,
       "name": "invalidFlowExtension",
       "msg": "The proposed flow extension date must be after the current end date"
+    },
+    {
+      "code": 6039,
+      "name": "unauthorizedWithdrawal",
+      "msg": "Unauthorized withdrawal"
+    },
+    {
+      "code": 6040,
+      "name": "flowCanceled",
+      "msg": "Flow is cancelled"
+    },
+    {
+      "code": 6041,
+      "name": "insufficientFunds",
+      "msg": "Insufficient funds"
+    },
+    {
+      "code": 6042,
+      "name": "flowNotCanceled",
+      "msg": "Flow not canceled"
+    },
+    {
+      "code": 6043,
+      "name": "unauthorizedContributor",
+      "msg": "Unauthorized contributor"
+    },
+    {
+      "code": 6044,
+      "name": "alreadyRefunded",
+      "msg": "(Already refunded)"
+    },
+    {
+      "code": 6045,
+      "name": "invalidFlowTokenAccount",
+      "msg": "Invalid flow token account"
+    },
+    {
+      "code": 6046,
+      "name": "refundTooSmall",
+      "msg": " Refund too small"
+    },
+    {
+      "code": 6047,
+      "name": "insufficientTreasuryFunds",
+      "msg": "Insufficient treasury funds"
     }
   ],
   "types": [
@@ -625,6 +773,20 @@ export type TitaFlow = {
           {
             "name": "tokenMint",
             "type": "pubkey"
+          },
+          {
+            "name": "refunded",
+            "type": "bool"
+          },
+          {
+            "name": "refundAmount",
+            "type": "u64"
+          },
+          {
+            "name": "refundedAt",
+            "type": {
+              "option": "i64"
+            }
           },
           {
             "name": "bump",
@@ -687,6 +849,22 @@ export type TitaFlow = {
             "type": "u64"
           },
           {
+            "name": "balance",
+            "type": "u64"
+          },
+          {
+            "name": "available",
+            "type": "u64"
+          },
+          {
+            "name": "withdrawn",
+            "type": "u64"
+          },
+          {
+            "name": "flowTa",
+            "type": "pubkey"
+          },
+          {
             "name": "startDate",
             "type": {
               "option": "i64"
@@ -739,6 +917,14 @@ export type TitaFlow = {
             "type": {
               "option": "pubkey"
             }
+          },
+          {
+            "name": "totalRefunded",
+            "type": "u64"
+          },
+          {
+            "name": "refundsCount",
+            "type": "u32"
           },
           {
             "name": "bump",
@@ -811,10 +997,6 @@ export type TitaFlow = {
           },
           {
             "name": "completed",
-            "type": "bool"
-          },
-          {
-            "name": "withdrawn",
             "type": "bool"
           }
         ]

@@ -7,6 +7,9 @@ pub use contribute::*;
 pub mod withdraw;
 pub use withdraw::*;
 
+pub mod withdraw_contribution;
+pub use withdraw_contribution::*;
+
 pub mod create_proposal;
 pub use create_proposal::*;
 

@@ -30,7 +30,6 @@ pub struct VoteOnProposal<'info> {
 }
 
 impl<'info> VoteOnProposal<'info> {
-
     pub fn vote(
         &mut self,
         vote_type: VoteType
@@ -60,124 +59,142 @@ impl<'info> VoteOnProposal<'info> {
                     .ok_or(TitaErrors::MathOverflow)?;
             },
         }
-        
+
         // Check if thresholds are met for execution
         if proposal.check_execution_threshold()? {
             // Execute the proposal action
             match proposal.proposal_type {
                 ProposalType::MilestoneCompletion { milestone_id } => {
-                    // Find the milestone and mark it as completed
-                if let Some(milestones) = &mut flow.milestones {
-                    let milestone = milestones.iter_mut()
-                        .find(|m| m.id == milestone_id)
-                        .ok_or(TitaErrors::MilestoneNotFound)?;
-                    
-                    // Ensure milestone isn't already completed
-                    require!(!milestone.completed, TitaErrors::MilestoneAlreadyCompleted);
-                    
-                    // Mark milestone as completed
-                    milestone.completed = true;
-                    
+                    // First, extract the milestone amount to avoid multiple mutable borrows
+                    let milestone_amount = {
+                        // Find the milestone and get its amount
+                        if let Some(milestones) = &flow.milestones {
+                            let milestone = milestones.iter()
+                                .find(|m| m.id == milestone_id)
+                                .ok_or(TitaErrors::MilestoneNotFound)?;
+                            
+                            milestone.amount
+                        } else {
+                            return err!(TitaErrors::NotMilestoneFlow);
+                        }
+                    };
+
+                    // Now update the flow's balance using the extracted amount
+                    flow.balance = flow.balance
+                        .checked_sub(milestone_amount)
+                        .ok_or(TitaErrors::MathOverflow)?;
+
+                    // Add to flow available field
+                    flow.available = flow.available
+                        .checked_add(milestone_amount)
+                        .ok_or(TitaErrors::MathOverflow)?;
+
+                    // Now mark the milestone as completed
+                    if let Some(milestones) = &mut flow.milestones {
+                        let milestone = milestones.iter_mut()
+                            .find(|m| m.id == milestone_id)
+                            .ok_or(TitaErrors::MilestoneNotFound)?;
+                        
+                        milestone.completed = true;
+                    }
+
                     msg!("Milestone {} has been completed by governance vote", milestone_id);
-                } else {
-                    return err!(TitaErrors::NotMilestoneFlow);
-                }
-                        },
+                },
                 ProposalType::FlowCancellation => {
                     // Ensure flow is in a state that can be canceled
-                require!(
-                    flow.flow_status == FlowStatus::Active,
-                    TitaErrors::CannotCancelFlow
-                );
-                
-                // Set flow status to canceled
-                flow.flow_status = FlowStatus::Canceled;
-                
-                msg!("Flow has been canceled by governance vote");
-                
-                // Funds distribution after cancellation would typically be handled
-                // by a separate instruction, as it requires different accounts
+                    require!(
+                        flow.flow_status == FlowStatus::Active,
+                        TitaErrors::CannotCancelFlow
+                    );
+                    
+                    // Set flow status to canceled
+                    flow.flow_status = FlowStatus::Canceled;
+                    
+                    msg!("Flow has been canceled by governance vote");
+                    
+                    // Funds distribution after cancellation would typically be handled
+                    // by a separate instruction, as it requires different accounts
                 },
                 ProposalType::MilestoneAdjustment { milestone_id, new_amount, new_deadline } => {
                     // Find milestone
-                if let Some(milestones) = &mut flow.milestones {
-                    let milestnes =  &mut milestones.clone();
-                    let milestone = milestnes.iter_mut()
-                        .find(|m| m.id == milestone_id)
-                        .ok_or(TitaErrors::MilestoneNotFound)?;
-                    
-                    // Ensure milestone isn't already completed
-                    require!(!milestone.completed, TitaErrors::MilestoneAlreadyCompleted);
-                    
-                    // Update milestone amount if provided
-                    if let Some(amount) = new_amount {
-                        // Validate the new amount doesn't exceed flow goal
-                        let current_total: u64 = milestones.iter()
-                            .map(|m| m.amount)
-                            .sum();
-                        let adjustment = amount.checked_sub(milestone.amount)
-                            .ok_or(TitaErrors::MathOverflow)?;
+                    if let Some(milestones) = &mut flow.milestones {
+                        let milestnes =  &mut milestones.clone();
+                        let milestone = milestnes.iter_mut()
+                            .find(|m| m.id == milestone_id)
+                            .ok_or(TitaErrors::MilestoneNotFound)?;
                         
-                        let new_total = current_total.checked_add(adjustment)
-                            .ok_or(TitaErrors::MathOverflow)?;
+                        // Ensure milestone isn't already completed
+                        require!(!milestone.completed, TitaErrors::MilestoneAlreadyCompleted);
                         
-                        require!(
-                            new_total <= flow.goal,
-                            TitaErrors::InvalidMilestoneAdjustment
-                        );
-                        
-                        // Apply the new amount
-                        milestone.amount = amount;
-                        msg!("Milestone {} amount updated to {}", milestone_id, amount);
-                    }
-                    
-                    // Update milestone deadline if provided
-                    if let Some(deadline) = new_deadline {
-                        // Ensure new deadline is in the future
-                        let current_time = Clock::get()?.unix_timestamp;
-                        require!(
-                            deadline > current_time,
-                            TitaErrors::InvalidMilestoneDeadline
-                        );
-                        
-                        // Check that new deadline is before flow end date if set
-                        if let Some(end_date) = flow.end_date {
-                            require!(
-                                deadline < end_date,
-                                TitaErrors::InvalidMilestoneDeadline
-                            );
+                        // Update milestone amount if provided
+                        if let Some(amount) = new_amount {
+                            // Validate the new amount doesn't exceed flow goal
+                            // let current_total: u64 = milestones.iter()
+                            //     .map(|m| m.amount)
+                            //     .sum();
+                            // let adjustment = amount.checked_sub(milestone.amount)
+                            //     .ok_or(TitaErrors::MathOverflow)?;
+                            
+                            // let new_total = current_total.checked_add(adjustment)
+                            //     .ok_or(TitaErrors::MathOverflow)?;
+                            
+                            // require!(
+                            //     new_total <= flow.goal,
+                            //     TitaErrors::InvalidMilestoneAdjustment
+                            // );
+                            
+                            // Apply the new amount
+                            milestone.amount = amount;
+                            msg!("Milestone {} amount updated to {}", milestone_id, amount);
                         }
                         
-                        // Apply the new deadline
-                        milestone.deadline = deadline;
-                        msg!("Milestone {} deadline updated to {}", milestone_id, deadline);
+                        // Update milestone deadline if provided
+                        if let Some(deadline) = new_deadline {
+                            // Ensure new deadline is in the future
+                            let current_time = Clock::get()?.unix_timestamp;
+                            require!(
+                                deadline > current_time,
+                                TitaErrors::InvalidMilestoneDeadline
+                            );
+                            
+                            // Check that new deadline is before flow end date if set
+                            if let Some(end_date) = flow.end_date {
+                                require!(
+                                    deadline < end_date,
+                                    TitaErrors::InvalidMilestoneDeadline
+                                );
+                            }
+                            
+                            // Apply the new deadline
+                            milestone.deadline = deadline;
+                            msg!("Milestone {} deadline updated to {}", milestone_id, deadline);
+                        }
+                    } else {
+                        return err!(TitaErrors::NotMilestoneFlow);
                     }
-                } else {
-                    return err!(TitaErrors::NotMilestoneFlow);
-                }
                 },
                 ProposalType::FlowFundingExtension { new_end_date } => {
                     // Validate extension
-                let current_time = Clock::get()?.unix_timestamp;
-                
-                // Ensure new end date is in the future
-                require!(
-                    new_end_date > current_time,
-                    TitaErrors::InvalidFlowExtension
-                );
-                
-                // If current end date exists, ensure new date is later
-                if let Some(current_end_date) = flow.end_date {
+                    let current_time = Clock::get()?.unix_timestamp;
+                    
+                    // Ensure new end date is in the future
                     require!(
-                        new_end_date > current_end_date,
+                        new_end_date > current_time,
                         TitaErrors::InvalidFlowExtension
                     );
-                }
-                
-                // Update the flow end date
-                flow.end_date = Some(new_end_date);
-                
-                msg!("Flow end date extended to {}", new_end_date);
+                    
+                    // If current end date exists, ensure new date is later
+                    if let Some(current_end_date) = flow.end_date {
+                        require!(
+                            new_end_date > current_end_date,
+                            TitaErrors::InvalidFlowExtension
+                        );
+                    }
+                    
+                    // Update the flow end date
+                    flow.end_date = Some(new_end_date);
+                    
+                    msg!("Flow end date extended to {}", new_end_date);
                 },
             }
             

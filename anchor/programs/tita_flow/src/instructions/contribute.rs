@@ -15,7 +15,8 @@ pub struct Contribute<'info> {
 
     #[account(mut,
         constraint = flow.flow_status == FlowStatus::Active @ TitaErrors::FlowNotActive,
-        constraint = flow.token_mint == token_mint.key() @ TitaErrors::InvalidTokenMint,)]
+        constraint = flow.token_mint == token_mint.key() @ TitaErrors::InvalidTokenMint,
+    )]
     pub flow: Account<'info, Flow>,
 
     #[account(
@@ -93,6 +94,11 @@ impl<'info> Contribute<'info> {
             self.contribution.first_contribution = current_timestamp;
             self.contribution.last_contribution = current_timestamp;
             self.contribution.contribution_count = 0; // Will increment below
+
+            self.contribution.refunded = false;
+            self.contribution.refund_amount = 0;
+            self.contribution.refunded_at = None;
+
             self.contribution.bump = contribution_bump;
         }
         
@@ -100,6 +106,13 @@ impl<'info> Contribute<'info> {
         self.contribution.total_amount = self.contribution.total_amount
             .checked_add(amount)
             .ok_or(TitaErrors::MathOverflow)?;
+
+        // if there's no milestone all should be available for withdrawal
+        if self.flow.milestones.is_none() {
+            self.flow.available = self.flow.available
+                .checked_add(amount)
+                .ok_or(TitaErrors::MathOverflow)?;
+        }
             
         self.contribution.last_contribution = current_timestamp;
         self.contribution.contribution_count = self.contribution.contribution_count
