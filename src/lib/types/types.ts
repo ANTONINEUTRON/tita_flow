@@ -158,8 +158,8 @@ export interface Flow {
   };
   currency: string;
   currencySymbol: string;
-  goal?: number;
-  raised?: number;
+  goal: number;
+  raised: number;
   amountToDistribute?: number;
   distributedAmount?: number;
   rules: {
