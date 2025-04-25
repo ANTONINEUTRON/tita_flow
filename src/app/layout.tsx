@@ -1,4 +1,5 @@
 import './globals.css'
+import Provider from './provider'
 import { ReactQueryProvider } from './react-query-provider'
 import { Toaster } from "@/components/ui/toaster"
 
@@ -17,8 +18,10 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
   return (
     <html lang="en">
       <body>
+        <Provider>
           <Toaster />
           {children}
+        </Provider>
       </body>
     </html>
   )

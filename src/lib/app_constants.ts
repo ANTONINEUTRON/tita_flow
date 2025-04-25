@@ -1,3 +1,5 @@
+import { Connection } from "@solana/web3.js";
+
 /**
  * Application-wide constants
  */
@@ -30,4 +32,13 @@ export class AppConstants {
    * Support contact information
    */
   public static readonly SUPPORT_EMAIL = "support@tita.com";
+
+
+  public static readonly APP_URL = "https://beta.setita.com"
+
+  public static readonly APP_SOL_ENDPOINT = "https://devnet.helius-rpc.com/?api-key=" + process.env.NEXT_PUBLIC_HELIUS_API_KEY;
+  // https://mainnet.helius-rpc.com/?api-key=ammmmmm
+
+  public static readonly APP_CONNECTION: Connection = new Connection(AppConstants.APP_SOL_ENDPOINT, "confirmed");
+
 }
