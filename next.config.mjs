@@ -6,7 +6,9 @@ const nextConfig = {}
 
 const withCivicAuth = createCivicAuthPlugin({
     clientId: process.env.CIVIC_CLIENT_ID,
-    loginUrl: '/auth/'
+    // callbackUrl: "/app/dashboard",
+
+    // loginUrl: '/auth/',
 });
 
 export default withCivicAuth(nextConfig)

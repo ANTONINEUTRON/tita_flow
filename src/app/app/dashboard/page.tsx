@@ -20,7 +20,7 @@ import { Separator } from "@/components/ui/separator";
 import { OverviewContent } from "@/components/dashboard/overview-content";
 import { FlowsContent } from "@/components/dashboard/flows-content";
 import { ActivityContent } from "@/components/dashboard/activity-content";
-import { SettingsContent } from "@/components/dashboard/settings-content";
+import { SettingsContent } from "@/components/dashboard/settings/settings-content";
 
 export default function DashboardPage() {
     const [sidebarExpanded, setSidebarExpanded] = useState(true);

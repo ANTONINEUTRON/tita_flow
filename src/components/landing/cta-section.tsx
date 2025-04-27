@@ -1,4 +1,5 @@
 import Link from "next/link";
+import GetStartedButton from "../buttons/get-started-button";
 
 export function CTASection() {
   return (
@@ -12,9 +13,10 @@ export function CTASection() {
             </p>
           </div>
           <div className="space-x-4 mt-8">
-            <Link href="/launch" className="inline-flex h-11 items-center justify-center rounded-md bg-white text-primary px-8 text-sm font-medium shadow transition-colors hover:bg-gray-100 focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:pointer-events-none disabled:opacity-50">
-              Get Started – Launch a Flow Today
-            </Link>
+            <GetStartedButton
+              text="Get Started – Launch a Flow Today"
+              variant='outline'
+              className="text-primary font-medium mt-2" />
           </div>
         </div>
       </div>
