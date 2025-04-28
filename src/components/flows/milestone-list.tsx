@@ -1,20 +1,47 @@
 "use client";
 
+import { useEffect } from "react";
 import { FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Button } from "@/components/ui/button";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Plus, Trash2 } from "lucide-react";
+import { UseFormReturn } from "react-hook-form";
+
+type Milestone = {
+  description: string;
+  amount: string;
+  deadline: string; // Add deadline property to the Milestone type
+};
 
 type MilestoneListProps = {
-  milestones: any[];
+  milestones: Milestone[];
   onAdd: () => void;
   onRemove: (index: number) => void;
-  form: any;
+  form: UseFormReturn<any>;
 };
 
 export function MilestoneList({ milestones, onAdd, onRemove, form }: MilestoneListProps) {
+  // Generate a default deadline for new milestones
+  const getDefaultDeadline = (index: number) => {
+    const today = new Date();
+    today.setDate(today.getDate() + 30 * (index + 1)); // Each milestone 30 days apart
+    return today.toISOString().split('T')[0]; // Format: YYYY-MM-DD
+  };
+
+  // Initialize deadlines for milestones that don't have one
+  useEffect(() => {
+    milestones.forEach((milestone, index) => {
+      if (!milestone.deadline) {
+        form.setValue(
+          `milestones.${index}.deadline`, 
+          getDefaultDeadline(index)
+        );
+      }
+    });
+  }, [milestones.length, form]);
+
   return (
     <div className="space-y-4 p-4 border rounded-lg bg-muted/30">
       <div className="flex items-center justify-between">
@@ -30,7 +57,7 @@ export function MilestoneList({ milestones, onAdd, onRemove, form }: MilestoneLi
         </Button>
       </div>
       
-      <ScrollArea className="h-[300px] pr-4">
+      <ScrollArea className=" pr-4">
         <div className="space-y-4">
           {milestones.length === 0 ? (
             <div className="text-center p-4 border rounded-lg border-dashed">
@@ -65,20 +92,6 @@ export function MilestoneList({ milestones, onAdd, onRemove, form }: MilestoneLi
                 
                 <FormField
                   control={form.control}
-                  name={`milestones.${index}.title`}
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Title</FormLabel>
-                      <FormControl>
-                        <Input placeholder="Milestone Title" {...field} />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-                
-                <FormField
-                  control={form.control}
                   name={`milestones.${index}.description`}
                   render={({ field }) => (
                     <FormItem>
@@ -94,23 +107,43 @@ export function MilestoneList({ milestones, onAdd, onRemove, form }: MilestoneLi
                   )}
                 />
                 
-                <FormField
-                  control={form.control}
-                  name={`milestones.${index}.amount`}
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Amount</FormLabel>
-                      <FormControl>
-                        <Input 
-                          type="number" 
-                          placeholder="Amount to be released" 
-                          {...field} 
-                        />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <FormField
+                    control={form.control}
+                    name={`milestones.${index}.amount`}
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Amount</FormLabel>
+                        <FormControl>
+                          <Input 
+                            type="number" 
+                            placeholder="Amount to be released" 
+                            {...field} 
+                          />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+
+                  <FormField
+                    control={form.control}
+                    name={`milestones.${index}.deadline`}
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Deadline</FormLabel>
+                        <FormControl>
+                          <Input 
+                            type="date" 
+                            {...field} 
+                            min={new Date().toISOString().split('T')[0]}
+                          />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                </div>
               </div>
             ))
           )}

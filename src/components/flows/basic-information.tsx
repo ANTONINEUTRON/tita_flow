@@ -8,7 +8,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { CURRENCIES } from "@/lib/flow-constants";
-import { FileVideo, FileImage, X, Upload, AlertCircle, Info } from "lucide-react";
+import { FileVideo, FileImage, X, Upload, AlertCircle, Info, ChevronUp, ChevronDown } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 
@@ -25,16 +25,15 @@ type MediaItem = {
 type BasicInformationProps = {
   form: any;
   minDateString: string;
-  type: 'raise' | 'distribute';
 };
 
 const VIDEO_MAX_SIZE_MB = 50;
-const IMAGE_MAX_SIZE_MB = 5;
+const IMAGE_MAX_SIZE_MB = 2;
 const MAX_IMAGES = 5;
 
-export function BasicInformation({ form, minDateString, type }: BasicInformationProps) {
-  const isRaiseForm = type === 'raise';
+export function BasicInformation({ form, minDateString, }: BasicInformationProps) {
   const [uploadError, setUploadError] = useState<string | null>(null);
+  const [isMediaExpanded, setIsMediaExpanded] = useState(false);
   
   // Handle media file selection
   const handleMediaSelect = (event: React.ChangeEvent<HTMLInputElement>, mediaType: 'image' | 'video') => {
@@ -146,16 +145,13 @@ export function BasicInformation({ form, minDateString, type }: BasicInformation
         name="title"
         render={({ field }) => (
           <FormItem>
-            <FormLabel>Flow Title</FormLabel>
+            <FormLabel>Title</FormLabel>
             <FormControl>
               <Input
-                placeholder="Enter a descriptive title for your flow"
+                placeholder="Enter a title for your flow"
                 {...field}
               />
             </FormControl>
-            <FormDescription>
-              This will be displayed as the main title of your flow.
-            </FormDescription>
             <FormMessage />
           </FormItem>
         )}
@@ -169,10 +165,7 @@ export function BasicInformation({ form, minDateString, type }: BasicInformation
             <FormLabel>Description</FormLabel>
             <FormControl>
               <Textarea 
-                placeholder={isRaiseForm 
-                  ? "Describe what you're raising funds for..." 
-                  : "Describe what this distribution is for..."
-                } 
+                placeholder={ "Describe what you're raising funds for..."} 
                 className="min-h-[120px]"
                 {...field} 
               />
@@ -184,38 +177,22 @@ export function BasicInformation({ form, minDateString, type }: BasicInformation
       
       {/* First row of paired fields */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-        {isRaiseForm ? (
-          <FormField
-            control={form.control}
-            name="goal"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>Funding Goal (Optional)</FormLabel>
-                <FormControl>
-                  <Input type="number" placeholder="10000" {...field} />
-                </FormControl>
-                <FormDescription>
+        <FormField
+          control={form.control}
+          name="goal"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>Funding Goal (Optional)</FormLabel>
+              <FormControl>
+                <Input type="number" placeholder="10000" {...field} />
+              </FormControl>
+              {/* <FormDescription>
                   The total amount you want to raise
-                </FormDescription>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
-        ) : (
-          <FormField
-            control={form.control}
-            name="amount"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>Total Amount to Distribute</FormLabel>
-                <FormControl>
-                  <Input type="number" placeholder="10000" {...field} />
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
-        )}
+                </FormDescription> */}
+              <FormMessage />
+            </FormItem>
+          )}
+        />
         
         <FormField
           control={form.control}
@@ -251,57 +228,38 @@ export function BasicInformation({ form, minDateString, type }: BasicInformation
       
       {/* Second row of paired fields */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-        {isRaiseForm ? (
-          <FormField
-            control={form.control}
-            name="duration"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>Duration in Days (Optional)</FormLabel>
-                <FormControl>
-                  <Input type="number" placeholder="30" {...field} />
-                </FormControl>
-                <FormDescription>
-                  How long the funding will be open
-                </FormDescription>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
-        ) : (
-          <FormField
-            control={form.control}
-            name="applicationDuration"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>Application Duration (Days)</FormLabel>
-                <FormControl>
-                  <Input type="number" placeholder="30" {...field} />
-                </FormControl>
-                <FormDescription>
-                  How long the application window will be open
-                </FormDescription>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
-        )}
-        
         <FormField
           control={form.control}
-          name="startDate"
+          name="startdate"
           render={({ field }) => (
             <FormItem>
               <FormLabel>Start Date</FormLabel>
               <FormControl>
-                <Input 
-                  type="date" 
+                <Input
+                  type="date"
                   min={minDateString}
-                  {...field} 
+                  {...field}
                 />
               </FormControl>
               <FormDescription>
-                When the {isRaiseForm ? "funding" : "distribution"} flow will go live
+                When the funding flow will go live
+              </FormDescription>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+
+        <FormField
+          control={form.control}
+          name="duration"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>Duration in Days (Optional)</FormLabel>
+              <FormControl>
+                <Input type="number" placeholder="30" {...field} />
+              </FormControl>
+              <FormDescription>
+                How long the funding will be open
               </FormDescription>
               <FormMessage />
             </FormItem>
@@ -310,11 +268,29 @@ export function BasicInformation({ form, minDateString, type }: BasicInformation
       </div>
       
       {/* Media Upload Section */}
-      <div className="space-y-4 mt-8">
-        <h3 className="text-lg font-medium">Media</h3>
-        <FormDescription>
-          Add images and videos to showcase your flow. You can upload up to 5 images (max 5MB each) and 1 video (max 50MB).
-        </FormDescription>
+      <div className="space-y-4 mt-8 border rounded-lg">
+        {/* <h3 className="text-lg font-medium">Media</h3> */}
+        {/* <FormDescription>
+          You can upload up to 5 images (max 5MB each) and 1 video (max 50MB).
+        </FormDescription> */}
+        <div
+          className="p-4 flex justify-between items-center cursor-pointer"
+          onClick={() => setIsMediaExpanded(!isMediaExpanded)}
+        >
+          <div>
+            <h4 className="font-medium text-sm">Media</h4>
+            <FormDescription className="text-xs text-muted-foreground">
+              Add images or videos to showcase your project
+            </FormDescription>
+          </div>
+          <Button variant="ghost" size="sm" className="h-8 w-8 p-0" type="button">
+            {isMediaExpanded ? (
+              <ChevronUp className="h-4 w-4" />
+            ) : (
+              <ChevronDown className="h-4 w-4" />
+            )}
+          </Button>
+        </div>
         
         {uploadError && (
           <Alert variant="destructive">
@@ -324,113 +300,117 @@ export function BasicInformation({ form, minDateString, type }: BasicInformation
           </Alert>
         )}
         
-        <FormField
-          control={form.control}
-          name="media"
-          render={({ field }) => (
-            <FormItem>
-              <div className="flex flex-wrap gap-4">
-                {/* Video upload button */}
-                <div className="flex flex-col items-center">
-                  <div className="relative">
-                    <Input
-                      type="file"
-                      id="video-upload"
-                      className="sr-only"
-                      accept="video/*"
-                      onChange={(e) => handleMediaSelect(e, 'video')}
-                    />
-                    <label
-                      htmlFor="video-upload"
-                      className={cn(
-                        "flex flex-col items-center justify-center w-40 h-40 border-2 border-dashed rounded-lg cursor-pointer",
-                        "transition-colors duration-200 ease-in-out",
-                        "hover:bg-muted",
-                        (field.value?.some((item: MediaItem) => item.type === 'video')) ? 
-                          "opacity-50 cursor-not-allowed" : ""
-                      )}
-                    >
-                      <FileVideo className="w-8 h-8 text-muted-foreground mb-2" />
-                      <span className="text-xs text-center text-muted-foreground">Upload video<br/>(max 50MB)</span>
-                    </label>
-                  </div>
-                </div>
-                
-                {/* Image upload button */}
-                <div className="flex flex-col items-center">
-                  <div className="relative">
-                    <Input
-                      type="file"
-                      id="image-upload"
-                      className="sr-only"
-                      accept="image/*"
-                      multiple
-                      onChange={(e) => handleMediaSelect(e, 'image')}
-                    />
-                    <label
-                      htmlFor="image-upload"
-                      className={cn(
-                        "flex flex-col items-center justify-center w-40 h-40 border-2 border-dashed rounded-lg cursor-pointer",
-                        "transition-colors duration-200 ease-in-out",
-                        "hover:bg-muted",
-                        (field.value?.filter((item: MediaItem) => item.type === 'image')?.length >= MAX_IMAGES) ? 
-                          "opacity-50 cursor-not-allowed" : ""
-                      )}
-                    >
-                      <FileImage className="w-8 h-8 text-muted-foreground mb-2" />
-                      <span className="text-xs text-center text-muted-foreground">Upload images<br/>(max 5 images, 5MB each)</span>
-                    </label>
-                  </div>
-                </div>
-                
-                {/* Media preview */}
-                {field.value?.map((media: MediaItem) => (
-                  <div key={media.id} className="relative">
-                    <div className="w-40 h-40 border rounded-lg overflow-hidden">
-                      {media.type === 'image' ? (
-                        <img 
-                          src={media.previewUrl} 
-                          alt={media.title} 
-                          className="w-full h-full object-cover"
+        {
+          isMediaExpanded && (
+            <FormField
+              control={form.control}
+              name="media"
+              render={({ field }) => (
+                <FormItem>
+                  <div className="flex flex-wrap gap-4 px-4">
+                    {/* Video upload button */}
+                    <div className="flex flex-col items-center">
+                      <div className="relative">
+                        <Input
+                          type="file"
+                          id="video-upload"
+                          className="sr-only"
+                          accept="video/*"
+                          onChange={(e) => handleMediaSelect(e, 'video')}
                         />
-                      ) : (
-                        <video 
-                          src={media.previewUrl} 
-                          className="w-full h-full object-cover"
-                          controls
-                        />
-                      )}
+                        <label
+                          htmlFor="video-upload"
+                          className={cn(
+                            "flex flex-col items-center justify-center w-40 h-40 border-2 border-dashed rounded-lg cursor-pointer",
+                            "transition-colors duration-200 ease-in-out",
+                            "hover:bg-muted",
+                            (field.value?.some((item: MediaItem) => item.type === 'video')) ?
+                              "opacity-50 cursor-not-allowed" : ""
+                          )}
+                        >
+                          <FileVideo className="w-8 h-8 text-muted-foreground mb-2" />
+                          <span className="text-xs text-center text-muted-foreground">Upload video<br />(max 50MB)</span>
+                        </label>
+                      </div>
                     </div>
-                    <button
-                      type="button"
-                      onClick={() => handleRemoveMedia(media.id)}
-                      className="absolute -top-2 -right-2 bg-destructive text-destructive-foreground rounded-full p-1 shadow-md hover:bg-destructive/90 transition-colors"
-                    >
-                      <X className="w-4 h-4" />
-                    </button>
-                    <Input
-                      placeholder="Title"
-                      value={media.title}
-                      onChange={(e) => handleUpdateMediaMetadata(media.id, 'title', e.target.value)}
-                      className="mt-2 text-xs px-2 py-1 h-7"
-                    />
+
+                    {/* Image upload button */}
+                    <div className="flex flex-col items-center">
+                      <div className="relative">
+                        <Input
+                          type="file"
+                          id="image-upload"
+                          className="sr-only"
+                          accept="image/*"
+                          multiple
+                          onChange={(e) => handleMediaSelect(e, 'image')}
+                        />
+                        <label
+                          htmlFor="image-upload"
+                          className={cn(
+                            "flex flex-col items-center justify-center w-40 h-40 border-2 border-dashed rounded-lg cursor-pointer",
+                            "transition-colors duration-200 ease-in-out",
+                            "hover:bg-muted",
+                            (field.value?.filter((item: MediaItem) => item.type === 'image')?.length >= MAX_IMAGES) ?
+                              "opacity-50 cursor-not-allowed" : ""
+                          )}
+                        >
+                          <FileImage className="w-8 h-8 text-muted-foreground mb-2" />
+                          <span className="text-xs text-center text-muted-foreground">Upload images<br />(max {MAX_IMAGES} images, {IMAGE_MAX_SIZE_MB}MB each)</span>
+                        </label>
+                      </div>
+                    </div>
+
+                    {/* Media preview */}
+                    {field.value?.map((media: MediaItem) => (
+                      <div key={media.id} className="relative">
+                        <div className="w-40 h-40 border rounded-lg overflow-hidden">
+                          {media.type === 'image' ? (
+                            <img
+                              src={media.previewUrl}
+                              alt={media.title}
+                              className="w-full h-full object-cover"
+                            />
+                          ) : (
+                            <video
+                              src={media.previewUrl}
+                              className="w-full h-full object-cover"
+                              controls
+                            />
+                          )}
+                        </div>
+                        <button
+                          type="button"
+                          onClick={() => handleRemoveMedia(media.id)}
+                          className="absolute -top-2 -right-2 bg-destructive text-destructive-foreground rounded-full p-1 shadow-md hover:bg-destructive/90 transition-colors"
+                        >
+                          <X className="w-4 h-4" />
+                        </button>
+                        <Input
+                          placeholder="Title"
+                          value={media.title}
+                          onChange={(e) => handleUpdateMediaMetadata(media.id, 'title', e.target.value)}
+                          className="mt-2 text-xs px-2 py-1 h-7"
+                        />
+                      </div>
+                    ))}
                   </div>
-                ))}
-              </div>
-              
-              <div className="mt-2 text-xs text-muted-foreground flex items-center">
-                <Info className="h-3 w-3 mr-1" />
-                {field.value?.filter((item: MediaItem) => item.type === 'image').length || 0} of {MAX_IMAGES} images, 
-                {field.value?.some((item: MediaItem) => item.type === 'video') ? " 1" : " 0"} of 1 video
-              </div>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
+
+                  <div className="m-2 text-xs text-muted-foreground flex items-center">
+                    <Info className="h-3 w-3 mr-1" />
+                    {field.value?.filter((item: MediaItem) => item.type === 'image').length || 0} of {MAX_IMAGES} images,
+                    {field.value?.some((item: MediaItem) => item.type === 'video') ? " 1" : " 0"} of 1 video
+                  </div>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+          )
+        }
         
         {/* Media metadata editor for the selected item would go here */}
         {(form.getValues('media')?.length > 0) && (
-          <div className="mt-4">
+          <div className="mt-4 mx-4">
             <h4 className="text-sm font-medium">Media Description</h4>
             <FormDescription className="mt-1">
               Add descriptions to your media to provide context.
