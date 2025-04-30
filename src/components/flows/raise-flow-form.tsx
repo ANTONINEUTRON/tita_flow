@@ -1,3 +1,5 @@
+"use client"
+
 import { useState } from "react";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -10,9 +12,12 @@ import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { LucideArrowRight, LucideArrowLeft, Check } from "lucide-react";
 import { useRouter } from "next/navigation";
-import { useToast } from "@/lib/hooks/use-toast";
+// import { useToast } from "@/lib/hooks/use-toast";
 import { GovernanceConfiguration } from "./governance-config";
-import { title } from "process";
+import { FundingFlow, VotingPowerModel } from "@/lib/types/flow";
+import { v4 as uuidv4 } from 'uuid';
+import toast from "react-hot-toast";
+import { useUser } from "@civic/auth/react";
 
 // Define form steps
 enum FormStep {
@@ -25,7 +30,7 @@ const raiseFlowSchema = z.object({
   // Basic Information
   title: z.string().min(1, "Title is required"),
   description: z.string().min(1, "Description is required"),
-  goal: z.string().min(1, "Goal amount is required"),
+  goal: z.string().min(1, "Goal amount is required").default("0"),
   startdate: z.string().min(1, "Deadline is required"),
   currency: z.string().min(1, "Currency is required"),
   duration: z.number().min(1, "Funding duration can't be less than a day").max(90, "Funding duration cannot exceed 90 days"),
@@ -39,23 +44,36 @@ const raiseFlowSchema = z.object({
   // Milestone Configuration
   milestones: z.array(
     z.object({
+      id: z.number().min(6, "Id is required"),
       description: z.string().min(1, "Description is required"),
-      amount: z.string().min(1, "Amount is required"),
+      amount: z.number().min(1, "Amount is required"),
       deadline: z.string().min(1, "Deadline is required"),
     })
   ).optional(),
 
   // Governance Configuration
-  votingPowerModel: z.enum(["tokenWeighted", "quadraticVoting", "individualVoting"]).default("tokenWeighted"),
+  votingPowerModel: z.nativeEnum(VotingPowerModel).default(VotingPowerModel.TOKEN_WEIGHTED),
   quorumPercentage: z.number().min(1).max(100).default(30),
   approvalPercentage: z.number().min(51).max(100).default(50),
   votingPeriodDays: z.number().min(1).default(7),
+  media: z.array(
+    z.object({
+      id: z.string(),
+      file: z.any(),
+      type: z.enum(["image", "video"]),
+      previewUrl: z.string(),
+      title: z.string().optional(),
+      description: z.string().optional(),
+    })
+    // z.any()
+  ).optional(),
 });
 
 type RaiseFlowFormValues = z.infer<typeof raiseFlowSchema>;
 
 export default function RaiseFlowForm() {
-  const { toast } = useToast();
+  // const { toast } = useToast();
+  const {user} = useUser();
   const router = useRouter();
   const [currentStep, setCurrentStep] = useState<FormStep>(FormStep.BASIC_INFO);
 
@@ -69,7 +87,7 @@ export default function RaiseFlowForm() {
       title: "",
       currency: "",
       description: "",
-      goal: "",
+      goal: "0",
       startdate: formattedToday,
       duration: 3,
       rules: {
@@ -77,10 +95,11 @@ export default function RaiseFlowForm() {
         governance: false,
       },
       milestones: [],
-      votingPowerModel: "tokenWeighted",
+      votingPowerModel: VotingPowerModel.TOKEN_WEIGHTED,
       quorumPercentage: 30,
-      approvalPercentage: 50,
+      approvalPercentage: 51,
       votingPeriodDays: 7,
+      media: []
     },
   });
 
@@ -99,7 +118,7 @@ export default function RaiseFlowForm() {
     const currentMilestones = form.getValues("milestones") || [];
     form.setValue("milestones", [
       ...currentMilestones,
-      { description: "", amount: "", deadline: "" },
+      { id: currentMilestones.length + 1, description: "", amount: 0, deadline: "" },
     ]);
   };
 
@@ -111,38 +130,159 @@ export default function RaiseFlowForm() {
     );
   };
 
+
   // Form submission handler
   const onSubmit = async (values: RaiseFlowFormValues) => {
+    console.log("Form values:", values);
+    let flowToSubmitted: FundingFlow = {
+      id: uuidv4(),
+      title: values.title,
+      description: values.description,
+      goal: values.goal,
+      duration: values.duration,
+      startdate: values.startdate,
+      currency: values.currency,
+
+      rules: values.rules,
+      creator: "0x1234567890abcdef", // Placeholder for creator's address
+      creator_id: user?.id!, // Placeholder for creator's ID
+      milestones: values.milestones || [],
+      votingPowerModel: values.votingPowerModel,
+      quorumPercentage: values.quorumPercentage,
+      approvalPercentage: values.approvalPercentage,
+      votingPeriodDays: values.votingPeriodDays,
+      images: [],
+      video: "",
+    }
+
+    console.log("Flow to be submitted11:", flowToSubmitted);
+
     try {
       // Validate milestone-based rules
       if (values.rules.milestone && (!values.milestones || values.milestones.length === 0)) {
-        toast({
-          title: "Validation Error",
-          description: "At least one milestone is required when milestone-based funding is enabled",
-          variant: "destructive",
-        });
+        // toast({
+        //   title: "Validation Error",
+        //   description: "At least one milestone is required when milestone-based funding is enabled",
+        //   variant: "destructive",
+        // });
+        toast("At least one milestone is required when milestone-based funding is enabled")
         return;
       }
 
-      console.log("Form values:", values);
-      toast({
-        title: "Success!",
-        description: "Your raise flow has been created.",
+      // Show loading toast
+      toast("Uploading media and creating your raise flow");
+
+
+
+      // Create a copy of the form values to avoid mutating the original
+      const submissionValues = { ...values };
+
+      // Handle media uploads if present
+      if (submissionValues.media && submissionValues.media.length > 0) {
+        try {
+          // Prepare for media upload
+          const mediaFiles = submissionValues.media.filter(item => item.file); // Only items with files need upload
+
+          if (mediaFiles.length > 0) {
+            // Create FormData for file upload
+            const formData = new FormData();
+
+            // Append each media file to FormData
+            mediaFiles.forEach((mediaItem, index) => {
+              formData.append(mediaItem.type, mediaItem.file);
+              // formData.append(`fileInfo${index}`, JSON.stringify({
+              //   id: mediaItem.id,
+              //   title: mediaItem.title,
+              //   type: mediaItem.type
+              // }));
+            });
+
+            // Upload the media files
+            const uploadResponse = await fetch('/api/upload-flow-media', {
+              method: 'POST',
+              body: formData,
+            });
+            console.log("Upload response:", uploadResponse);
+            if (!uploadResponse.ok) {
+              throw new Error('Failed to upload media files');
+            }
+
+            // Get the uploaded media URLs
+            const uploadedMedia = await uploadResponse.json();
+
+            console.log("Uploaded media:", uploadedMedia);
+
+            flowToSubmitted.images = uploadedMedia.imageUrls || [];
+            flowToSubmitted.video = uploadedMedia.videoUrl || "";
+
+            // Replace the media items with their uploaded versions
+            // flowToSubmitted.media = uploadedMedia.imageUrl.map(image => {
+            //   // Find the matching uploaded item
+            //   const uploadedItem = uploadedMedia.find((uploaded: any) => uploaded.id === item.id);
+
+            //   // if (uploadedItem) {
+            //   // Return the item with the uploaded URL
+            //   return {
+            //     id: uploadedItem.id,
+            //     title: uploadedItem.title,
+            //     type: uploadedItem.type,
+            //     url: uploadedItem.url, // The permanent URL from the server
+            //   };
+            //   // }
+
+            //   // return item;
+            // });
+          }
+        } catch (uploadError) {
+          console.error("Media upload error:", uploadError);
+          toast.error("There was a problem uploading your media files. Please try again.");
+          
+          return;
+        }
+      }
+
+      console.log("Flow to be submitted:", flowToSubmitted);
+
+      // // Cleanup client-side only data before submitting to API
+      // if (submissionValues.media) {
+      //   submissionValues.media = submissionValues.media.map(item => {
+      //     // Create a new object without the file and previewUrl properties
+      //     const { file, previewUrl, ...cleanedItem } = item;
+      //     return cleanedItem;
+      //   });
+      // }
+
+      // Submit the flow data with the uploaded media URLs
+      const response = await fetch('/api/flow', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(flowToSubmitted),
       });
-      // Add your form submission logic here
+
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.message || 'Failed to create flow');
+      }
+
+      const flowData = await response.json();
+
+      // Success notification
+      toast.success("Your raise flow has been created.");
+
+      router.push(`/flow/${flowData.id}`);
 
     } catch (error) {
       console.error("Error submitting form:", error);
-      toast({
-        title: "Error",
-        description: "There was a problem creating your raise flow.",
-        variant: "destructive",
-      });
+
+      toast(error instanceof Error ? error.message : "There was a problem creating your flow");
     }
   };
 
   // Navigation functions
   const nextStep = () => {
+    console.log("Current step:", currentStep);
     if (true) {
       setCurrentStep((prevStep) => (prevStep + 1) as FormStep);
     }
@@ -175,10 +315,10 @@ export default function RaiseFlowForm() {
             {["Basic Info", "Rules & Config", "Preview"].map((step, index) => (
               <div key={index} className="flex flex-col items-center">
                 <div className={`w-8 h-8 rounded-full flex items-center justify-center ${currentStep === index
-                    ? "bg-primary text-primary-foreground"
-                    : currentStep > index
-                      ? "bg-primary/80 text-primary-foreground"
-                      : "bg-muted text-muted-foreground"
+                  ? "bg-primary text-primary-foreground"
+                  : currentStep > index
+                    ? "bg-primary/80 text-primary-foreground"
+                    : "bg-muted text-muted-foreground"
                   }`}>
                   {currentStep > index ? <Check className="h-4 w-4" /> : index + 1}
                 </div>
@@ -311,6 +451,8 @@ export default function RaiseFlowForm() {
                     <span>{form.getValues("goal")}</span>
                     <span className="text-muted-foreground">Start Date:</span>
                     <span>{new Date(form.getValues("startdate")).toLocaleDateString()}</span>
+                    <span className="text-muted-foreground">Duration:</span>
+                    <span>{form.getValues("duration")}</span>
                   </div>
                 </div>
 
@@ -365,6 +507,7 @@ export default function RaiseFlowForm() {
           <CardFooter className="flex justify-between border-t p-6">
             {currentStep === FormStep.BASIC_INFO ? (
               <Button
+                key={"cancelBtn"}
                 type="button"
                 variant="outline"
                 onClick={() => router.back()}
@@ -373,6 +516,7 @@ export default function RaiseFlowForm() {
               </Button>
             ) : (
               <Button
+                key={"backBtn"}
                 type="button"
                 variant="outline"
                 onClick={prevStep}
@@ -384,6 +528,7 @@ export default function RaiseFlowForm() {
 
             {currentStep < FormStep.PREVIEW ? (
               <Button
+                key={"nextBtn"}
                 type="button"
                 onClick={nextStep}
               >
@@ -391,7 +536,9 @@ export default function RaiseFlowForm() {
                 <LucideArrowRight className="ml-2 h-4 w-4" />
               </Button>
             ) : (
-              <Button type="submit">
+              <Button
+                key={"submitBtn"}
+                type="submit">
                 Create Flow
                 <LucideArrowRight className="ml-2 h-4 w-4" />
               </Button>

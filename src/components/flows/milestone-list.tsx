@@ -8,12 +8,13 @@ import { Button } from "@/components/ui/button";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Plus, Trash2 } from "lucide-react";
 import { UseFormReturn } from "react-hook-form";
+import { Milestone } from "@/lib/types/flow";
 
-type Milestone = {
-  description: string;
-  amount: string;
-  deadline: string; // Add deadline property to the Milestone type
-};
+// type Milestone = {
+//   description: string;
+//   amount: string;
+//   deadline: string; // Add deadline property to the Milestone type
+// };
 
 type MilestoneListProps = {
   milestones: Milestone[];

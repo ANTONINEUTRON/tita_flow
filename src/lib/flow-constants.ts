@@ -5,10 +5,3 @@ export const CURRENCIES = [
   { label: "SOL", value: "sol", icon: "◎" },
   { label: "USDT", value: "usdt", icon: "💲" }
 ];
-
-// Configuration rule types
-export const RULE_TYPES = {
-  DIRECT: "direct",
-  MILESTONE: "milestone",
-  WEIGHTED: "weighted"
-};
