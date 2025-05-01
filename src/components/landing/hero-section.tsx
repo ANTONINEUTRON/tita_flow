@@ -32,10 +32,11 @@ export function HeroSection() {
         <div className="flex flex-col items-center space-y-4 text-center">
           <div className="space-y-2">
             <h1 className="text-3xl font-bold tracking-tighter sm:text-4xl md:text-5xl lg:text-6xl/none">
-              Launch a Flow<br/> Fund, Invest, and Transact Your Way
+              Funding with <span className="text-primary">Accountability</span><br />
+              Built Right In
             </h1>
             <p className="mx-auto max-w-[700px] text-gray-500 md:text-xl dark:text-gray-400 mt-4">
-                Tita lets you create fully customizable, flexible funding flows for grants, escrow payments, and investments—to your needs.
+              Tita enables transparent, rule-based funding flows with milestone triggers and community governance—ensuring capital is deployed exactly as promised.
             </p>
           </div>
           <div className="space-x-4 mt-8">
