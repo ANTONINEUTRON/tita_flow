@@ -17,7 +17,6 @@ import { GovernanceConfiguration } from "./governance-config";
 import { FundingFlow, VotingPowerModel } from "@/lib/types/flow";
 import { v4 as uuidv4 } from 'uuid';
 import toast from "react-hot-toast";
-import { useUser } from "@civic/auth/react";
 
 // Define form steps
 enum FormStep {
@@ -73,7 +72,6 @@ type RaiseFlowFormValues = z.infer<typeof raiseFlowSchema>;
 
 export default function RaiseFlowForm() {
   // const { toast } = useToast();
-  const {user} = useUser();
   const router = useRouter();
   const [currentStep, setCurrentStep] = useState<FormStep>(FormStep.BASIC_INFO);
 
@@ -145,7 +143,7 @@ export default function RaiseFlowForm() {
 
       rules: values.rules,
       creator: "0x1234567890abcdef", // Placeholder for creator's address
-      creator_id: user?.id!, // Placeholder for creator's ID
+      creator_id: "bbunmm", // Placeholder for creator's ID
       milestones: values.milestones || [],
       votingPowerModel: values.votingPowerModel,
       quorumPercentage: values.quorumPercentage,

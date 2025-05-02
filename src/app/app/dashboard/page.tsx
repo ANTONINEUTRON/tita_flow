@@ -21,13 +21,11 @@ import { OverviewContent } from "@/components/dashboard/overview-content";
 import { FlowsContent } from "@/components/dashboard/flows-content";
 import { ActivityContent } from "@/components/dashboard/activity-content";
 import { SettingsContent } from "@/components/dashboard/settings/settings-content";
-import { useUser } from "@civic/auth/react";
 
 export default function DashboardPage() {
     const [sidebarExpanded, setSidebarExpanded] = useState(true);
     const [activeView, setActiveView] = useState("overview");
     const [showNotifications, setShowNotifications] = useState(false);
-    const {user} = useUser()
 
     // Navigation items (used for both sidebar and bottom nav)
     const navItems = [
@@ -149,16 +147,16 @@ export default function DashboardPage() {
                     !sidebarExpanded && "justify-center"
                 )}>
                     <Avatar className="h-10 w-10">
-                        <AvatarImage src={user?.picture} alt="User" />
-                        <AvatarFallback>{user?.name?.substring(0,2)}</AvatarFallback>
+                        {/* <AvatarImage src=ser?.picture alt="User" /> */}
+                        <AvatarFallback>ser?.name?.substring(0,2)</AvatarFallback>
                     </Avatar>
                     {sidebarExpanded && (
                         <div className="ml-3 overflow-hidden">
                             <p className="font-medium truncate">
-                                {user?.name || "Name not set"}
+                                ser?.name || "Name not set"
                             </p>
                             <p className="text-xs text-muted-foreground truncate">
-                                {user?.email || "Email not set"}
+                                ser?.email || "Email not set"
                             </p>
                         </div>
                     )}

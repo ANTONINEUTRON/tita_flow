@@ -7,19 +7,19 @@ import { objectToSnake } from "ts-case-convert";
 
 // All operations here are rendered on the server side
 // DON'T CALL FROM ANY FRONT FACING COMPONENT
-export class SupabaseService {
-    private static instance: SupabaseService;
+export class FlowService {
+    private static instance: FlowService;
     private client: Promise<SupabaseClient>;
 
     private constructor() {
         this.client = SUPABASE_CLIENT;
     }
 
-    public static getInstance(): SupabaseService {
-        if (!SupabaseService.instance) {
-            SupabaseService.instance = new SupabaseService();
+    public static getInstance(): FlowService {
+        if (!FlowService.instance) {
+            FlowService.instance = new FlowService();
         }
-        return SupabaseService.instance;
+        return FlowService.instance;
     }
 
     public async fetchFundingFlow() {}

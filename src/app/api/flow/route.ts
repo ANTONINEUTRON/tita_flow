@@ -1,4 +1,4 @@
-import { SupabaseService } from "@/lib/server_services/flow_services";
+import { FlowService } from "@/lib/server_services/flow_service";
 import { FundingFlow } from "@/lib/types/flow";
 import { NextRequest, NextResponse } from "next/server";
 
@@ -23,7 +23,7 @@ export async function POST(req: NextRequest) {
     try {
         const fundingFlowObject: FundingFlow = formData as any as FundingFlow;
 
-        await SupabaseService
+        await FlowService
             .getInstance()
             .createFundingFlow(fundingFlowObject);
 

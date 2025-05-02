@@ -1,5 +1,5 @@
+import Provider from '@/lib/providers/providers';
 import './globals.css'
-import Provider from './provider'
 import { ReactQueryProvider } from './react-query-provider'
 import { Toaster } from 'react-hot-toast';
 

@@ -4,7 +4,6 @@ import { UseCasesSection } from "@/components/landing/use-cases-section";
 import { HowItWorksSection } from "@/components/landing/how-it-works-section";
 import { Footer } from "@/components/landing/footer";
 import { CTASection } from "@/components/landing/cta-section";
-import { UserButton } from "@civic/auth-web3/react";
 
 export default function Page() {
   return (

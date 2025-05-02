@@ -5,7 +5,6 @@ import { Label } from "@/components/ui/label";
 import { useState } from "react";
 import { SettingsTabsProp } from "./settings-content";
 import { LogOut, Trash2 } from "lucide-react";
-import { useUser } from "@civic/auth/react";
 import { SignOutButton } from "@/components/buttons/sign-out-button";
 
 

@@ -1,10 +1,10 @@
 'use client'
 import { useRouter } from "next/navigation";
 import { Button } from "../ui/button";
-import { useUser } from "@civic/auth/react"; 
 import toast from "react-hot-toast";
 import { useEffect, useState } from "react";
 import { cn } from "@/lib/utils";
+import useProfile from "@/lib/hooks/use_profile";
 
 
 interface GetStartedButtonProps{
@@ -20,29 +20,29 @@ export default function GetStartedButton({
     className,
 }: GetStartedButtonProps) {
     const router = useRouter();
-    const {user, signIn} = useUser();
     const [isSigningIn, setIsSigningIn] = useState(false);
+    const { signIn, loading, ready } = useProfile()
     
     // When user state changes and we were in signing in process, navigate
-    useEffect(() => {
-        if (user && isSigningIn) {
-            setIsSigningIn(false);
-            router.push("/app/dashboard");
-        }
-    }, [user, isSigningIn, router]);
+    // useEffect(() => {
+    //     if (user && isSigningIn) {
+    //         setIsSigningIn(false);
+    //         router.push("/app/dashboard");
+    //     }
+    // }, [user, isSigningIn, router]);
 
     const onclick = () => {
-        if(user){
-            router.push("/app/dashboard")
-        } else {
-            setIsSigningIn(true);
-            signIn()
-                .catch((error) => {
-                    console.error("Error signing in:", error);
-                    setIsSigningIn(false);
-                    toast.error("Error signing in. Please try again."); 
-                });
-        }
+        // if(user){
+        //     router.push("/app/dashboard")
+        // } else {
+        //     setIsSigningIn(true);
+        //     signIn()
+        //         .catch((error) => {
+        //             console.error("Error signing in:", error);
+        //             setIsSigningIn(false);
+        //             toast.error("Error signing in. Please try again."); 
+        //         });
+        // }
     }
     
     return (
