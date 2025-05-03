@@ -17,6 +17,7 @@ import { GovernanceConfiguration } from "./governance-config";
 import { FundingFlow, VotingPowerModel } from "@/lib/types/flow";
 import { v4 as uuidv4 } from 'uuid';
 import toast from "react-hot-toast";
+import useProfile from "@/lib/hooks/use_profile";
 
 // Define form steps
 enum FormStep {
@@ -71,7 +72,7 @@ const raiseFlowSchema = z.object({
 type RaiseFlowFormValues = z.infer<typeof raiseFlowSchema>;
 
 export default function RaiseFlowForm() {
-  // const { toast } = useToast();
+  const {userProfile} = useProfile();
   const router = useRouter();
   const [currentStep, setCurrentStep] = useState<FormStep>(FormStep.BASIC_INFO);
 
@@ -142,8 +143,8 @@ export default function RaiseFlowForm() {
       currency: values.currency,
 
       rules: values.rules,
-      creator: "0x1234567890abcdef", // Placeholder for creator's address
-      creator_id: "bbunmm", // Placeholder for creator's ID
+      creator: userProfile?.wallet!, // Placeholder for creator's address
+      creator_id: userProfile?.id!, // Placeholder for creator's ID
       milestones: values.milestones || [],
       votingPowerModel: values.votingPowerModel,
       quorumPercentage: values.quorumPercentage,
@@ -168,7 +169,7 @@ export default function RaiseFlowForm() {
       }
 
       // Show loading toast
-      toast("Uploading media and creating your raise flow");
+      toast("Uploading media and creating your funding flow");
 
 
 
@@ -269,7 +270,7 @@ export default function RaiseFlowForm() {
       // Success notification
       toast.success("Your raise flow has been created.");
 
-      router.push(`/flow/${flowData.id}`);
+      router.push(`/flow/${flowToSubmitted.id}`);
 
     } catch (error) {
       console.error("Error submitting form:", error);

@@ -18,6 +18,8 @@ export async function GET(req: NextRequest) {
             ? await userService.getUserRecord(userId ?? "")
             : await userService.getUserRecordByEmail(userEmail ?? "");
 
+        console.log(userRecord)
+
         return NextResponse.json(userRecord);
     } catch (error) {
         console.log(error)
@@ -28,7 +30,6 @@ export async function GET(req: NextRequest) {
 // Save the user profile
 export async function POST(req: NextRequest) {
     let userProfile = await req.json() as unknown as AppUser;
-
     try {
         // save user record to db
         await userService.saveUserRecordToDb(userProfile);

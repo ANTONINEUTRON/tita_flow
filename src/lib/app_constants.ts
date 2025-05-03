@@ -1,4 +1,5 @@
 import { Connection } from "@solana/web3.js";
+import { SupportCurrency } from "./types/supported_currencies";
 
 /**
  * Application-wide constants
@@ -45,4 +46,32 @@ export class AppConstants {
   public static readonly FLOW_TABLE = "funding_flows";
 
   public static readonly USER_TABLE = "users";
+
+
+  public static readonly SUPPORTEDCURRENCIES: SupportCurrency[] = [
+    {
+      name: "SOL",
+      address: "So11111111111111111111111111111111111111112",
+      decimals: 9,
+      logo: "/icon/solana.png"
+    },
+    {
+      name: "USDC",//Devnet USDC
+      address: "61DVYzrDYcAqx8oVQ8jixoEYfGhLz1dvmcYic3qJEzYU",//"EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v", 
+      decimals: 6,
+      logo: "/icon/usdc.png"
+    },
+    // {
+    //     name: "USDT",
+    //     address: "Es9vMFrzaCERmJfrF4H2FYD4KCoNkY11McCe8BenwNYB", 
+    //     decimals: 6,
+    //     logo: "/icon/usdt.png"
+    // },
+    // {
+    //     name: "SEND",
+    //     address: "SENDdRQtYMWaQrBroBrJ2Q53fgVuq95CV9UPGEvpCxa", 
+    //     decimals: 9,
+    // },
+  ];
+
 }

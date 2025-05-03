@@ -11,6 +11,7 @@ import { CURRENCIES } from "@/lib/flow-constants";
 import { FileVideo, FileImage, X, Upload, AlertCircle, Info, ChevronUp, ChevronDown } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
+import { AppConstants } from "@/lib/app_constants";
 
 // Define types for media items
 type MediaItem = {
@@ -210,11 +211,15 @@ export function BasicInformation({ form, minDateString, }: BasicInformationProps
                   </SelectTrigger>
                 </FormControl>
                 <SelectContent>
-                  {CURRENCIES.map((currency) => (
-                    <SelectItem key={currency.value} value={currency.value}>
+                  {AppConstants.SUPPORTEDCURRENCIES.map((currency) => (
+                    <SelectItem key={currency.name} value={currency.name}>
                       <div className="flex items-center">
-                        <span className="mr-2">{currency.icon}</span>
-                        <span>{currency.label}</span>
+                        {/* <span className="mr-2">{currency.icon}</span> */}
+                        <img
+                          src={currency.logo}
+                          alt={currency.name}
+                          className="w-6 h-6 mr-2"/>
+                        <span>{currency.name}</span>
                       </div>
                     </SelectItem>
                   ))}

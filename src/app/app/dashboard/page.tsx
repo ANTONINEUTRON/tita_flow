@@ -150,8 +150,8 @@ export default function DashboardPage() {
                     !sidebarExpanded && "justify-center"
                 )}>
                     <Avatar className="h-10 w-10">
-                        {/* <AvatarImage src=ser?.picture alt="User" /> */}
-                        <AvatarFallback>{userProfile?.username.substring(0,2)}</AvatarFallback>
+                        <AvatarImage src={userProfile?.profilePics} alt="User" />
+                        <AvatarFallback>{userProfile?.username.substring(0,2).toUpperCase()}</AvatarFallback>
                     </Avatar>
                     {sidebarExpanded && (
                         <div className="ml-3 overflow-hidden">
