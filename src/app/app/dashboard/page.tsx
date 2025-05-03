@@ -21,11 +21,14 @@ import { OverviewContent } from "@/components/dashboard/overview-content";
 import { FlowsContent } from "@/components/dashboard/flows-content";
 import { ActivityContent } from "@/components/dashboard/activity-content";
 import { SettingsContent } from "@/components/dashboard/settings/settings-content";
+import useProfile from "@/lib/hooks/use_profile";
+import formatWalletAddress from "@/lib/utils/format_wallet_address";
 
 export default function DashboardPage() {
     const [sidebarExpanded, setSidebarExpanded] = useState(true);
     const [activeView, setActiveView] = useState("overview");
     const [showNotifications, setShowNotifications] = useState(false);
+    const { userProfile } = useProfile()
 
     // Navigation items (used for both sidebar and bottom nav)
     const navItems = [
@@ -148,15 +151,15 @@ export default function DashboardPage() {
                 )}>
                     <Avatar className="h-10 w-10">
                         {/* <AvatarImage src=ser?.picture alt="User" /> */}
-                        <AvatarFallback>ser?.name?.substring(0,2)</AvatarFallback>
+                        <AvatarFallback>{userProfile?.username.substring(0,2)}</AvatarFallback>
                     </Avatar>
                     {sidebarExpanded && (
                         <div className="ml-3 overflow-hidden">
                             <p className="font-medium truncate">
-                                ser?.name || "Name not set"
+                                {userProfile?.username || "Name not set"}
                             </p>
                             <p className="text-xs text-muted-foreground truncate">
-                                ser?.email || "Email not set"
+                                {formatWalletAddress(userProfile?.wallet || "")}
                             </p>
                         </div>
                     )}

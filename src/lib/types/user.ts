@@ -4,7 +4,6 @@ export default interface AppUser{
     email: string,
     wallet: string,
     username: string,
-    firstname: string,
-    lastname: string,
+    name: string,
     profilePics?: string
 }

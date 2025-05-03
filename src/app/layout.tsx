@@ -4,7 +4,7 @@ import { ReactQueryProvider } from './react-query-provider'
 import { Toaster } from 'react-hot-toast';
 
 export const metadata = {
-  title: 'Tita',
+  title: 'TitaFlow',
   description: 'Configurable rule based funding platform',
 }
 

@@ -20,35 +20,30 @@ export default function GetStartedButton({
     className,
 }: GetStartedButtonProps) {
     const router = useRouter();
-    const [isSigningIn, setIsSigningIn] = useState(false);
-    const { signIn, loading, ready } = useProfile()
-    
-    // When user state changes and we were in signing in process, navigate
-    // useEffect(() => {
-    //     if (user && isSigningIn) {
-    //         setIsSigningIn(false);
-    //         router.push("/app/dashboard");
-    //     }
-    // }, [user, isSigningIn, router]);
+    const { signIn, loading, userProfile } = useProfile()
+    const [signinClicked, setSigninClicked] = useState(false);
+
+    useEffect(() => {
+        if(userProfile && signinClicked){
+            router.push("/app/dashboard")
+            toast.success("Welcome back!");
+        }
+    },[userProfile]);
 
     const onclick = () => {
-        // if(user){
-        //     router.push("/app/dashboard")
-        // } else {
-        //     setIsSigningIn(true);
-        //     signIn()
-        //         .catch((error) => {
-        //             console.error("Error signing in:", error);
-        //             setIsSigningIn(false);
-        //             toast.error("Error signing in. Please try again."); 
-        //         });
-        // }
+        if(userProfile){
+            router.push("/app/dashboard")
+        } else {
+            signIn();
+            setSigninClicked(true);
+        }
     }
     
     return (
         <Button 
             onClick={onclick} 
             variant={variant} 
+            isLoading={loading}
             className={cn(
                 "px-8 h-11 ",className
             )}>     
