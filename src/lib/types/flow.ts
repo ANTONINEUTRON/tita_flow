@@ -20,7 +20,6 @@ export interface FundingFlow{
     quorumPercentage: number,
     approvalPercentage: number,
     votingPeriodDays: number,
-    
 }
 
 export enum VotingPowerModel{

@@ -18,8 +18,6 @@ export async function GET(req: NextRequest) {
             ? await userService.getUserRecord(userId ?? "")
             : await userService.getUserRecordByEmail(userEmail ?? "");
 
-        console.log(userRecord)
-
         return NextResponse.json(userRecord);
     } catch (error) {
         console.log(error)

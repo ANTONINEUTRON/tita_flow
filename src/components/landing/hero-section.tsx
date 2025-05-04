@@ -36,7 +36,7 @@ export function HeroSection() {
               Built Right In
             </h1>
             <p className="mx-auto max-w-[700px] text-gray-500 md:text-xl dark:text-gray-400 mt-4">
-              Tita enables transparent, rule-based funding flows with milestone triggers and community governance—ensuring capital is deployed exactly as promised.
+              Titaflow enables transparent, rule-based funding flows with milestone triggers and community governance—ensuring capital is deployed exactly as promised.
             </p>
           </div>
           <div className="space-x-4 mt-8">
