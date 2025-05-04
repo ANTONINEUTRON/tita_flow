@@ -16,9 +16,6 @@ export default function AuthGuard({ children }:AuthGuardProps){
     const {user, } = usePrivy()
 
     useEffect(() => {
-        console.log("Loading: ", loading);
-        console.log("User Profile: ", userProfile);
-        console.log("User: ", user);
         if (!loading) {
             if (!userProfile) {
                 toast("Sign in to continue");

@@ -63,7 +63,7 @@ export class FlowService {
             createdAfter?: Date;
             createdBefore?: Date;
         },
-        sortBy: string = 'createdAt',
+        sortBy: string = 'created_at',
         sortOrder: 'asc' | 'desc' = 'desc'
     ): Promise<{
         flows: FundingFlow[];
@@ -96,16 +96,16 @@ export class FlowService {
 
                 // Filter by creation date range
                 if (filters.createdAfter) {
-                    query = query.gte('createdAt', filters.createdAfter.toISOString());
+                    query = query.gte('created_at', filters.createdAfter.toISOString());
                 }
 
                 if (filters.createdBefore) {
-                    query = query.lte('createdAt', filters.createdBefore.toISOString());
+                    query = query.lte('created_at', filters.createdBefore.toISOString());
                 }
             }
 
             // Add sorting
-            query = query.order(sortBy, { ascending: sortOrder === 'asc' });
+            // query = query.order(sortBy, { ascending: sortOrder === 'asc' });
 
             // Add pagination
             query = query.range(offset, offset + pageSize - 1);

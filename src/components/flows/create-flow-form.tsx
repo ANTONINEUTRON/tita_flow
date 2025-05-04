@@ -26,7 +26,7 @@ enum FormStep {
   PREVIEW = 2,
 }
 
-const raiseFlowSchema = z.object({
+const createFlowValidationSchema = z.object({
   // Basic Information
   title: z.string().min(1, "Title is required"),
   description: z.string().min(1, "Description is required"),
@@ -69,9 +69,9 @@ const raiseFlowSchema = z.object({
   ).optional(),
 });
 
-type RaiseFlowFormValues = z.infer<typeof raiseFlowSchema>;
+type FlowCreationValues = z.infer<typeof createFlowValidationSchema>;
 
-export default function RaiseFlowForm() {
+export default function CreateFlowForm() {
   const {userProfile} = useProfile();
   const router = useRouter();
   const [currentStep, setCurrentStep] = useState<FormStep>(FormStep.BASIC_INFO);
@@ -80,8 +80,8 @@ export default function RaiseFlowForm() {
   const today = new Date();
   const formattedToday = today.toISOString().split('T')[0]; // Format: YYYY-MM-DD
 
-  const form = useForm<RaiseFlowFormValues>({
-    resolver: zodResolver(raiseFlowSchema),
+  const form = useForm<FlowCreationValues>({
+    resolver: zodResolver(createFlowValidationSchema),
     defaultValues: {
       title: "",
       currency: "",
@@ -131,7 +131,7 @@ export default function RaiseFlowForm() {
 
 
   // Form submission handler
-  const onSubmit = async (values: RaiseFlowFormValues) => {
+  const onSubmit = async (values: FlowCreationValues) => {
     console.log("Form values:", values);
     let flowToSubmitted: FundingFlow = {
       id: uuidv4(),

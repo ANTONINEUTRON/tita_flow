@@ -2,6 +2,9 @@ import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { PlusCircleIcon } from "lucide-react";
+import { useEffect } from "react";
+import useFlow from "@/lib/hooks/use_flow";
+import useProfile from "@/lib/hooks/use_profile";
 
 export function FlowsContent() {
   // Mock data
@@ -11,6 +14,20 @@ export function FlowsContent() {
     { id: 3, name: "NFT Project Launch", status: "pending", raised: 0, target: 30000, milestones: 3, completedMilestones: 0 },
     { id: 4, name: "Technical Bounty Fund", status: "completed", raised: 15000, target: 15000, milestones: 6, completedMilestones: 6 },
   ];
+
+  const { getUserFlows,flows } = useFlow();
+  const {userProfile} = useProfile();
+ 
+  useEffect(() => {
+    if(userProfile){
+      getUserFlows(userProfile?.id ?? "").then((res) => {
+        console.log("User flows", res);
+      }
+      ).catch((error) => {
+        console.error("Error fetching user flows:", error);
+      });
+    }
+  },[userProfile])
 
   return (
     <div className="space-y-6">

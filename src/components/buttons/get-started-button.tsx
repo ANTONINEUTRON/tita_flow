@@ -13,7 +13,6 @@ interface GetStartedButtonProps{
     className?: string;
 }
 
-
 export default function GetStartedButton({
     text = "Get Started",
     variant = "default",
@@ -24,7 +23,6 @@ export default function GetStartedButton({
     const [signinClicked, setSigninClicked] = useState(false);
 
     useEffect(() => {
-        console.log(loading)
         if(userProfile && signinClicked){
             router.push("/app/dashboard")
             toast.success("Welcome back!");

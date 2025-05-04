@@ -1,5 +1,5 @@
 import AuthGuard from "@/components/auth_guard";
-import RaiseFlowForm from "@/components/flows/raise-flow-form";
+import CreateFlowForm from "@/components/flows/create-flow-form";
 
 
 export default function CreateFlowPage() {
@@ -13,7 +13,7 @@ export default function CreateFlowPage() {
           </p>
         </div>
 
-        <RaiseFlowForm />
+        <CreateFlowForm />
       </div>
     </AuthGuard>
   );

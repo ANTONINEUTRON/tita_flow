@@ -78,8 +78,8 @@ export default function useProfile() {
                             email!,
                             3
                         ),
-                        firstname: "",
-                        lastname: "",
+                        name: "",
+                        profilePics: "",
                     }
 
                     setUserProfile(appUser)
@@ -163,7 +163,7 @@ export default function useProfile() {
             const response = await axios.put(
                 `/api/user`,
                 {
-                    id: id,
+                    userId: id,
                     ...updatedUserProfileFields
                 }
             );
