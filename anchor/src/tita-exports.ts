@@ -1,4 +1,3 @@
-// Here we export some useful types and functions for interacting with the Anchor program.
 import { AnchorProvider, Program } from '@coral-xyz/anchor'
 import { PublicKey } from '@solana/web3.js'
 import TitaFlowIDL from '../target/idl/tita_flow.json'
@@ -11,6 +10,6 @@ export { TitaFlow, TitaFlowIDL }
 export const TITA_PROGRAM_ID = new PublicKey(TitaFlowIDL.address)
 
 // This is a helper function to get the Basic Anchor program.
-export function getBasicProgram(provider: AnchorProvider) {
+export function getTitaFlowProgram(provider: AnchorProvider) {
   return new Program(TitaFlowIDL as TitaFlow, provider)
 }
