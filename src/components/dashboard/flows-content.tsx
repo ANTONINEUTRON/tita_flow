@@ -5,6 +5,7 @@ import { PlusCircleIcon } from "lucide-react";
 import { useEffect } from "react";
 import useFlow from "@/lib/hooks/use_flow";
 import useProfile from "@/lib/hooks/use_profile";
+import { cn } from "@/lib/utils";
 
 export function FlowsContent() {
   // Mock data
@@ -16,11 +17,12 @@ export function FlowsContent() {
   ];
 
   const { getUserFlows,flows } = useFlow();
-  const {userProfile} = useProfile();
+  const {userProfile, } = useProfile();
  
   useEffect(() => {
     if(userProfile){
       getUserFlows(userProfile?.id ?? "").then((res) => {
+        console.log("User flows", flows);
         console.log("User flows", res);
       }
       ).catch((error) => {
@@ -29,52 +31,64 @@ export function FlowsContent() {
     }
   },[userProfile])
 
+  useEffect(()=>{
+    console.log("Flows efeefcet", flows);
+  },[flows])
+
   return (
     <div className="space-y-6">
       <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
-        {flowsData.map((flow) => (
-          <Card key={flow.id} className={flow.status === "pending" ? "border-dashed" : ""}>
-            <CardHeader className="pb-3">
-              <div className="flex items-center justify-between">
-                <CardTitle className="text-base">{flow.name}</CardTitle>
-                <div className={`px-2 py-1 rounded-full text-xs font-medium capitalize
+        {flows.map((flow) => (
+          <Card key={flow.id} className={cn(flow.status === "cancelled" ? "border-dashed" : "", "flex flex-col justify-between")}>
+            <div>
+              <CardHeader className="pb-3">
+                <div className="flex items-center justify-between">
+                  <CardTitle className="text-base">{flow.title}</CardTitle>
+                  <div className={`px-2 py-1 rounded-full text-xs font-medium capitalize
                   ${flow.status === "active" ? "bg-green-100 text-green-800" : ""}
-                  ${flow.status === "pending" ? "bg-yellow-100 text-yellow-800" : ""}
+                  ${flow.status === "cancelled" ? "bg-yellow-100 text-yellow-800" : ""}
                   ${flow.status === "completed" ? "bg-blue-100 text-blue-800" : ""}
                 `}>
-                  {flow.status}
-                </div>
-              </div>
-            </CardHeader>
-            <CardContent className="pb-3">
-              <div className="space-y-3">
-                <div className="space-y-1">
-                  <div className="flex justify-between text-sm">
-                    <span className="text-muted-foreground">Raised</span>
-                    <span className="font-medium">${flow.raised.toLocaleString()} of ${flow.target.toLocaleString()}</span>
-                  </div>
-                  <div className="h-2 bg-muted rounded-full overflow-hidden">
-                    <div 
-                      className="h-full bg-primary"
-                      style={{ width: `${(flow.raised / flow.target) * 100}%` }}
-                    ></div>
+                    {flow.status}
                   </div>
                 </div>
-                
-                <div className="space-y-1">
-                  <div className="flex justify-between text-sm">
-                    <span className="text-muted-foreground">Milestones</span>
-                    <span className="font-medium">{flow.completedMilestones} of {flow.milestones} completed</span>
+              </CardHeader>
+              <CardContent className="pb-3">
+                <div className="space-y-3">
+                  <div>
+                    <p className="text-sm text-muted-foreground line-clamp-2">{flow.description}</p>
                   </div>
-                  <div className="h-2 bg-muted rounded-full overflow-hidden">
-                    <div 
-                      className="h-full bg-secondary"
-                      style={{ width: `${(flow.completedMilestones / flow.milestones) * 100}%` }}
-                    ></div>
+                  <div className="space-y-1">
+                    <div className="flex justify-between text-sm">
+                      <span className="text-muted-foreground">Raised</span>
+                      <span className="font-medium">${flow.raised.toLocaleString()} of ${flow.goal.toLocaleString()}</span>
+                    </div>
+                    <div className="h-2 bg-muted rounded-full overflow-hidden">
+                      <div
+                        className="h-full bg-primary"
+                        style={{ width: `${(Number(flow.raised) / Number(flow.goal)) * 100}%` }}
+                      ></div>
+                    </div>
                   </div>
+                  {
+                    flow.rules.milestone && (
+                      <div className="space-y-1">
+                        <div className="flex justify-between text-sm">
+                          <span className="text-muted-foreground">Milestones</span>
+                          <span className="font-medium">{flow.completedMilestones} of {flow.milestones?.length} completed</span>
+                        </div>
+                        <div className="h-2 bg-muted rounded-full overflow-hidden">
+                          <div
+                            className="h-full bg-secondary"
+                            style={{ width: `${(flow.completedMilestones! / flow.milestones?.length!) * 100}%` }}
+                          ></div>
+                        </div>
+                      </div>
+                    )
+                  }
                 </div>
-              </div>
-            </CardContent>
+              </CardContent>
+            </div>
             <CardFooter>
               <Button variant="outline" size="sm" className="w-full" asChild>
                 <Link href={`/flows/${flow.id}`}>Manage Flow</Link>

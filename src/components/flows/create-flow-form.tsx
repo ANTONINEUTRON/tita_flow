@@ -152,6 +152,10 @@ export default function CreateFlowForm() {
       votingPeriodDays: values.votingPeriodDays,
       images: [],
       video: "",
+      status: "active",
+      raised: 0,
+      createdAt: "",
+      updatedAt: ""
     }
 
     console.log("Flow to be submitted11:", flowToSubmitted);

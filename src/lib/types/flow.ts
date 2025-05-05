@@ -14,12 +14,17 @@ export interface FundingFlow{
         governance: boolean,
     },
     milestones?: Milestone[],
+    completedMilestones?: number,
+    status: 'active' | 'completed' | 'cancelled',
+    raised: number,
     votingPowerModel: VotingPowerModel,
     images: string[],
     video?: string,
     quorumPercentage: number,
     approvalPercentage: number,
     votingPeriodDays: number,
+    createdAt: string,
+    updatedAt: string,
 }
 
 export enum VotingPowerModel{
