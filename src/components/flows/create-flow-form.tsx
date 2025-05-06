@@ -153,20 +153,6 @@ export default function CreateFlowForm() {
       // Show loading toast
       toast("Uploading media and creating your funding flow");
 
-      // Create a copy of the form values to avoid mutating the original
-      // const submissionValues = { ...values };
-
-      // console.log("Flow to be submitted:", flowToSubmitted);
-
-      // // Cleanup client-side only data before submitting to API
-      // if (submissionValues.media) {
-      //   submissionValues.media = submissionValues.media.map(item => {
-      //     // Create a new object without the file and previewUrl properties
-      //     const { file, previewUrl, ...cleanedItem } = item;
-      //     return cleanedItem;
-      //   });
-      // }
-
       // Submit the flow data with the uploaded media URLs
       const flowId = uuidv4()
 
