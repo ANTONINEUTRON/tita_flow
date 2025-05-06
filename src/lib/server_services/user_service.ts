@@ -2,6 +2,7 @@ import { SupabaseClient } from "@supabase/supabase-js";
 import { SUPABASE_CLIENT } from "../supabaseconfig";
 import { AppConstants } from "../app_constants";
 import AppUser from "../types/user";
+import { objectToSnake } from "ts-case-convert";
 
 
 // All operations here are rendered on the server side
@@ -27,7 +28,7 @@ export class UserService {
 
             const { data, error } = await (await this.client)
                 .from(AppConstants.USER_TABLE)
-                .upsert([user]);
+                .upsert([objectToSnake(user)]);
 
             if (error) {
                 throw error;
@@ -43,7 +44,7 @@ export class UserService {
         try {
             const { data, error } = await (await this.client)
                 .from(AppConstants.USER_TABLE)
-                .update(user)
+                .update(objectToSnake(user))
                 .eq("id", user.id);
 
             if (error) {

@@ -1,18 +1,23 @@
-'use client';
+'use client'
 
-import { PrivyProvider } from '@privy-io/react-auth';
-import { AppConstants } from '../app_constants';
+import { AppConstants } from "@/lib/app_constants";
+import { CivicAuthProvider } from "@civic/auth-web3/nextjs"
+import {
+    ConnectionProvider,
+    WalletProvider
+} from '@solana/wallet-adapter-react';
+import { WalletModalProvider } from '@solana/wallet-adapter-react-ui';
 
 export default function Provider({ children }: { children: React.ReactNode }) {
-    return (  
-        <PrivyProvider
-            appId={process.env.NEXT_PUBLIC_PRIVY_APPID!}
-            config={{
-                solanaClusters: [{ name: 'devnet', rpcUrl: AppConstants.APP_RPC_ENDPOINT }],
-                loginMethods: ["email", "google"],
-                appearance: { walletChainType: 'solana-only' },
-            }}>
-            {children}
-        </PrivyProvider>
-    );
+    return (
+        <ConnectionProvider endpoint={AppConstants.APP_RPC_ENDPOINT}>
+            <WalletProvider wallets={[]} autoConnect>
+                <WalletModalProvider>
+                    <CivicAuthProvider>
+                        {children}
+                    </CivicAuthProvider>
+                </WalletModalProvider>
+            </WalletProvider>
+        </ConnectionProvider>
+    )
 }

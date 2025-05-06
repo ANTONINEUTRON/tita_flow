@@ -1,17 +1,19 @@
 'use client'
 import { useRouter } from "next/navigation";
 import { Button } from "../ui/button";
+import { useUser } from "@civic/auth-web3/react";
 import toast from "react-hot-toast";
 import { useEffect, useState } from "react";
 import { cn } from "@/lib/utils";
 import useProfile from "@/lib/hooks/use_profile";
 
 
-interface GetStartedButtonProps{
+interface GetStartedButtonProps {
     text?: string;
     variant?: "default" | "destructive" | "outline" | "secondary" | "ghost" | "link" | null | undefined;
     className?: string;
 }
+
 
 export default function GetStartedButton({
     text = "Get Started",
@@ -19,33 +21,41 @@ export default function GetStartedButton({
     className,
 }: GetStartedButtonProps) {
     const router = useRouter();
-    const { signIn, loading, userProfile } = useProfile()
-    const [signinClicked, setSigninClicked] = useState(false);
+    const { user, signIn } = useUser();
+    const {userProfile, signUserIn, loading} = useProfile()
+    // const [isSigningIn, setIsSigningIn] = useState(false);
 
+    // When user state changes and we were in signing in process, navigate
     useEffect(() => {
-        if(userProfile && signinClicked){
-            router.push("/app/dashboard")
-            toast.success("Welcome back!");
+        if (userProfile && !loading) {
+            // setIsSigningIn(false);
+            router.push("/app/dashboard");
         }
-    },[userProfile]);
+    }, [userProfile, loading]);
 
     const onclick = () => {
-        if(userProfile){
+        if (userProfile) {
             router.push("/app/dashboard")
         } else {
-            signIn();
-            setSigninClicked(true);
+            signUserIn()
+            // setIsSigningIn(true);
+            // signIn()
+            //     .catch((error) => {
+            //         console.error("Error signing in:", error);
+            //         setIsSigningIn(false);
+            //         toast.error("Error signing in. Please try again.");
+            //     });
         }
     }
-    
+
     return (
-        <Button 
-            onClick={onclick} 
-            variant={variant} 
+        <Button
+            onClick={onclick}
+            variant={variant}
             isLoading={loading}
             className={cn(
-                "px-8 h-11 ",className
-            )}>     
+                "px-8 h-11 ", className
+            )}>
             {text}
         </Button>
     );

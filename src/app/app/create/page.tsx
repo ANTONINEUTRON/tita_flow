@@ -1,10 +1,8 @@
-import AuthGuard from "@/components/auth_guard";
 import CreateFlowForm from "@/components/flows/create-flow-form";
 
 
 export default function CreateFlowPage() {
   return (
-    <AuthGuard>
       <div className="container max-w-4xl mx-auto py-8 px-4">
         <div className="mb-8 text-center">
           <h1 className="text-3xl font-bold mb-2">Create a New Flow</h1>
@@ -15,6 +13,5 @@ export default function CreateFlowPage() {
 
         <CreateFlowForm />
       </div>
-    </AuthGuard>
   );
 }

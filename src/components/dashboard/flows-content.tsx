@@ -91,7 +91,7 @@ export function FlowsContent() {
             </div>
             <CardFooter>
               <Button variant="outline" size="sm" className="w-full" asChild>
-                <Link href={`/flows/${flow.id}`}>Manage Flow</Link>
+                <Link href={`/flow/${flow.id}`}>Manage Flow</Link>
               </Button>
             </CardFooter>
           </Card>
@@ -107,7 +107,7 @@ export function FlowsContent() {
               Set up a new funding flow with customizable rules and milestones
             </p>
             <Button asChild className="mt-2">
-              <Link href="/flows/create">Get Started</Link>
+              <Link href="/app/create">Get Started</Link>
             </Button>
           </CardContent>
         </Card>

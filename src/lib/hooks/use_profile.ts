@@ -6,26 +6,30 @@ import toast from "react-hot-toast";
 import axios from "axios";
 import { generateFromEmail } from "unique-username-generator";
 import { useRouter } from "next/navigation";
-import { usePrivy, useSolanaWallets } from "@privy-io/react-auth";
 import { v4 as uuidv4, } from 'uuid';
 import airdropWallet from "../utils/airdrop_wallet";
+import { useUser, useWallet } from "@civic/auth-web3/react";
+import { userHasWallet } from "@civic/auth-web3";
 
 export default function useProfile() {
     const [userProfile, setUserProfile] = useState<AppUser | null>(null);
-    const [loading, setLoading] = useState(true);
+    const [loading, setLoading] = useState(false);
     const [error, setError] = useState<string | null>(null);
     const router = useRouter();
-    const { ready, authenticated, login, logout, user, } = usePrivy();
-    const { createWallet } = useSolanaWallets();
+    const userContext = useUser();
+    const { address } = useWallet({ type: "solana" })
+    // { user, authStatus, signIn, signOut, isLoading } = useUser();
 
     useEffect(() => {
-        onLogin();
-    }, [authenticated])
+        if(userContext.authStatus === "authenticated" && userProfile == null) {
+            onLogin();
+        }
+    }, [userContext.user])
 
-    const signIn = async () => {
+    const signUserIn = async () => {
         setLoading(true);
         try {
-            login();
+            await userContext.signIn();
         } catch (e) {
             console.log(e);
             toast.error("An error occurred during sign-in");
@@ -33,16 +37,16 @@ export default function useProfile() {
         setLoading(false);
     }
 
-    const signOut = async () => {
+    const signUserOut = async () => {
         setLoading(true);
 
         try {
-            logout();
+            userContext.signOut();
 
             setUserProfile(null);
             setLoading(false);
             setError(null);
-            router.push("/app")
+            router.push("/")
         } catch (e) {
             console.log(e);
             toast.error("An error occurred during sign-in");
@@ -55,12 +59,8 @@ export default function useProfile() {
         setLoading(true);
 
         try {
-            if (authenticated && userProfile == null) {
                 // Identify user email
-                let email = user?.email?.address;
-                if (!email) {
-                    email = user?.google?.email;
-                }
+                let email = userContext.user?.email;
 
                 // fetch user record from db
                 let userRecord: AppUser | null = await fetchProfileWithEmail(email!)
@@ -71,7 +71,7 @@ export default function useProfile() {
                 } else {
                     //// if it does not exist, create a new user record
                     let appUser: AppUser = {
-                        id: uuidv4(),
+                        id: userContext.user?.id || uuidv4(),
                         email: email!,
                         wallet: "",
                         username: generateFromEmail(
@@ -86,9 +86,6 @@ export default function useProfile() {
 
                     saveUserProfile(appUser)
                 }
-            } else {
-                // signOut()
-            }
 
         } catch (error) {
             console.log("An error occurred while fetching user profile " + error);
@@ -130,13 +127,16 @@ export default function useProfile() {
     const saveUserProfile = async (userProfile: AppUser) => {
         try {
             if (userProfile.wallet === "") {
-                const { address } = await createWallet();
-                const updatedProfile = { ...userProfile, wallet: address };
+                if (userContext.user && !userHasWallet(userContext)) {
+                    await userContext.createWallet();
+                }
+                // const { address } = await user!.createWallet();
+                const updatedProfile: AppUser = { ...userProfile, wallet: address! };
                 setUserProfile(updatedProfile);
                 userProfile = updatedProfile;
 
                 // airdrop the wallet
-                airdropWallet(address);
+                airdropWallet(address!);
             }
 
 
@@ -173,5 +173,5 @@ export default function useProfile() {
         }
     }
 
-    return { userProfile, loading, error, updateUserProfile, signIn, signOut, ready }
+    return { userProfile, loading, error, updateUserProfile, signUserIn, signUserOut }
 }
