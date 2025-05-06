@@ -12,12 +12,12 @@ import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { LucideArrowRight, LucideArrowLeft, Check } from "lucide-react";
 import { useRouter } from "next/navigation";
-// import { useToast } from "@/lib/hooks/use-toast";
+import { v4 as uuidv4 } from 'uuid';
 import { GovernanceConfiguration } from "./governance-config";
 import { FundingFlow, VotingPowerModel } from "@/lib/types/flow";
-import { v4 as uuidv4 } from 'uuid';
 import toast from "react-hot-toast";
 import useProfile from "@/lib/hooks/use_profile";
+import useFlow from "@/lib/hooks/use_flow";
 
 // Define form steps
 enum FormStep {
@@ -69,16 +69,18 @@ const createFlowValidationSchema = z.object({
   ).optional(),
 });
 
-type FlowCreationValues = z.infer<typeof createFlowValidationSchema>;
+export type FlowCreationValues = z.infer<typeof createFlowValidationSchema>;
 
 export default function CreateFlowForm() {
-  const {userProfile} = useProfile();
+  const { userProfile } = useProfile();
   const router = useRouter();
   const [currentStep, setCurrentStep] = useState<FormStep>(FormStep.BASIC_INFO);
 
   // Get today's date in YYYY-MM-DD format for default start date
   const today = new Date();
   const formattedToday = today.toISOString().split('T')[0]; // Format: YYYY-MM-DD
+
+  const { prepareFlowData, createFlowTransaction, saveFlowToStore } = useFlow();
 
   const form = useForm<FlowCreationValues>({
     resolver: zodResolver(createFlowValidationSchema),
@@ -133,32 +135,8 @@ export default function CreateFlowForm() {
   // Form submission handler
   const onSubmit = async (values: FlowCreationValues) => {
     console.log("Form values:", values);
-    let flowToSubmitted: FundingFlow = {
-      id: uuidv4(),
-      title: values.title,
-      description: values.description,
-      goal: values.goal,
-      duration: values.duration,
-      startdate: values.startdate,
-      currency: values.currency,
 
-      rules: values.rules,
-      creator: userProfile?.wallet!, // Placeholder for creator's address
-      creator_id: userProfile?.id!, // Placeholder for creator's ID
-      milestones: values.milestones || [],
-      votingPowerModel: values.votingPowerModel,
-      quorumPercentage: values.quorumPercentage,
-      approvalPercentage: values.approvalPercentage,
-      votingPeriodDays: values.votingPeriodDays,
-      images: [],
-      video: "",
-      status: "active",
-      raised: 0,
-      createdAt: "",
-      updatedAt: ""
-    }
-
-    console.log("Flow to be submitted11:", flowToSubmitted);
+    // console.log("Flow to be submitted11:", flowToSubmitted);
 
     try {
       // Validate milestone-based rules
@@ -175,76 +153,10 @@ export default function CreateFlowForm() {
       // Show loading toast
       toast("Uploading media and creating your funding flow");
 
-
-
       // Create a copy of the form values to avoid mutating the original
-      const submissionValues = { ...values };
+      // const submissionValues = { ...values };
 
-      // Handle media uploads if present
-      if (submissionValues.media && submissionValues.media.length > 0) {
-        try {
-          // Prepare for media upload
-          const mediaFiles = submissionValues.media.filter(item => item.file); // Only items with files need upload
-
-          if (mediaFiles.length > 0) {
-            // Create FormData for file upload
-            const formData = new FormData();
-
-            // Append each media file to FormData
-            mediaFiles.forEach((mediaItem, index) => {
-              formData.append(mediaItem.type, mediaItem.file);
-              // formData.append(`fileInfo${index}`, JSON.stringify({
-              //   id: mediaItem.id,
-              //   title: mediaItem.title,
-              //   type: mediaItem.type
-              // }));
-            });
-
-            // Upload the media files
-            const uploadResponse = await fetch('/api/upload-flow-media', {
-              method: 'POST',
-              body: formData,
-            });
-            console.log("Upload response:", uploadResponse);
-            if (!uploadResponse.ok) {
-              throw new Error('Failed to upload media files');
-            }
-
-            // Get the uploaded media URLs
-            const uploadedMedia = await uploadResponse.json();
-
-            console.log("Uploaded media:", uploadedMedia);
-
-            flowToSubmitted.images = uploadedMedia.imageUrls || [];
-            flowToSubmitted.video = uploadedMedia.videoUrl || "";
-
-            // Replace the media items with their uploaded versions
-            // flowToSubmitted.media = uploadedMedia.imageUrl.map(image => {
-            //   // Find the matching uploaded item
-            //   const uploadedItem = uploadedMedia.find((uploaded: any) => uploaded.id === item.id);
-
-            //   // if (uploadedItem) {
-            //   // Return the item with the uploaded URL
-            //   return {
-            //     id: uploadedItem.id,
-            //     title: uploadedItem.title,
-            //     type: uploadedItem.type,
-            //     url: uploadedItem.url, // The permanent URL from the server
-            //   };
-            //   // }
-
-            //   // return item;
-            // });
-          }
-        } catch (uploadError) {
-          console.error("Media upload error:", uploadError);
-          toast.error("There was a problem uploading your media files. Please try again.");
-          
-          return;
-        }
-      }
-
-      console.log("Flow to be submitted:", flowToSubmitted);
+      // console.log("Flow to be submitted:", flowToSubmitted);
 
       // // Cleanup client-side only data before submitting to API
       // if (submissionValues.media) {
@@ -256,25 +168,18 @@ export default function CreateFlowForm() {
       // }
 
       // Submit the flow data with the uploaded media URLs
-      const response = await fetch('/api/flow', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(flowToSubmitted),
-      });
+      const flowId = uuidv4()
 
-      if (!response.ok) {
-        const errorData = await response.json();
-        throw new Error(errorData.message || 'Failed to create flow');
-      }
+      // await createFlowTransaction(flowId, userProfile?.id!, values);
 
-      const flowData = await response.json();
+      const fflow = await prepareFlowData(flowId, values, userProfile?.wallet!, userProfile?.id!,);
+
+      await saveFlowToStore(fflow);
 
       // Success notification
       toast.success("Your raise flow has been created.");
 
-      router.push(`/flow/${flowToSubmitted.id}`);
+      router.push(`/flow/${flowId}`);
 
     } catch (error) {
       console.error("Error submitting form:", error);
@@ -459,6 +364,8 @@ export default function CreateFlowForm() {
                   </div>
                 </div>
 
+
+
                 {/* Rules Preview */}
                 <div className="rounded-lg border p-4">
                   <h4 className="font-medium mb-3">Rules & Configuration</h4>
@@ -503,6 +410,78 @@ export default function CreateFlowForm() {
                     )}
                   </div>
                 </div>
+
+                <div className="rounded-lg border p-4">
+                  <h4 className="font-medium mb-3">Media</h4>
+                  {form.getValues("media") && form?.getValues("media")!.length > 0 ? (
+                    <div className="space-y-4">
+                      {/* Images Preview */}
+                      <div>
+                        <h5 className="text-sm font-medium text-muted-foreground mb-2">Images</h5>
+                        <div className="grid grid-cols-2 sm:grid-cols-3 gap-4">
+                          {form?.getValues("media")!
+                            .filter(item => item.type === "image")
+                            .map((image, index) => (
+                              <div
+                                key={image.id || index}
+                                className="aspect-square rounded-md border overflow-hidden relative"
+                              >
+                                {image.previewUrl ? (
+                                  <img
+                                    src={image.previewUrl}
+                                    alt={image.title || `Image ${index + 1}`}
+                                    className="w-full h-full object-cover"
+                                  />
+                                ) : (
+                                  <div className="flex items-center justify-center h-full bg-muted">
+                                    <span className="text-muted-foreground text-sm">No preview</span>
+                                  </div>
+                                )}
+                                {image.title && (
+                                  <div className="absolute bottom-0 left-0 right-0 bg-background/80 p-1 text-xs truncate">
+                                    {image.title}
+                                  </div>
+                                )}
+                              </div>
+                            ))}
+                        </div>
+                      </div>
+
+                      {/* Video Preview */}
+                      {form?.getValues("media")!.some(item => item.type === "video") && (
+                        <div>
+                          <h5 className="text-sm font-medium text-muted-foreground mb-2">Video</h5>
+                          <div className="rounded-md border overflow-hidden aspect-video">
+                            {form?.getValues("media")!
+                              .filter(item => item.type === "video")
+                              .map((video, index) => (
+                                <div key={video.id || index} className="h-full">
+                                  {video.previewUrl ? (
+                                    <video
+                                      src={video.previewUrl}
+                                      controls
+                                      className="w-full h-full"
+                                    >
+                                      Your browser does not support the video tag.
+                                    </video>
+                                  ) : (
+                                    <div className="flex items-center justify-center h-full bg-muted">
+                                      <span className="text-muted-foreground">Video preview not available</span>
+                                    </div>
+                                  )}
+                                </div>
+                              ))[0]}
+                          </div>
+                        </div>
+                      )}
+                    </div>
+                  ) : (
+                    <div className="text-center py-6 text-muted-foreground">
+                      <p>No media files have been added to this flow.</p>
+                    </div>
+                  )}
+                </div>
+
               </div>
             )}
           </CardContent>
