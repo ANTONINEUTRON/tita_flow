@@ -10,7 +10,7 @@ export type TitaFlow = {
     "name": "titaFlow",
     "version": "0.1.0",
     "spec": "0.1.0",
-    "description": "Created with Anchor"
+    "description": "Configurable funding protocol"
   },
   "instructions": [
     {

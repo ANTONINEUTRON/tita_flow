@@ -8,11 +8,14 @@ skip-lint = false
 [programs.localnet]
 tita_flow = "4qgU6nZVrBQdYoaKHNBZju32cX3QqKhhDx23m3VCCuHp"
 
+[programs.devnet]
+tita_flow = "4qgU6nZVrBQdYoaKHNBZju32cX3QqKhhDx23m3VCCuHp"
+
 [registry]
 url = "https://api.apr.dev"
 
 [provider]
-cluster = "Localnet"
+cluster = "devnet"
 wallet = "~/.config/solana/id.json"
 
 [scripts]
