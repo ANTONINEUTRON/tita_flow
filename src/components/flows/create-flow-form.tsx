@@ -33,7 +33,7 @@ const createFlowValidationSchema = z.object({
   goal: z.string().min(1, "Goal amount is required").default("0"),
   startdate: z.string().min(1, "Deadline is required"),
   currency: z.string().min(1, "Currency is required"),
-  duration: z.number().min(1, "Funding duration can't be less than a day").max(90, "Funding duration cannot exceed 90 days"),
+  duration: z.string().min(1, "Funding duration can't be less than a day").max(90, "Funding duration cannot exceed 90 days"),
 
   // Rules Configuration
   rules: z.object({
@@ -72,9 +72,10 @@ const createFlowValidationSchema = z.object({
 export type FlowCreationValues = z.infer<typeof createFlowValidationSchema>;
 
 export default function CreateFlowForm() {
-  const { userProfile } = useProfile();
+  const { userProfile, walletInstance } = useProfile();
   const router = useRouter();
   const [currentStep, setCurrentStep] = useState<FormStep>(FormStep.BASIC_INFO);
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   // Get today's date in YYYY-MM-DD format for default start date
   const today = new Date();
@@ -90,7 +91,7 @@ export default function CreateFlowForm() {
       description: "",
       goal: "0",
       startdate: formattedToday,
-      duration: 3,
+      duration: "3",
       rules: {
         milestone: false,
         governance: false,
@@ -134,18 +135,10 @@ export default function CreateFlowForm() {
 
   // Form submission handler
   const onSubmit = async (values: FlowCreationValues) => {
-    console.log("Form values:", values);
-
-    // console.log("Flow to be submitted11:", flowToSubmitted);
-
+    setIsSubmitting(true);
     try {
       // Validate milestone-based rules
       if (values.rules.milestone && (!values.milestones || values.milestones.length === 0)) {
-        // toast({
-        //   title: "Validation Error",
-        //   description: "At least one milestone is required when milestone-based funding is enabled",
-        //   variant: "destructive",
-        // });
         toast("At least one milestone is required when milestone-based funding is enabled")
         return;
       }
@@ -154,13 +147,13 @@ export default function CreateFlowForm() {
       toast("Uploading media and creating your funding flow");
 
       // Submit the flow data with the uploaded media URLs
-      const flowId = uuidv4()
-
-      // await createFlowTransaction(flowId, userProfile?.id!, values);
+      const flowId = uuidv4().substring(0, 22)
 
       const fflow = await prepareFlowData(flowId, values, userProfile?.wallet!, userProfile?.id!,);
 
-      await saveFlowToStore(fflow);
+      let flowAddress = await createFlowTransaction(fflow, walletInstance!);
+
+      await saveFlowToStore({...fflow, address: flowAddress});
 
       // Success notification
       toast.success("Your raise flow has been created.");
@@ -169,8 +162,9 @@ export default function CreateFlowForm() {
 
     } catch (error) {
       console.error("Error submitting form:", error);
-
       toast(error instanceof Error ? error.message : "There was a problem creating your flow");
+    } finally {
+      setIsSubmitting(false);
     }
   };
 
@@ -487,6 +481,7 @@ export default function CreateFlowForm() {
                 key={"backBtn"}
                 type="button"
                 variant="outline"
+                isLoading={isSubmitting}
                 onClick={prevStep}
               >
                 <LucideArrowLeft className="mr-2 h-4 w-4" />
@@ -506,6 +501,7 @@ export default function CreateFlowForm() {
             ) : (
               <Button
                 key={"submitBtn"}
+                isLoading={isSubmitting}
                 type="submit">
                 Create Flow
                 <LucideArrowRight className="ml-2 h-4 w-4" />

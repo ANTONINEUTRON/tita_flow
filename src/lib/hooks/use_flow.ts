@@ -1,9 +1,16 @@
 "use client"
 
 import { useState } from "react";
-import { FundingFlow } from "../types/flow";
+import { FundingFlow, anchorAnumBasedOnVotingPowerModel, VotingPowerModel } from "../types/flow";
 import { FlowCreationValues } from "@/components/flows/create-flow-form";
 import toast from "react-hot-toast";
+import { getTitaFlowProgram } from "@project/anchor";
+import { AppConstants } from "../app_constants";
+import { PublicKey, SystemProgram, Transaction, TransactionMessage, VersionedTransaction } from "@solana/web3.js";
+import BN from "bn.js";
+import { TOKEN_PROGRAM_ID } from "@solana/spl-token";
+import { useUser } from "@civic/auth-web3/react";
+import { SolanaWallet, userHasWallet } from "@civic/auth-web3";
 
 interface FetchFlowOptions {
     page?: number;
@@ -98,8 +105,94 @@ export default function useFlow() {
         }
     }
 
-    const createFlowTransaction = async () => {
+    const createFlowTransaction = async (
+        fundingFlow: FundingFlow,
+        solanaWallet: SolanaWallet
+    ): Promise<string> => {
+        const connection = AppConstants.APP_CONNECTION;
+        const program = getTitaFlowProgram({ connection } as any);
 
+        const userPubKey = new PublicKey(fundingFlow.creator);
+        const selectedTokenMint: PublicKey = new PublicKey(AppConstants.SUPPORTEDCURRENCIES.find((currency) => currency.name === fundingFlow.currency)!.address);
+        const flowId: string = fundingFlow.id;
+        const goal: BN = new BN(fundingFlow.goal);
+        const startTime: BN = new BN(new Date(fundingFlow.startdate).getTime() / 1000);
+        const endTime: BN = new BN(startTime.add(new BN(Number(fundingFlow.duration) * 24 * 60 * 60)).toString());
+        let vPowerModel: VotingPowerModel = fundingFlow.votingPowerModel;
+
+        let milestones = null;
+        if(fundingFlow.rules.milestone){
+            milestones = fundingFlow?.milestones!.map((milestone) => {
+                return {
+                    id: milestone.id,
+                    amount: new BN(milestone.amount),
+                    deadline: new BN(new Date(milestone.deadline).getTime() / 1000),
+                    completed: false,
+                };
+            });
+        }
+
+        // Find the flow PDA
+        const [flowPda] = await PublicKey.findProgramAddressSync(
+            [
+                AppConstants.TITA_FLOW_SEED,
+                Buffer.from(flowId),
+                userPubKey.toBuffer(),
+            ],
+            program.programId
+        );
+
+        // Find the flow token account PDA
+        const [flowTokenAccount] = await PublicKey.findProgramAddressSync(
+            [
+                AppConstants.TITA_FLOW_TA_SEED,
+                flowPda.toBuffer(),
+                selectedTokenMint.toBuffer(),
+            ],
+            program.programId
+        );
+
+        const inx = await program.methods.createFlow(
+            flowId,
+            goal,
+            startTime,
+            endTime,
+            anchorAnumBasedOnVotingPowerModel(vPowerModel),
+            milestones // no milestones = direct flow
+        ).accountsPartial({
+            creator: new PublicKey(fundingFlow.creator),
+            flow: flowPda,
+            flowTokenAccount: flowTokenAccount,
+            tokenMint: selectedTokenMint,
+            tokenProgram: TOKEN_PROGRAM_ID,
+            systemProgram: SystemProgram.programId,
+        }).instruction();
+
+        const blockhash = await connection.getLatestBlockhash();
+        console.log("blockhash", blockhash.blockhash);
+        // create v0 compatible message
+        // const insructions = [inx];
+        // const messageV0 = new TransactionMessage({
+        //     instructions: insructions,
+        //     payerKey: userPubKey,
+        //     recentBlockhash: blockhash.blockhash,
+        // }).compileToV0Message();
+
+        // const transferTransaction = new VersionedTransaction(messageV0);
+        // console.log(messageV0.recentBlockhash);
+
+        const trx = new Transaction({
+            ...blockhash,
+            feePayer: userPubKey,
+        });
+
+        trx.add(inx)
+
+        const signature = await solanaWallet.sendTransaction(trx, connection);
+        
+        await connection.confirmTransaction({ signature, ...blockhash });
+
+        return signature;
     }
 
     const saveFlowToStore = async (flowToSubmitted: FundingFlow) => {

@@ -47,6 +47,9 @@ export class AppConstants {
 
   public static readonly USER_TABLE = "users";
 
+  public static readonly TITA_FLOW_SEED = Buffer.from("tita-flow");
+  public static readonly TITA_FLOW_TA_SEED = Buffer.from("tita-flow-ta");
+  public static readonly TITA_CONTRIBUTION_SEED = Buffer.from("tita-contribution");
 
   public static readonly SUPPORTEDCURRENCIES: SupportCurrency[] = [
     {

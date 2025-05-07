@@ -18,7 +18,9 @@ export default function useProfile() {
     const router = useRouter();
     const userContext = useUser();
     const { address } = useWallet({ type: "solana" })
-    // { user, authStatus, signIn, signOut, isLoading } = useUser();
+    const walletInstance = userHasWallet(userContext)
+        ? userContext.solana.wallet
+        : undefined;
 
     useEffect(() => {
         if(userContext.authStatus === "authenticated" && userProfile == null) {
@@ -173,5 +175,5 @@ export default function useProfile() {
         }
     }
 
-    return { userProfile, loading, error, updateUserProfile, signUserIn, signUserOut }
+    return { userProfile, loading, error, walletInstance, updateUserProfile, signUserIn, signUserOut }
 }

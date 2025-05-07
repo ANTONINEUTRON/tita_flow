@@ -6,7 +6,7 @@ export interface FundingFlow{
     goal: string,
     startdate: string,
     currency: string,
-    duration: number,
+    duration: string,
     creator: string,
     creator_id: string,
     rules: {
@@ -25,12 +25,24 @@ export interface FundingFlow{
     votingPeriodDays: number,
     createdAt?: string,
     updatedAt?: string,
+    address?: string,
 }
 
 export enum VotingPowerModel{
     TOKEN_WEIGHTED = 'tokenWeighted',
     QUADRATIC_VOTING = 'quadraticVoting',
     INDIVIDUAL_VOTING = 'individualVoting',
+}
+
+export function anchorAnumBasedOnVotingPowerModel(votingPowerModel: VotingPowerModel) {
+    switch (votingPowerModel) {
+        case VotingPowerModel.TOKEN_WEIGHTED:
+            return { tokenWeighted: {} };
+        case VotingPowerModel.QUADRATIC_VOTING:
+            return { quadraticVoting: {} };
+        case VotingPowerModel.INDIVIDUAL_VOTING:
+            return { individualVoting: {} };
+    }
 }
 
 // export interface MediaItem {
