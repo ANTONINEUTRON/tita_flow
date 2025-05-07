@@ -2,13 +2,6 @@ use anchor_lang::prelude::*;
 
 use super::VoteType;
 
-#[derive(AnchorSerialize, AnchorDeserialize, Clone, Copy, PartialEq, Eq, InitSpace)]
-pub enum VotingMechanism {
-    Standard,//simple vote based on contribution weight
-    Futarchy,
-    Quadratic,
-    TimeWeighted,
-}
 
 #[account]
 #[derive(InitSpace)]
