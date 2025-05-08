@@ -37,6 +37,7 @@ import useFlow from "@/lib/hooks/use_flow";
 import AppUser from "@/lib/types/user";
 import toast from "react-hot-toast";
 import { FundingFlowResponse } from "@/lib/types/flow.response";
+import useProfile from "@/lib/hooks/use_profile";
 
 // Update the NavItem interface
 interface NavItem {
@@ -50,12 +51,13 @@ interface NavItem {
 export default function FlowDetailPage() {
   const params = useParams();
   const router = useRouter();
-  // const { toast } = useToast();
   const [flow, setFlow] = useState<FundingFlowResponse | null>(null);
   const [loading, setLoading] = useState(true);
   const [activeView, setActiveView] = useState("overview");
   const [currentUser, setCurrentUser] = useState<any>(null);
   const [user, setUser] = useState<AppUser | null>(null)
+
+  const {userProfile} = useProfile();
 
   const flowId = params.id as string;
   const { getFlowById } = useFlow();
@@ -162,12 +164,16 @@ export default function FlowDetailPage() {
     <div className="container max-w-7xl mx-auto pb-20 md:pb-8">
       {/* Header with back button and actions */}
       <div className="flex justify-between items-center py-4 px-4">
-        <Button variant="outline" size="sm" asChild className="h-9">
-          <Link href="/app/flows">
-            <ArrowLeft className="mr-2 h-4 w-4" />
-            Back to Flows
-          </Link>
-        </Button>
+        {
+          userProfile && (
+            <Button variant="outline" size="sm" asChild className="h-9">
+              <Link href="/app/flows">
+                <ArrowLeft className="mr-2 h-4 w-4" />
+                Back to Flows
+              </Link>
+            </Button>
+          )
+        }
         <div className="flex items-center gap-2">
           <Button variant="outline" size="sm" onClick={handleShareFlow} className="h-9">
             <Share2 className="mr-2 h-4 w-4" />
