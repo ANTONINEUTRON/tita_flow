@@ -99,9 +99,14 @@ export default function useProfile() {
 
     const fetchProfile = async (userId: string): Promise<AppUser | null> => {
         try {
+            console.log("Fetching user profile with id", userId);
+            console.log("Fetching user profile with id", userId);
+            console.log("Fetching user profile with id", userId);
             // fetch user record using axios from api/user?userId=[userId]
             const response = await axios.get(`/api/user?userId=${userId}`);
-
+            console.log("User profile fetched", response.data);
+            console.log("User profile fetched", response.data);
+            console.log("User profile fetched", response.data);
             return response.data as AppUser;
         } catch (error) {
             setError("An error occurred while fetching user profile");
@@ -175,5 +180,5 @@ export default function useProfile() {
         }
     }
 
-    return { userProfile, loading, error, walletInstance, updateUserProfile, signUserIn, signUserOut }
+    return { userProfile, loading, error, walletInstance, fetchProfile, updateUserProfile, signUserIn, signUserOut }
 }

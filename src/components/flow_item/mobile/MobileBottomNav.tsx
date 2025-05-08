@@ -6,7 +6,6 @@ import { cn } from "@/lib/utils";
 import { FlowType, NavItem } from "../../../lib/types/types";
 
 interface MobileBottomNavProps {
-  flowType: FlowType;
   actionButtonText: string;
   mobileNavItems: NavItem[];
   activeView: string;
@@ -15,7 +14,6 @@ interface MobileBottomNavProps {
 }
 
 export function MobileBottomNav({
-  flowType,
   actionButtonText,
   mobileNavItems,
   activeView,
@@ -31,11 +29,7 @@ export function MobileBottomNav({
           className="h-14 w-14 rounded-full shadow-lg flex items-center justify-center"
           onClick={onAction}
         >
-          {flowType === FlowType.RAISE ? (
-            <Coins className="h-6 w-6" />
-          ) : (
-            <FileText className="h-6 w-6" />
-          )}
+          <Coins className="h-6 w-6" />
           <span className="sr-only">{actionButtonText}</span>
         </Button>
       </div>

@@ -1,11 +1,13 @@
-import React from "react";
+import React, { useEffect, useState } from "react";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { Badge } from "@/components/ui/badge";
 import { CardHeader, CardTitle } from "@/components/ui/card";
-import { Flow } from "../../../lib/types/types";
+import { FundingFlow } from "@/lib/types/flow";
+import useProfile from "@/lib/hooks/use_profile";
+import AppUser from "@/lib/types/user";
+import { FundingFlowResponse } from "@/lib/types/flow.response";
 
 interface FlowHeaderProps {
-  flow: Flow;
+  flow: FundingFlowResponse
 }
 
 export function FlowHeader({ flow }: FlowHeaderProps) {
@@ -17,10 +19,10 @@ export function FlowHeader({ flow }: FlowHeaderProps) {
         </CardTitle> */}
         <div className="flex items-center text-muted-foreground text-sm mt-2">
           <Avatar className="h-5 w-5 mr-2">
-            <AvatarImage src={flow.creator.avatarUrl} alt={flow.creator.name} />
-            <AvatarFallback>{flow.creator.name.charAt(0)}</AvatarFallback>
+            <AvatarImage src={flow.users?.profilePics } alt={flow.users?.username} />
+            <AvatarFallback>{flow.users?.username.substring(0,2).toUpperCase()}</AvatarFallback>
           </Avatar>
-          <span className="truncate">{flow.creator.name}</span>
+          <span className="truncate">{flow.users?.username}</span>
         </div>
       </div>
     </CardHeader>

@@ -1,0 +1,29 @@
+import { Milestone, VotingPowerModel } from "./flow";
+import AppUser from "./user";
+
+export interface FundingFlowResponse {
+    id: string,
+    title: string,
+    description: string,
+    goal: string,
+    startdate: string,
+    currency: string,
+    enddate: string,
+    creator: string,
+    rules: {
+        milestone: boolean,
+        governance: boolean,
+    },
+    milestones?: Milestone[],
+    completedMilestones?: number,
+    status: 'active' | 'completed' | 'cancelled',
+    raised: number,
+    votingPowerModel: VotingPowerModel,
+    images: string[],
+    video?: string,
+    createdAt?: string,
+    updatedAt?: string,
+    address?: string,
+    //
+    users: AppUser
+}

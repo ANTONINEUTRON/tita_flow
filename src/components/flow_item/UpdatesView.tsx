@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { 
   Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle 
 } from "@/components/ui/card";
@@ -21,11 +21,13 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { EllipsisVertical } from "lucide-react";
-import { DistributeFlow, Flow, Update } from "@/lib/types/types";
+import { Flow, Update } from "@/lib/types/types";
 import { formatDate } from "@/lib/utils";
+import { fetchFlowData } from "@/lib/data/flow_item_data";
+import { FundingFlowResponse } from "@/lib/types/flow.response";
 
 interface UpdatesViewProps {
-  flow: Flow | DistributeFlow;
+  flow: FundingFlowResponse;
   currentUser?: {
     id: string;
     name: string;
@@ -37,7 +39,7 @@ interface UpdatesViewProps {
 }
 
 export function UpdatesView({ 
-  flow, 
+  // flow, 
   currentUser,
   onCreateUpdate,
   onComment,
@@ -48,10 +50,18 @@ export function UpdatesView({
   const [newUpdateContent, setNewUpdateContent] = useState('');
   const [expandedUpdateId, setExpandedUpdateId] = useState<string | null>(null);
   const [attachments, setAttachments] = useState<File[]>([]);
+  const flow = fetchFlowData("1");
+  // const [flow, setFlow] = useState<Flow>()
   
-  const updates = flow.updates || [];
+  // useEffect(()=>{
+  //   fetchFlowData("1").then(data => {
+  //     setFlow(data);
+  //   });
+  // })
+    
+  const updates = flow!.updates || [];
   
-  const isCreator = currentUser?.id === flow.creator.id;
+  const isCreator = currentUser?.id === flow!.creator.id;
   
   const handleCreateUpdate = async () => {
     if (!onCreateUpdate || !newUpdateContent.trim()) return;
@@ -211,7 +221,7 @@ export function UpdatesView({
                     <div>
                       <div className="flex items-center gap-2">
                         <span className="font-medium">{update.author.name}</span>
-                        {update.author.id === flow.creator.id && (
+                        {update.author.id === flow!.creator.id && (
                           <Badge variant="outline">Creator</Badge>
                         )}
                       </div>
@@ -300,7 +310,7 @@ export function UpdatesView({
                                 <div className="flex items-center justify-between mb-1">
                                   <div className="flex items-center gap-2">
                                     <span className="font-medium text-sm">{comment.author.name}</span>
-                                    {comment.author.id === flow.creator.id && (
+                                    {comment.author.id === flow!.creator.id && (
                                       <Badge variant="outline" className="text-[10px] h-4 px-1">Creator</Badge>
                                     )}
                                   </div>

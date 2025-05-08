@@ -12,16 +12,18 @@ import { formatCurrency } from "../../../lib/utils";
 import { FlowHeader } from "./FlowHeader";
 import { FlowProgress } from "./FlowProgress";
 import { SidebarNavigation } from "./SidebarNavigation";
+import { FundingFlow } from "@/lib/types/flow";
+import AppUser from "@/lib/types/user";
+import { FundingFlowResponse } from "@/lib/types/flow.response";
 
 interface FlowSidebarProps {
-  flow: Flow;
+  flow: FundingFlowResponse;
   activeView: string;
   navItems: NavItem[];
   progress: number;
   remainingDays: number | null;
   onNavigate: (view: string) => void;
   onContribute: () => void;
-  onApply: () => void;
 }
 
 export function FlowSidebar({
@@ -31,8 +33,7 @@ export function FlowSidebar({
   progress,
   remainingDays,
   onNavigate,
-  onContribute,
-  onApply
+  onContribute
 }: FlowSidebarProps) {
   return (
     <div className="hidden md:block md:w-64 flex-shrink-0">
@@ -40,13 +41,11 @@ export function FlowSidebar({
         <FlowHeader flow={flow} />
 
         {/* Progress for Raise Flow */}
-        {flow.type === FlowType.RAISE && flow.goal && (
-          <FlowProgress 
-            flow={flow}
-            progress={progress}
-            remainingDays={remainingDays}
-          />
-        )}
+        <FlowProgress
+          flow={flow}
+          progress={progress}
+          remainingDays={remainingDays}
+        />
 
         <CardContent className="pt-0">
           <Separator className="my-3" />
@@ -58,17 +57,10 @@ export function FlowSidebar({
         </CardContent>
 
         <CardFooter>
-          {flow.type === FlowType.RAISE ? (// Instead check if 
-            <Button className="w-full" onClick={onContribute}>
-              <Coins className="mr-2 h-4 w-4" />
-              Contribute to Flow
-            </Button>
-          ) : (
-            <Button className="w-full" onClick={onApply}>
-              <FileText className="mr-2 h-4 w-4" />
-              Apply for Funding
-            </Button>
-          )}
+          <Button className="w-full" onClick={onContribute}>
+            <Coins className="mr-2 h-4 w-4" />
+            Contribute to Flow
+          </Button>
         </CardFooter>
       </Card>
     </div>

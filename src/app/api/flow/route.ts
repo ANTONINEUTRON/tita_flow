@@ -5,16 +5,35 @@ import { NextRequest, NextResponse } from "next/server";
 
 export async function GET(req: NextRequest) {
     try {
-        let campaignId: string = req.nextUrl.searchParams.get('id') ?? "";
+        let id: string = req.nextUrl.searchParams.get('id') ?? "";
+        
+        console.log("Flow ID:", id);
 
-        // let campaigns = await SupabaseService
-        //     .getInstance()
-        //     .fetchFundingFlow(campaignId)
+        if (!id) {
+            return NextResponse.json(
+                { error: "Flow ID is required" },
+                { status: 400 }
+            );
+        }
 
-        // return NextResponse.json(campaigns[0]);
+        const flow = await FlowService
+            .getInstance()
+            .fetchFundingFlow(id);
+            
+        if (!flow) {
+            return NextResponse.json(
+                { error: "Flow not found" },
+                { status: 404 }
+            );
+        }
+
+        return NextResponse.json(flow);
     } catch (error) {
-        console.error("Error getting campaign", error);
-        return NextResponse.error();
+        console.error("Error getting flow", error);
+        return NextResponse.json(
+            { error: "Failed to retrieve flow data" },
+            { status: 500 }
+        );
     }
 }
 

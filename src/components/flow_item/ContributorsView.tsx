@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { 
   Card, CardContent, CardDescription, CardHeader, CardTitle 
 } from "@/components/ui/card";
@@ -10,23 +10,32 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { 
   BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, PieChart, Pie, Cell, Legend 
 } from "recharts";
-import { ChevronRight, Download, Filter, Search, TrendingUp, Users } from "lucide-react";
+import { Download, Search, TrendingUp, Users } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Badge } from "@/components/ui/badge";
 import { Flow } from "@/lib/types/types";
 import { formatCurrency, formatDate } from "@/lib/utils";
+import { fetchFlowData } from "@/lib/data/flow_item_data";
+import { FundingFlowResponse } from "@/lib/types/flow.response";
 
 interface ContributorsViewProps {
-  flow: Flow;
+  flow: FundingFlowResponse;
 }
 
-export function ContributorsView({ flow }: ContributorsViewProps) {
+export function ContributorsView({  }: ContributorsViewProps) {
+  // const [flow, setFlow] = useState<Flow>()
+  const flow = fetchFlowData("1");
   const [timeRange, setTimeRange] = useState<'all' | 'month' | 'week' | 'day'>('all');
   const [searchQuery, setSearchQuery] = useState('');
   const [viewMode, setViewMode] = useState<'list' | 'stats'>('list');
   
-  const contributors = flow.contributors || [];
+  const contributors = flow!.contributors || [];
+
+  // useEffect(()=>{
+  //   fetchFlowData("1").then(data => {
+  //     setFlow(data);
+  //   });
+  // })
   
   // Filter contributors based on search query
   const filteredContributors = contributors.filter(contributor => 
@@ -133,7 +142,7 @@ export function ContributorsView({ flow }: ContributorsViewProps) {
         <div>
           <h2 className="text-2xl font-bold">Contributors</h2>
           <p className="text-muted-foreground">
-            {contributors.length} contributor{contributors.length !== 1 ? 's' : ''} have donated a total of {formatCurrency(flow.raised!, flow.currencySymbol)}
+            {contributors.length} contributor{contributors.length !== 1 ? 's' : ''} have donated a total of {formatCurrency(flow!.raised!, flow!.currencySymbol)}
           </p>
         </div>
         
@@ -209,7 +218,7 @@ export function ContributorsView({ flow }: ContributorsViewProps) {
                           </div>
                         </div>
                         <div className="text-right">
-                          <p className="font-medium">{formatCurrency(contributor.amount, flow.currencySymbol)}</p>
+                          <p className="font-medium">{formatCurrency(contributor.amount, flow!.currencySymbol)}</p>
                         </div>
                       </div>
                     ))
@@ -242,10 +251,10 @@ export function ContributorsView({ flow }: ContributorsViewProps) {
                           tick={{ fontSize: 12 }}
                         />
                         <YAxis 
-                          tickFormatter={(value) => `${flow.currencySymbol}${value}`}
+                          tickFormatter={(value) => `${flow!.currencySymbol}${value}`}
                         />
                         <Tooltip 
-                          formatter={(value: any) => [`${formatCurrency(value, flow.currencySymbol)}`, 'Amount']}
+                          formatter={(value: any) => [`${formatCurrency(value, flow!.currencySymbol)}`, 'Amount']}
                           labelFormatter={(label) => `Date: ${label}`}
                         />
                         <Bar 
@@ -286,7 +295,7 @@ export function ContributorsView({ flow }: ContributorsViewProps) {
                           ))}
                         </Pie>
                         <Tooltip 
-                          formatter={(value: any) => [`${formatCurrency(value, flow.currencySymbol)}`, 'Amount']}
+                          formatter={(value: any) => [`${formatCurrency(value, flow!.currencySymbol)}`, 'Amount']}
                         />
                         <Legend />
                       </PieChart>
@@ -303,7 +312,7 @@ export function ContributorsView({ flow }: ContributorsViewProps) {
             <CardHeader>
               <CardTitle>Top Contributors</CardTitle>
               <CardDescription>
-                Contributors who have donated the most to this flow
+                Contributors who have donated the most to this flow!
               </CardDescription>
             </CardHeader>
             <CardContent>
@@ -330,9 +339,9 @@ export function ContributorsView({ flow }: ContributorsViewProps) {
                         </div>
                       </div>
                       <div className="text-right">
-                        <p className="font-medium">{formatCurrency(contributor.amount, flow.currencySymbol)}</p>
+                        <p className="font-medium">{formatCurrency(contributor.amount, flow!.currencySymbol)}</p>
                         <p className="text-sm text-muted-foreground">
-                          {Math.round((contributor.amount / flow.raised!) * 100)}% of total
+                          {Math.round((contributor.amount / flow!.raised!) * 100)}% of total
                         </p>
                       </div>
                     </div>
@@ -347,7 +356,7 @@ export function ContributorsView({ flow }: ContributorsViewProps) {
             <CardHeader>
               <CardTitle>Recent Contributors</CardTitle>
               <CardDescription>
-                Latest contributions to this flow
+                Latest contributions to this flow!
               </CardDescription>
             </CardHeader>
             <CardContent>
@@ -371,7 +380,7 @@ export function ContributorsView({ flow }: ContributorsViewProps) {
                         </div>
                       </div>
                       <div className="text-right">
-                        <p className="font-medium">{formatCurrency(contributor.amount, flow.currencySymbol)}</p>
+                        <p className="font-medium">{formatCurrency(contributor.amount, flow!.currencySymbol)}</p>
                       </div>
                     </div>
                   ))}

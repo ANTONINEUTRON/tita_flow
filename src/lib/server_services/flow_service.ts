@@ -2,7 +2,7 @@ import { SupabaseClient } from "@supabase/supabase-js";
 import { SUPABASE_CLIENT } from "../supabaseconfig";
 import { FundingFlow } from "../types/flow";
 import { AppConstants } from "../app_constants";
-import { objectToSnake } from "ts-case-convert";
+import { objectToSnake, objectToCamel } from "ts-case-convert";
 
 
 // All operations here are rendered on the server side
@@ -22,7 +22,30 @@ export class FlowService {
         return FlowService.instance;
     }
 
-    public async fetchFundingFlow() {}
+    public async fetchFundingFlow(flowId: string): Promise<FundingFlow | null> {
+        try {
+            const { data, error } = await (await this.client)
+                .from(AppConstants.FLOW_TABLE)
+                .select("*, users(*)")
+                .eq('id', flowId)
+                .single();
+
+            if (error) {
+                console.error('Error fetching funding flow:', error);
+                throw error;
+            }
+
+            if (!data) {
+                return null;
+            }
+
+            // Convert snake_case to camelCase and return as FundingFlow
+            return objectToCamel(data) as any as FundingFlow;
+        } catch (error) {
+            console.error('Error in fetchFundingFlow:', error);
+            throw error;
+        }
+    }
 
     public async createFundingFlow(flow: FundingFlow): Promise<void> {
         try {

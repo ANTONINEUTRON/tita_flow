@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { 
   Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle 
 } from "@/components/ui/card";
@@ -20,9 +20,12 @@ import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Label } from "@/components/ui/label";
 import { Flow, Proposal } from "@/lib/types/types";
 import { formatDate } from "@/lib/utils";
+import { FundingFlow } from "@/lib/types/flow";
+import { fetchFlowData } from "@/lib/data/flow_item_data";
+import { FundingFlowResponse } from "@/lib/types/flow.response";
 
 interface ProposalsViewProps {
-  flow: Flow;
+  flow: FundingFlowResponse;
   currentUser?: {
     id: string;
     name: string;
@@ -33,7 +36,7 @@ interface ProposalsViewProps {
 }
 
 export function ProposalsView({ 
-  flow, 
+  // flow, 
   currentUser,
   onCreateProposal,
   onVote
@@ -46,11 +49,22 @@ export function ProposalsView({
   const [activeProposal, setActiveProposal] = useState<Proposal | null>(null);
   const [selectedOption, setSelectedOption] = useState<string>('');
   const [showVotingDialog, setShowVotingDialog] = useState(false);
+
+  const flow = fetchFlowData("1");
+    // const [flow, setFlow] = useState<Flow>()
+
+    
+    // useEffect(()=>{
+    //   fetchFlowData("1").then(data => {
+    //     setFlow(data);
+    //   });
+    // })
+      
   
-  const proposals = flow.proposals || [];
+  const proposals = flow!.proposals || [];
   
-  const isCreator = currentUser?.id === flow.creator.id;
-  const canCreateProposal = isCreator || flow.settings?.communityProposals;
+  const isCreator = currentUser?.id === flow!.creator.id;
+  const canCreateProposal = isCreator || flow!.settings?.communityProposals;
   
   const handleCreateProposal = async () => {
     if (!onCreateProposal) return;
@@ -304,7 +318,7 @@ export function ProposalsView({
                           </Avatar>
                           <span>
                             Created by {proposal.creator.name}
-                            {proposal.creator.id === flow.creator.id && (
+                            {proposal.creator.id === flow!.creator.id && (
                               <Badge variant="outline" className="ml-1">Creator</Badge>
                             )}
                           </span>
@@ -391,7 +405,7 @@ export function ProposalsView({
                           </Avatar>
                           <span>
                             Created by {proposal.creator.name}
-                            {proposal.creator.id === flow.creator.id && (
+                            {proposal.creator.id === flow!.creator.id && (
                               <Badge variant="outline" className="ml-1">Creator</Badge>
                             )}
                           </span>

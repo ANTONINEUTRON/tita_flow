@@ -1,11 +1,11 @@
 import { Flow, FlowType, FlowStatus, MilestoneStatus } from "../types/types";
 
-export async function fetchFlowData(id: string): Promise<Flow> {
+export function fetchFlowData(id: string): Flow {
   // In a real app, this would be a fetch call to your API
   // For now, we return mock data
   
   // Simulate network delay
-  await new Promise(resolve => setTimeout(resolve, 800));
+  // await new Promise(resolve => setTimeout(resolve, 800));
   
   const dummyFlow: Flow = {
     id,

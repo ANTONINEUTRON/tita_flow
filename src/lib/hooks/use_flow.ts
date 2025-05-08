@@ -11,6 +11,7 @@ import BN from "bn.js";
 import { TOKEN_PROGRAM_ID } from "@solana/spl-token";
 import { useUser } from "@civic/auth-web3/react";
 import { SolanaWallet, userHasWallet } from "@civic/auth-web3";
+import { FundingFlowResponse } from "../types/flow.response";
 
 interface FetchFlowOptions {
     page?: number;
@@ -282,30 +283,45 @@ export default function useFlow() {
         setLoading(false);
     }
 
-    // Example usage
-    // try {
-    //     const result = await getUserFlows('user123', {
-    //         page: 2,
-    //         pageSize: 20,
-    //         filters: {
-    //             status: ['active', 'completed'],
-    //             title: 'project',
-    //             createdAfter: '2023-01-01'
-    //         },
-    //         sortBy: 'title',
-    //         sortOrder: 'asc'
-    //     });
+    // Function to fetch a specific flow by ID
+    const getFlowById = async (id: string): Promise<FundingFlowResponse | null> => {
+        if (!id) {
+            throw new Error('Flow ID is required');
+        }
+        
+        try {
+            const response = await fetch(`/api/flow?id=${encodeURIComponent(id)}`, {
+                method: 'GET',
+                headers: {
+                    'Content-Type': 'application/json',
+                }
+            });
 
-    //     console.log(`Found ${result.pagination.total} flows`);
-    //     console.log(`Showing page ${result.pagination.page} of ${result.pagination.totalPages}`);
+            console.log("Flow response:", response);
+            
+            if (!response.ok) {
+                const errorData = await response.json();
+                throw new Error(errorData.error || 'Failed to fetch flow');
+            }
+            
+            const flowData = await response.json();
+            console.log("Flow responseJSJSJS:", flowData);
+            return flowData;
+        } catch (error) {
+            console.error('Error fetching flow:', error);
+            throw new Error(error instanceof Error ? error.message : 'An unknown error occurred');
+        }
+    };
 
-    //     // Render the flows
-    //     result.flows.forEach((flow) => {
-    //         console.log(flow.title);
-    //     });
-    // } catch (error) {
-    //     console.error('Error:', error);
-    // }
-
-    return { getUserFlows, prepareFlowData, createFlowTransaction, saveFlowToStore, loading, error, flows, pagination }
+    return {
+        getUserFlows, 
+        getFlowById, 
+        prepareFlowData, 
+        createFlowTransaction, 
+        saveFlowToStore, 
+        loading, 
+        error, 
+        flows, 
+        pagination,
+    };
 }
