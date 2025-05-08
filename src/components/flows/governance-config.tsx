@@ -56,82 +56,6 @@ export function GovernanceConfiguration({ control, className }: GovernanceConfig
                         </FormItem>
                     )}
                 />
-
-                {/* Governance Parameters */}
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                    <FormField
-                        control={control}
-                        name="quorumPercentage"
-                        render={({ field }) => (
-                            <FormItem>
-                                <FormLabel>Quorum Percentage</FormLabel>
-                                <FormControl>
-                                    <Input
-                                        type="number"
-                                        placeholder="50"
-                                        value={field.value?.toString() || ''}
-                                        onChange={(e) => field.onChange(Number(e.target.value))}
-                                        min={1}
-                                        max={100}
-                                    />
-                                </FormControl>
-                                <FormDescription>
-                                    Minimum participation required for a valid vote (%)
-                                </FormDescription>
-                                <FormMessage />
-                            </FormItem>
-                        )}
-                    />
-
-                    <FormField
-                        control={control}
-                        name="approvalPercentage"
-                        render={({ field }) => (
-                            <FormItem>
-                                <FormLabel>Approval Threshold</FormLabel>
-                                <FormControl>
-                                    <Input
-                                        type="number"
-                                        placeholder="60"
-                                        value={field.value?.toString() || ''}
-                                        onChange={(e) => field.onChange(Number(e.target.value))}
-                                        min={51}
-                                        max={100}
-                                    />
-                                </FormControl>
-                                <FormDescription>
-                                    Percentage of votes needed for approval (%)
-                                </FormDescription>
-                                <FormMessage />
-                            </FormItem>
-                        )}
-                    />
-                </div>
-
-                {/* Voting Period */}
-                <FormField
-                    control={control}
-                    name="votingPeriodDays"
-                    render={({ field }) => (
-                        <FormItem>
-                            <FormLabel>Voting Period (days)</FormLabel>
-                            <FormControl>
-                                <Input
-                                    type="number"
-                                    placeholder="7"
-                                    value={field.value?.toString() || ''}
-                                    onChange={(e) => field.onChange(Number(e.target.value))}
-                                    min={1}
-                                    max={30}
-                                />
-                            </FormControl>
-                            <FormDescription>
-                                How long proposals stay open for voting
-                            </FormDescription>
-                            <FormMessage />
-                        </FormItem>
-                    )}
-                />
             </CardContent>
         </Card>
     );
@@ -140,7 +64,4 @@ export function GovernanceConfiguration({ control, className }: GovernanceConfig
 // Optionally export schema for reuse
 export const governanceSchema = z.object({
     votingPowerModel: z.enum(["tokenWeighted", "quadraticVoting", "individualVoting"]).default("tokenWeighted"),
-    quorumPercentage: z.number().min(1).max(100).default(30),
-    approvalPercentage: z.number().min(51).max(100).default(50),
-    votingPeriodDays: z.number().min(1).max(30).default(7),
 });

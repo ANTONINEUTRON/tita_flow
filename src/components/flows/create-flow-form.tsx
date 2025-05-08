@@ -136,6 +136,29 @@ export default function CreateFlowForm() {
     );
   };
 
+  // Add this function near the beginning of your component
+  const validateCurrentStep = async () => {
+    try {
+      const currentValues = form.getValues();
+      
+      // Define which fields to validate at each step
+      const fieldsToValidateByStep = {
+        [FormStep.BASIC_INFO]: ["title", "description", "goal", "currency", "startdate", "endDate"],
+        [FormStep.RULES_CONFIG]: ["rules"],
+        [FormStep.PREVIEW]: [] // No validation needed at preview step
+      };
+      
+      // Get the fields for the current step
+      const fieldsToValidate = fieldsToValidateByStep[currentStep as FormStep];
+      
+      // Validate only the fields for the current step
+      const result = await form.trigger(fieldsToValidate as any);
+      return result;
+    } catch (error) {
+      console.error("Validation error:", error);
+      return false;
+    }
+  };
 
   // Form submission handler
   const onSubmit = async (values: FlowCreationValues) => {
@@ -191,6 +214,22 @@ export default function CreateFlowForm() {
         setCurrentStep(FormStep.PREVIEW);
       }
     });
+  };
+
+  // Modify your next step function
+  const handleNextStep = async () => {
+    // Validate the current step first
+    const isValid = await validateCurrentStep();
+    
+    if (!isValid) {
+      // Show a toast or some feedback
+      toast.error("Please fix the errors before proceeding");
+      return;
+    }
+
+    if (currentStep < FormStep.PREVIEW) {
+      setCurrentStep((prev) => (prev + 1) as FormStep);
+    }
   };
 
   return (
@@ -264,7 +303,7 @@ export default function CreateFlowForm() {
                     render={({ field }) => (
                       <FormItem className="flex flex-row items-center justify-between rounded-lg border p-4">
                         <div className="space-y-0.5">
-                          <FormLabel className="text-base">Milestone-based funding</FormLabel>
+                          <FormLabel className="text-base">Support Milestones</FormLabel>
                           <FormDescription>
                             Release funds gradually as project milestones are completed and approved
                           </FormDescription>
@@ -491,7 +530,8 @@ export default function CreateFlowForm() {
               <Button
                 key={"nextBtn"}
                 type="button"
-                onClick={nextStep}
+                onClick={handleNextStep}
+                disabled={isSubmitting}
               >
                 Next
                 <LucideArrowRight className="ml-2 h-4 w-4" />
