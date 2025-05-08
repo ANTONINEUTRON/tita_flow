@@ -41,7 +41,7 @@ export default function useFlow() {
             title: formValues.title,
             description: formValues.description,
             goal: formValues.goal,
-            duration: formValues.duration,
+            enddate: formValues.endDate,
             startdate: formValues.startdate,
             currency: formValues.currency,
 
@@ -50,9 +50,6 @@ export default function useFlow() {
             creator_id: creator_id!, // Placeholder for creator's ID
             milestones: formValues.milestones || [],
             votingPowerModel: formValues.votingPowerModel,
-            quorumPercentage: formValues.quorumPercentage,
-            approvalPercentage: formValues.approvalPercentage,
-            votingPeriodDays: formValues.votingPeriodDays,
             images: mediaUploadRes.imageUrls,
             video: mediaUploadRes.videoUrl,
             status: "active",
@@ -116,8 +113,33 @@ export default function useFlow() {
         const selectedTokenMint: PublicKey = new PublicKey(AppConstants.SUPPORTEDCURRENCIES.find((currency) => currency.name === fundingFlow.currency)!.address);
         const flowId: string = fundingFlow.id;
         const goal: BN = new BN(fundingFlow.goal);
-        const startTime: BN = new BN(new Date(fundingFlow.startdate).getTime() / 1000);
-        const endTime: BN = new BN(startTime.add(new BN(Number(fundingFlow.duration) * 24 * 60 * 60)).toString());
+
+        // Handle start time - could be optional on chain
+        let startTime: BN | null = null;
+        if (fundingFlow.startdate) {
+            const startDate = new Date(fundingFlow.startdate);
+            if (isNaN(startDate.getTime())) {
+                throw new Error("Invalid start date");
+            }
+            startTime = new BN(Math.floor(startDate.getTime() / 1000));
+        }
+
+        // Handle end time - could be optional on chain
+        let endTime: BN | null = null;
+        if (fundingFlow.enddate) {
+            const endDate = new Date(fundingFlow.enddate);
+            if (isNaN(endDate.getTime())) {
+                throw new Error("Invalid end date");
+            }
+            endTime = new BN(Math.floor(endDate.getTime() / 1000));
+        }
+
+        // Only validate time relationship if both times are provided
+        if (startTime && endTime && endTime.lte(startTime)) {
+            throw new Error("End time must be after start time");
+        }
+
+        
         let vPowerModel: VotingPowerModel = fundingFlow.votingPowerModel;
 
         let milestones = null;

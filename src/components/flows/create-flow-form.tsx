@@ -31,9 +31,16 @@ const createFlowValidationSchema = z.object({
   title: z.string().min(1, "Title is required"),
   description: z.string().min(1, "Description is required"),
   goal: z.string().min(1, "Goal amount is required").default("0"),
-  startdate: z.string().min(1, "Deadline is required"),
   currency: z.string().min(1, "Currency is required"),
-  duration: z.string().min(1, "Funding duration can't be less than a day").max(90, "Funding duration cannot exceed 90 days"),
+  startdate: z.string()
+    .min(1, "Start date is required")
+    .nonempty("Start date is required")
+    .refine(date => !isNaN(new Date(date).getTime()), "Invalid date format"),
+
+  endDate: z.string()
+    .min(1, "End date is required")
+    .nonempty("End date is required")
+    .refine(date => !isNaN(new Date(date).getTime()), "Invalid date format"),
 
   // Rules Configuration
   rules: z.object({
@@ -53,9 +60,7 @@ const createFlowValidationSchema = z.object({
 
   // Governance Configuration
   votingPowerModel: z.nativeEnum(VotingPowerModel).default(VotingPowerModel.TOKEN_WEIGHTED),
-  quorumPercentage: z.number().min(1).max(100).default(30),
-  approvalPercentage: z.number().min(51).max(100).default(50),
-  votingPeriodDays: z.number().min(1).default(7),
+  
   media: z.array(
     z.object({
       id: z.string(),
@@ -67,6 +72,9 @@ const createFlowValidationSchema = z.object({
     })
     // z.any()
   ).optional(),
+}).refine(data => new Date(data.endDate) > new Date(data.startdate), {
+  message: "End date must be after start date",
+  path: ["endDate"]
 });
 
 export type FlowCreationValues = z.infer<typeof createFlowValidationSchema>;
@@ -90,17 +98,13 @@ export default function CreateFlowForm() {
       currency: "",
       description: "",
       goal: "0",
-      startdate: formattedToday,
-      duration: "3",
       rules: {
         milestone: false,
         governance: false,
       },
       milestones: [],
       votingPowerModel: VotingPowerModel.TOKEN_WEIGHTED,
-      quorumPercentage: 30,
-      approvalPercentage: 51,
-      votingPeriodDays: 7,
+      
       media: []
     },
   });
@@ -150,7 +154,7 @@ export default function CreateFlowForm() {
       const flowId = uuidv4().substring(0, 22)
 
       const fflow = await prepareFlowData(flowId, values, userProfile?.wallet!, userProfile?.id!,);
-
+      
       let flowAddress = await createFlowTransaction(fflow, walletInstance!);
 
       await saveFlowToStore({...fflow, address: flowAddress});
@@ -182,7 +186,7 @@ export default function CreateFlowForm() {
 
   // Skip to last step (Preview)
   const skipToPreview = () => {
-    form.trigger(["title", "currency", "description", "goal", "startdate", "duration"]).then((isValid) => {
+    form.trigger(["title", "currency", "description", "goal", "startdate", "endDate"]).then((isValid) => {
       if (isValid) {
         setCurrentStep(FormStep.PREVIEW);
       }
@@ -339,8 +343,8 @@ export default function CreateFlowForm() {
                     <span>{form.getValues("goal")}</span>
                     <span className="text-muted-foreground">Start Date:</span>
                     <span>{new Date(form.getValues("startdate")).toLocaleDateString()}</span>
-                    <span className="text-muted-foreground">Duration:</span>
-                    <span>{form.getValues("duration")}</span>
+                    <span className="text-muted-foreground">End Date:</span>
+                    <span>{new Date(form.getValues("endDate")).toLocaleDateString()}</span>
                   </div>
                 </div>
 
@@ -379,12 +383,6 @@ export default function CreateFlowForm() {
                         <div className="grid grid-cols-2 gap-y-2 text-sm">
                           <span className="text-muted-foreground">Voting Model:</span>
                           <span>{form.getValues("votingPowerModel")}</span>
-                          <span className="text-muted-foreground">Quorum:</span>
-                          <span>{form.getValues("quorumPercentage")}%</span>
-                          <span className="text-muted-foreground">Approval Threshold:</span>
-                          <span>{form.getValues("approvalPercentage")}%</span>
-                          <span className="text-muted-foreground">Voting Period:</span>
-                          <span>{form.getValues("votingPeriodDays")} days</span>
                         </div>
                       </div>
                     )}

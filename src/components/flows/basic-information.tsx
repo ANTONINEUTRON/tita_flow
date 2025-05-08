@@ -183,7 +183,7 @@ export function BasicInformation({ form, minDateString, }: BasicInformationProps
           name="goal"
           render={({ field }) => (
             <FormItem>
-              <FormLabel>Funding Goal (Optional)</FormLabel>
+              <FormLabel>Funding Goal</FormLabel>
               <FormControl>
                 <Input type="number" placeholder="10000" {...field} />
               </FormControl>
@@ -246,9 +246,6 @@ export function BasicInformation({ form, minDateString, }: BasicInformationProps
                   {...field}
                 />
               </FormControl>
-              <FormDescription>
-                When the funding flow will go live
-              </FormDescription>
               <FormMessage />
             </FormItem>
           )}
@@ -256,16 +253,16 @@ export function BasicInformation({ form, minDateString, }: BasicInformationProps
 
         <FormField
           control={form.control}
-          name="duration"
+          name="endDate"
           render={({ field }) => (
             <FormItem>
-              <FormLabel>Duration in Days (Optional)</FormLabel>
+              <FormLabel>End Date</FormLabel>
               <FormControl>
-                <Input type="number" placeholder="30" {...field} />
+                <Input 
+                  type="date"
+                  min={form.watch("startdate") || minDateString} 
+                  {...field} />
               </FormControl>
-              <FormDescription>
-                How long the funding will be open
-              </FormDescription>
               <FormMessage />
             </FormItem>
           )}
