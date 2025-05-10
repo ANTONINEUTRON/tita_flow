@@ -1,0 +1,61 @@
+import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { RefreshCw, Wallet } from "lucide-react";
+import Image from "next/image";
+import Link from "next/link";
+
+export default function WalletCard() {
+    return (
+        <div className="space-y-6">
+            <div className="border-t pt-6 mt-6">
+                <h3 className="text-lg font-medium mb-4">Wallet</h3>
+
+                {/* Balance Card */}
+                <Card className="mb-4">
+                    <CardHeader className="pb-3">
+                        <CardTitle className="text-base">Your Balance</CardTitle>
+                    </CardHeader>
+                    <CardContent>
+                        <div className="space-y-2">
+                            {/* SOL Balance */}
+                            <div className="flex justify-between items-center">
+                                <div className="flex items-center">
+                                    <div className="h-8 w-8 rounded-full bg-gradient-to-r from-purple-500 to-blue-500 flex items-center justify-center mr-2">
+                                        <Image src={"/icon/solana.png"} width={30} height={30} alt="sol icon" className="text-white" />
+                                    </div>
+                                    <span>SOL</span>
+                                </div>
+                                <span className="font-medium">0.85 SOL</span>
+                            </div>
+
+                            {/* USDC Balance */}
+                            <div className="flex justify-between items-center">
+                                <div className="flex items-center">
+                                    <div className="h-8 w-8 rounded-full bg-blue-500 flex items-center justify-center mr-2">
+                                        <Image src={"/icon/usdc.png"} width={30} height={30} alt="sol icon" className=" text-white" />
+                                    </div>
+                                    <span>USDC</span>
+                                </div>
+                                <span className="font-medium">125.50 USDC</span>
+                            </div>
+                        </div>
+                    </CardContent>
+                </Card>
+
+                {/* Wallet Actions */}
+                <div className="flex flex-col sm:flex-row gap-3">
+                    <Link href={"https://faucet.solana.com/"} target="_blank" className="flex-1">
+                        <Button className="flex w-full" variant="outline">
+                            <Wallet className="mr-2 h-4 w-4" />
+                            Fund Wallet
+                        </Button>
+                    </Link>
+                    <Button className="flex-1" variant="outline">
+                        <RefreshCw className="mr-2 h-4 w-4" />
+                        Refresh Balance
+                    </Button>
+                </div>
+            </div>
+        </div>
+    )
+}

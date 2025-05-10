@@ -24,14 +24,19 @@ export default function useProfile() {
 
     useEffect(() => {
         if(userContext.authStatus === "authenticated" && userProfile == null) {
+            router.push("/app/dashboard");
             onLogin();
         }
-    }, [userContext.user])
+    }, [userContext.authStatus, userContext.user, userProfile, router])
 
     const signUserIn = async () => {
         setLoading(true);
         try {
-            await userContext.signIn();
+            if(userProfile){
+                router.push("/app/dashboard");
+            }else{
+                await userContext.signIn();
+            }
         } catch (e) {
             console.log(e);
             toast.error("An error occurred during sign-in");

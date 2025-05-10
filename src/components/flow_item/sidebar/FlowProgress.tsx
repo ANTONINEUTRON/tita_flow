@@ -24,7 +24,7 @@ export function FlowProgress({ flow, progress, remainingDays }: FlowProgressProp
 
   // Format values for display
   const formattedRaised = currency ?
-    cn(flow.raised, currency!.name) : "0.00";
+    cn(flow.raised) : "0.00";
     
   const formattedGoal = currency ? 
     cn(flow.goal, currency!.name) : "0.00";

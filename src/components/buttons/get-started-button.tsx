@@ -21,31 +21,23 @@ export default function GetStartedButton({
     className,
 }: GetStartedButtonProps) {
     const router = useRouter();
-    const { user, signIn } = useUser();
     const {userProfile, signUserIn, loading} = useProfile()
     // const [isSigningIn, setIsSigningIn] = useState(false);
 
     // When user state changes and we were in signing in process, navigate
-    useEffect(() => {
-        if (userProfile && !loading) {
-            // setIsSigningIn(false);
-            router.push("/app/dashboard");
-        }
-    }, [userProfile, loading]);
+    // useEffect(() => {
+    //     if (userProfile && !loading) {
+    //         // setIsSigningIn(false);
+    //         // router.push("/app/dashboard");
+    //     }
+    // }, [userProfile, loading]);
 
     const onclick = () => {
-        if (userProfile) {
-            router.push("/app/dashboard")
-        } else {
+        // if (userProfile) {
+        //     router.push("/app/dashboard")
+        // } else {
             signUserIn()
-            // setIsSigningIn(true);
-            // signIn()
-            //     .catch((error) => {
-            //         console.error("Error signing in:", error);
-            //         setIsSigningIn(false);
-            //         toast.error("Error signing in. Please try again.");
-            //     });
-        }
+        // }
     }
 
     return (

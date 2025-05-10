@@ -3,7 +3,7 @@ import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
 import { toast } from "react-hot-toast";
-import { Copy, Check, Wallet, User, Upload, Loader2 } from "lucide-react";
+import { Copy, Check, Wallet, User, Upload, Loader2, RefreshCw, LogOut, DollarSignIcon } from "lucide-react";
 
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -14,6 +14,8 @@ import { Label } from "@/components/ui/label";
 import { Form, FormControl, FormDescription, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
 import { Separator } from "@/components/ui/separator";
 import useProfile from "@/lib/hooks/use_profile";
+import Image from "next/image";
+import WalletCard from "./wallet_card";
 
 // Simplified form schema for only editable fields
 const accountFormSchema = z.object({
@@ -25,7 +27,7 @@ const accountFormSchema = z.object({
 type AccountFormValues = z.infer<typeof accountFormSchema>;
 
 export default function TabAccount() {
-  const { userProfile, updateUserProfile, loading } = useProfile();
+  const { userProfile, updateUserProfile, loading, signUserOut } = useProfile();
   const [copied, setCopied] = useState<string | null>(null);
   const [isUploading, setIsUploading] = useState(false);
   const [previewUrl, setPreviewUrl] = useState<string | null>(null);
@@ -191,6 +193,10 @@ export default function TabAccount() {
           <p className="text-sm text-muted-foreground">{userProfile.email || ""}</p>
         </div>
       </div>
+
+
+      {/* Wallet Section */}
+      <WalletCard />
       
       {/* Wallet Information - Read Only */}
       <Card>
@@ -301,7 +307,6 @@ export default function TabAccount() {
                       <Input 
                         placeholder="username" 
                         {...field}
-                        value={field.value || ""} 
                       />
                     </FormControl>
                     <FormMessage />
@@ -352,17 +357,28 @@ export default function TabAccount() {
                 </div>
               )}
             </CardContent>
-            <CardFooter>
-              <Button 
-                type="submit" 
-                disabled={loading || !form.formState.isDirty}
-              >
-                {loading ? "Saving..." : "Save Changes"}
-              </Button>
+
+            {/* Form Actions with Logout */}
+            <CardFooter className="w-full">
+              <div className="flex justify-between pt-6 border-t mt-6 w-full">
+                <Button
+                  type="submit"
+                  disabled={loading || !form.formState.isDirty}
+                >
+                  {loading ? "Saving..." : "Save Changes"}
+                </Button>
+                
+                <Button variant="destructive" type="button" onClick={() => signUserOut()}>
+                  <LogOut className="mr-2 h-4 w-4" />
+                  Log Out
+                </Button>
+              </div>
             </CardFooter>
           </Card>
         </form>
       </Form>
+      
+      
     </div>
   );
 }
