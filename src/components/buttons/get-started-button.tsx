@@ -21,23 +21,24 @@ export default function GetStartedButton({
     className,
 }: GetStartedButtonProps) {
     const router = useRouter();
-    const {userProfile, signUserIn, loading} = useProfile()
+    const { user, signIn } = useUser();
+    const { userProfile, signUserIn, loading } = useProfile()
     // const [isSigningIn, setIsSigningIn] = useState(false);
 
     // When user state changes and we were in signing in process, navigate
-    // useEffect(() => {
-    //     if (userProfile && !loading) {
-    //         // setIsSigningIn(false);
-    //         // router.push("/app/dashboard");
-    //     }
-    // }, [userProfile, loading]);
+    useEffect(() => {
+        if (userProfile && !loading) {
+            // setIsSigningIn(false);
+            router.push("/app/dashboard");
+        }
+    }, [userProfile, loading]);
 
     const onclick = () => {
-        // if (userProfile) {
-        //     router.push("/app/dashboard")
-        // } else {
+        if (userProfile) {
+            router.push("/app/dashboard")
+        } else {
             signUserIn()
-        // }
+        }
     }
 
     return (

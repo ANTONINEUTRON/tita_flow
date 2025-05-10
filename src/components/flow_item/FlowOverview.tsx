@@ -127,6 +127,49 @@ export function FlowOverview({ flow }: FlowOverviewProps) {
             <CardTitle>Flow Details</CardTitle>
           </CardHeader>
           <CardContent>
+            <dl className="grid grid-cols-1 sm:grid-cols-2 gap-x-4 gap-y-2">
+              {/* <div className="flex flex-col py-2">
+                <dt className="text-sm font-medium text-muted-foreground">Status</dt>
+                <dd className="flex items-center gap-2">
+                  {getStatusBadge(flow.status)}
+                </dd>
+              </div> */}
+              <div className="flex flex-col py-2">
+                <dt className="text-sm font-medium text-muted-foreground">Start Date</dt>
+                <dd>{formatDate(flow.startdate)}</dd>
+              </div>
+              <div className="flex flex-col py-2">
+                <dt className="text-sm font-medium text-muted-foreground">End Date</dt>
+                <dd>{flow.enddate ? formatDate(flow.enddate) : "No end date"}</dd>
+              </div>
+              <div className="flex flex-col py-2">
+                <dt className="text-sm font-medium text-muted-foreground">Currency</dt>
+                <dd>{flow.currency}</dd>
+              </div>
+              <div className="flex flex-col py-2">
+                <dt className="text-sm font-medium text-muted-foreground">Rules</dt>
+                <dd>
+                  <div className="flex flex-wrap gap-2 mt-1">
+                    {flow.rules.milestone && (
+                      <Badge variant="outline">Milestone Based</Badge>
+                    )}
+                    {flow.rules.governance && (
+                      <Badge variant="outline">Weighted Distribution</Badge>
+                    )}
+                    {!flow.rules.milestone && !flow.rules.governance && (
+                      <Badge variant="outline">No Rules configured</Badge>
+                    )}
+                  </div>
+                </dd>
+              </div>
+            </dl>
+          </CardContent>
+        </Card>
+        {/* <Card>
+          <CardHeader>
+            <CardTitle>Flow Details</CardTitle>
+          </CardHeader>
+          <CardContent>
             <div className="space-y-4">
               <div>
                 <h4 className="text-sm font-medium">Description</h4>
@@ -155,7 +198,7 @@ export function FlowOverview({ flow }: FlowOverviewProps) {
               </div>
             </div>
           </CardContent>
-        </Card>
+        </Card> */}
 
         {/* Media Card */}
         {mediaItems && mediaItems.length > 0 && (

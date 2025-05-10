@@ -1,6 +1,6 @@
 "use client"
 
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import AppUser from "../types/user";
 import toast from "react-hot-toast";
 import axios from "axios";
@@ -18,25 +18,23 @@ export default function useProfile() {
     const router = useRouter();
     const userContext = useUser();
     const { address } = useWallet({ type: "solana" })
+    const [isFetching, setIsFetching] = useState(false);
     const walletInstance = userHasWallet(userContext)
         ? userContext.solana.wallet
         : undefined;
+        const countRef = useRef(0);
 
     useEffect(() => {
-        if(userContext.authStatus === "authenticated" && userProfile == null) {
-            router.push("/app/dashboard");
+        if (userContext.authStatus === "authenticated" && userProfile == null) {
+            // router.push("/app/dashboard");
             onLogin();
         }
-    }, [userContext.authStatus, userContext.user, userProfile, router])
+    }, [userContext.user])
 
     const signUserIn = async () => {
         setLoading(true);
         try {
-            if(userProfile){
-                router.push("/app/dashboard");
-            }else{
-                await userContext.signIn();
-            }
+            await userContext.signIn();
         } catch (e) {
             console.log(e);
             toast.error("An error occurred during sign-in");
