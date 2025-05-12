@@ -1,9 +1,6 @@
-import React, { useEffect, useState } from "react";
+import React from "react";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { CardHeader, CardTitle } from "@/components/ui/card";
-import { FundingFlow } from "@/lib/types/flow";
-import useProfile from "@/lib/hooks/use_profile";
-import AppUser from "@/lib/types/user";
+import { CardHeader } from "@/components/ui/card";
 import { FundingFlowResponse } from "@/lib/types/flow.response";
 
 interface FlowHeaderProps {

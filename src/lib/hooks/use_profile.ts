@@ -22,12 +22,16 @@ export default function useProfile() {
     const walletInstance = userHasWallet(userContext)
         ? userContext.solana.wallet
         : undefined;
-        const countRef = useRef(0);
+    const loadingRef = useRef(false);
 
     useEffect(() => {
-        if (userContext.authStatus === "authenticated" && userProfile == null) {
+        console.log("User Profile: ", userContext.user);
+        if (userContext.user && !userProfile) {
             // router.push("/app/dashboard");
-            onLogin();
+            if (!loadingRef.current) {
+            loadingRef.current = true;
+                onLogin()
+            }
         }
     }, [userContext.user])
 
@@ -39,7 +43,7 @@ export default function useProfile() {
             console.log(e);
             toast.error("An error occurred during sign-in");
         }
-        setLoading(false);
+        // setLoading(false);
     }
 
     const signUserOut = async () => {
@@ -61,55 +65,53 @@ export default function useProfile() {
     }
 
     const onLogin = async () => {
-        setLoading(true);
-
         try {
-                // Identify user email
-                let email = userContext.user?.email;
+            // Identify user email
+            let email = userContext.user?.email;
 
-                // fetch user record from db
-                let userRecord: AppUser | null = await fetchProfileWithEmail(email!)
+            // fetch user record from db
+            let userRecord: AppUser | null = await fetchProfileWithEmail(email!)
 
-                if (userRecord) {
-                    //// if it exists, set the user profile
-                    setUserProfile(userRecord)
-                } else {
-                    //// if it does not exist, create a new user record
-                    let appUser: AppUser = {
-                        id: userContext.user?.id || uuidv4(),
-                        email: email!,
-                        wallet: "",
-                        username: generateFromEmail(
-                            email!,
-                            3
-                        ),
-                        name: "",
-                        profilePics: "",
-                    }
+            if (userRecord) {
+                //// if it exists, set the user profile
+                setUserProfile(userRecord)
 
-                    setUserProfile(appUser)
-
-                    saveUserProfile(appUser)
+                if(userRecord.profilePics == "" && userContext.user?.picture) {
+                    // update the profile picture
+                    updateUserProfile(userRecord.id, { profilePics: userContext.user?.picture })
                 }
+            } else {
+                //// if it does not exist, create a new user record
+                let appUser: AppUser = {
+                    id: userContext.user?.id || uuidv4(),
+                    email: email!,
+                    wallet: "",
+                    username: generateFromEmail(
+                        email!,
+                        3
+                    ),
+                    name: "",
+                    profilePics: userContext.user?.picture,
+                }
+
+                setUserProfile(appUser)
+
+                saveUserProfile(appUser)
+            }
 
         } catch (error) {
             console.log("An error occurred while fetching user profile " + error);
             setError("An error occurred while fetching user profile");
         }
 
+        loadingRef.current = false;
         setLoading(false);
     }
 
     const fetchProfile = async (userId: string): Promise<AppUser | null> => {
         try {
-            console.log("Fetching user profile with id", userId);
-            console.log("Fetching user profile with id", userId);
-            console.log("Fetching user profile with id", userId);
-            // fetch user record using axios from api/user?userId=[userId]
             const response = await axios.get(`/api/user?userId=${userId}`);
-            console.log("User profile fetched", response.data);
-            console.log("User profile fetched", response.data);
-            console.log("User profile fetched", response.data);
+
             return response.data as AppUser;
         } catch (error) {
             setError("An error occurred while fetching user profile");

@@ -34,6 +34,7 @@ export default function GetStartedButton({
     }, [userProfile, loading]);
 
     const onclick = () => {
+        // window.scrollTo({ top: 0, behavior: "smooth" }); // Scroll to top
         if (userProfile) {
             router.push("/app/dashboard")
         } else {

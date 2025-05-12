@@ -9,15 +9,26 @@ export function formatCurrency(amount: number, symbol: string = "$"): string {
     maximumFractionDigits: 2 
   })}`;
 }
-
 export function formatDate(dateString: string): string {
   const date = new Date(dateString);
-  
-  // For dates less than 24 hours ago, show relative time
   const now = new Date();
-  const diffInHours = (now.getTime() - date.getTime()) / (1000 * 60 * 60);
-  
-  if (diffInHours < 24) {
+  const diffInMs = now.getTime() - date.getTime();
+  const diffInHours = diffInMs / (1000 * 60 * 60);
+
+  // Handle future dates
+  if (diffInMs < 0) {
+    const futureMinutes = Math.abs(Math.floor(diffInHours * 60));
+    if (Math.abs(diffInHours) < 1) {
+      return `in ${futureMinutes} minute${futureMinutes !== 1 ? 's' : ''}`;
+    }
+    const futureHours = Math.abs(Math.floor(diffInHours));
+    if (Math.abs(diffInHours) < 24) {
+      return `in ${futureHours} hour${futureHours !== 1 ? 's' : ''}`;
+    }
+    // For future dates beyond 24 hours, show formatted date
+  }
+
+  if (diffInHours < 24 && diffInHours >= 0) {
     if (diffInHours < 1) {
       const minutes = Math.floor(diffInHours * 60);
       return `${minutes} minute${minutes !== 1 ? 's' : ''} ago`;
@@ -25,25 +36,20 @@ export function formatDate(dateString: string): string {
     const hours = Math.floor(diffInHours);
     return `${hours} hour${hours !== 1 ? 's' : ''} ago`;
   }
-  
-  // For dates this year, show Month Day
+
   const isThisYear = date.getFullYear() === now.getFullYear();
-  
   if (isThisYear) {
     return date.toLocaleDateString('en-US', {
       month: 'short',
       day: 'numeric'
     });
   }
-  
-  // For older dates, include the year
   return date.toLocaleDateString('en-US', {
     year: 'numeric',
     month: 'short',
     day: 'numeric'
   });
 }
-
 export function getStatusColor(status: FlowStatus | MilestoneStatus): string {
   switch (status) {
     case FlowStatus.ACTIVE:
