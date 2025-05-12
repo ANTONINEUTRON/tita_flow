@@ -43,8 +43,8 @@ export function MobileFlowHeader({ flow, creator, progress, remainingDays }: Mob
       
       {/* Mobile progress for Raise Flow */}
       <div className="mt-2">
-        <div className="flex justify-between mb-1 text-sm">
-          <Image src={currency?.logo!} alt={currency?.name!} width={40} height={40}/>
+        <div className="flex justify-between items-center mb-1 text-sm">
+          <Image src={currency?.logo!} alt={currency?.name!} width={26} height={26}/>
           <div className="font-semibold">
             {flow.raised!}
           </div>
@@ -56,7 +56,7 @@ export function MobileFlowHeader({ flow, creator, progress, remainingDays }: Mob
         {remainingDays !== null && (
           <div className="flex items-center mt-1 text-xs text-muted-foreground">
             <Clock className="mr-1 h-3 w-3" />
-            {remainingDays} days remaining
+            {remainingDays} days left
           </div>
         )}
       </div>

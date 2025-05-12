@@ -30,7 +30,7 @@ import { FlowDetailSkeleton } from "../../../components/flow_item/FlowSkeleton";
 import { FlowOverview } from "../../../components/flow_item/FlowOverview";
 import { FlowSidebar } from "../../../components/flow_item/sidebar";
 import { MobileFlowHeader, MobileBottomNav } from "../../../components/flow_item/mobile";
-import { ContributorsView } from "@/components/flow_item/ContributorsView";
+import { ContributorsView } from "@/components/flow_item/contributors/ContributorsView";
 import { UpdatesView } from "@/components/flow_item/UpdatesView";
 import { ProposalsView } from "@/components/flow_item/ProposalsView";
 import useFlow from "@/lib/hooks/use_flow";
@@ -38,6 +38,10 @@ import AppUser from "@/lib/types/user";
 import toast from "react-hot-toast";
 import { FundingFlowResponse } from "@/lib/types/flow.response";
 import useProfile from "@/lib/hooks/use_profile";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
+import { Input } from "@/components/ui/input";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { ContributeDialog } from "@/components/flow_item/contributors/ContributeDialog";
 
 // Update the NavItem interface
 interface NavItem {
@@ -50,14 +54,39 @@ interface NavItem {
 
 export default function FlowDetailPage() {
   const params = useParams();
+  const [dialogOpen, setDialogOpen] = useState(false);
   const router = useRouter();
   const [flow, setFlow] = useState<FundingFlowResponse | null>(null);
   const [loading, setLoading] = useState(true);
   const [activeView, setActiveView] = useState("overview");
   const [currentUser, setCurrentUser] = useState<any>(null);
   const [user, setUser] = useState<AppUser | null>(null)
+  const { userProfile } = useProfile();
 
-  const {userProfile} = useProfile();
+
+  interface Token {
+    symbol: string;
+    name: string;
+  }
+
+  const TOKENS: Token[] = [
+    { symbol: "USDC", name: "USD Coin" },
+    { symbol: "SOL", name: "Solana" },
+    { symbol: "ETH", name: "Ethereum" },
+  ];
+
+  // Mock user balances for demonstration
+  const USER_BALANCES: Record<string, number> = {
+    USDC: 120.5,
+    SOL: 3.14,
+    ETH: 0.25,
+  };
+
+
+  const [amount, setAmount] = useState("");
+  const [selectedToken, setSelectedToken] = useState<string>(TOKENS[1].symbol);
+
+  const userBalance = USER_BALANCES[selectedToken] ?? 0;
 
   const flowId = params.id as string;
   const { getFlowById } = useFlow();
@@ -88,7 +117,8 @@ export default function FlowDetailPage() {
 
   // Actions
   const handleContribute = () => {
-    router.push(`/flow/${flowId}/contribute`);
+    // router.push(`/flow/${flowId}/contribute`);
+    toast.success("Contribute action triggered!");
   };
 
   const handleShareFlow = () => {
@@ -119,6 +149,19 @@ export default function FlowDetailPage() {
   const handleVoteOnProposal = async (proposalId: string, optionId: string): Promise<void> => {
     // Logic for voting on a proposal
   };
+
+  const handleContributeClick = () => setDialogOpen(true);
+
+  const handleDialogContribute = () => {
+    const parsed = parseFloat(amount);
+    if (!isNaN(parsed) && parsed > 0) {
+      handleContribute();
+      setDialogOpen(false);
+      setAmount("");
+    }
+    // Optionally handle invalid input
+  };
+
 
   if (loading) {
     return <FlowDetailSkeleton />;
@@ -164,16 +207,18 @@ export default function FlowDetailPage() {
     <div className="container max-w-7xl mx-auto pb-20 md:pb-8">
       {/* Header with back button and actions */}
       <div className="flex justify-between items-center py-4 px-4">
-        {
-          userProfile && (
-            <Button variant="outline" size="sm" asChild className="h-9">
-              <Link href="/app/flows">
-                <ArrowLeft className="mr-2 h-4 w-4" />
-                Back to Flows
-              </Link>
-            </Button>
-          )
-        }
+        <div>
+          {
+            userProfile && (
+              <Button variant="outline" size="sm" asChild className="h-9">
+                <Link href="/app/flows">
+                  <ArrowLeft className="mr-2 h-4 w-4" />
+                  Back to Flows
+                </Link>
+              </Button>
+            )
+          }
+        </div>
         <div className="flex items-center gap-2">
           <Button variant="outline" size="sm" onClick={handleShareFlow} className="h-9">
             <Share2 className="mr-2 h-4 w-4" />
@@ -196,7 +241,7 @@ export default function FlowDetailPage() {
                 <Download className="mr-2 h-4 w-4" />
                 Export Details
               </DropdownMenuItem>
-              <DropdownMenuItem onClick={handleContribute}>
+              <DropdownMenuItem onClick={handleDialogContribute}>
                 <Coins className="mr-2 h-4 w-4" />
                 Contribute
               </DropdownMenuItem>
@@ -215,11 +260,23 @@ export default function FlowDetailPage() {
           progress={progress}
           remainingDays={remainingDays}
           onNavigate={handleNavigation}
-          onContribute={handleContribute}
+          handleContributeClick={handleContributeClick}
         />
 
         {/* Mobile title and progress */}
         <MobileFlowHeader flow={flow} creator={user} progress={progress} remainingDays={remainingDays} />
+
+        {/* Contribute dialog */}
+        <ContributeDialog
+          open={dialogOpen}
+          onOpenChange={setDialogOpen}
+          selectedToken={selectedToken}
+          setSelectedToken={setSelectedToken}
+          amount={amount}
+          setAmount={setAmount}
+          userBalance={userBalance}
+          onContribute={handleDialogContribute}
+        />
 
         {/* Main content area */}
         <div className="flex-1">
@@ -272,7 +329,7 @@ export default function FlowDetailPage() {
         mobileNavItems={mobileNavItems}
         activeView={activeView}
         onNavigate={handleNavigation}
-        onAction={handleContribute}
+        onAction={handleContributeClick}
       />
     </div>
   );

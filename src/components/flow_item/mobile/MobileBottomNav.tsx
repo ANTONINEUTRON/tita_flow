@@ -25,7 +25,6 @@ export function MobileBottomNav({
       {/* Notch for the donate button */}
       <div className="absolute -top-7 left-1/2 transform -translate-x-1/2">
         <Button 
-          size="lg" 
           className="h-14 w-14 rounded-full shadow-lg flex items-center justify-center"
           onClick={onAction}
         >
