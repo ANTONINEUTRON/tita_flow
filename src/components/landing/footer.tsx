@@ -23,16 +23,22 @@ export function Footer() {
         </div>
         <div className="flex flex-col md:flex-row justify-between items-center mt-8 pt-8 border-t border-gray-200 dark:border-gray-800">
           <p className="text-gray-500 dark:text-gray-400">© {new Date().getFullYear()} Tita. All rights reserved.</p>
-          <div className="flex space-x-4 mt-4 md:mt-0">
-            {socialLinks.map((social, index) => (
-              <Link key={index} href={social.href} className="text-gray-500 hover:text-primary dark:text-gray-400">
-                <span className="sr-only">{social.name}</span>
-                <social.icon className="h-6 w-6" />
-              </Link>
-            ))}
-          </div>
+          <SocialLinks />
         </div>
       </div>
     </footer>
+  );
+}
+
+export function SocialLinks() {
+  return (
+    <div className="flex space-x-4">
+      {socialLinks.map((social, index) => (
+        <Link key={index} href={social.href} className="text-gray-500 hover:text-primary dark:text-gray-400">
+          <span className="sr-only">{social.name}</span>
+          <social.icon className="h-6 w-6" />
+        </Link>
+      ))}
+    </div>
   );
 }

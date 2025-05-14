@@ -24,9 +24,8 @@ export class AppConstants {
    * Social media links
    */
   public static readonly SOCIAL_LINKS = {
-    TWITTER: "https://twitter.com/titafinance",
-    GITHUB: "https://github.com/titafinance",
-    DISCORD: "https://discord.gg/titafinance"
+    TWITTER: "https://x.com/titaflow_",
+    DISCORD: "https://discord.gg/titaflow_"
   };
   
   /**

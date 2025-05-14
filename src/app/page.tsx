@@ -9,9 +9,9 @@ export default function Page() {
   return (
     <main className="flex min-h-screen flex-col items-center">
       <HeroSection />
+      <HowItWorksSection />
       <FeaturesSection />
       <UseCasesSection />
-      <HowItWorksSection />
       <CTASection />
       <Footer />
     </main>

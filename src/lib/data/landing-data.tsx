@@ -139,6 +139,6 @@ const DiscordIcon = (props: React.SVGProps<SVGSVGElement>) => (
 
 export const socialLinks = [
     { name: "Twitter", href: AppConstants.SOCIAL_LINKS.TWITTER, icon: TwitterIcon },
-    { name: "GitHub", href: AppConstants.SOCIAL_LINKS.GITHUB, icon: GitHubIcon },
+    // { name: "GitHub", href: AppConstants.SOCIAL_LINKS.GITHUB, icon: GitHubIcon },
     { name: "Discord", href: AppConstants.SOCIAL_LINKS.DISCORD, icon: DiscordIcon }
 ];
