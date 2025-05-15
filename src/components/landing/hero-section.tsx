@@ -39,7 +39,7 @@ export function HeroSection() {
           height={56} />
         <SocialLinks />
       </div>
-      <section className="py-12 h-[100vh] md:py-24 lg:py-32 xl:py-48 relative overflow-hidden">
+      <section className="py-12 h-[100vh] md:py-24 lg:py-28 relative overflow-hidden">
         <div className="container z-40 mx-auto relative">
           {/* Hero content with parallax */}
           <div
@@ -50,10 +50,10 @@ export function HeroSection() {
             }}
           >
             <h1 className="text-4xl md:text-6xl font-bold mb-4">
-              Decentralized Funding for Your Projects
+              Configurable Fundraising Platform
             </h1>
-            <p className="text-xl text-muted-foreground max-w-2xl mb-8">
-              Create, fund and manage projects with full transparency and control.
+            <p className="text-xl text-muted-foreground max-w-2xl mb-4">
+              Create, fund and manage any project or cause with full transparency and control
             </p>
             <div className="space-x-4">
               <HeroGetStartedButton />
@@ -63,7 +63,7 @@ export function HeroSection() {
             </div>
 
             {/* Stats Section - now inside the parallax container */}
-            <div className="grid grid-cols-2 gap-10 my-12 mt-24 md:mt-12">
+            <div className="grid grid-cols-2 gap-14 md:gap-24 my-12 mt-24 md:mt-24">
               <div className="flex flex-col items-center">
                 <span className="text-3xl md:text-5xl font-bold tracking-tight text-primary">
                   ${(stats.amountRaised / 1000000).toFixed(1)}M+

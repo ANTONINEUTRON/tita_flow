@@ -15,6 +15,7 @@ import {
   Vote,
   LucideIcon,
   MoreHorizontal,
+  Loader2,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
@@ -38,9 +39,7 @@ import AppUser from "@/lib/types/user";
 import toast from "react-hot-toast";
 import { FundingFlowResponse } from "@/lib/types/flow.response";
 import useProfile from "@/lib/hooks/use_profile";
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
-import { Input } from "@/components/ui/input";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter, DialogDescription } from "@/components/ui/dialog";
 import { ContributeDialog } from "@/components/flow_item/contributors/ContributeDialog";
 
 // Update the NavItem interface
@@ -55,13 +54,15 @@ interface NavItem {
 export default function FlowDetailPage() {
   const params = useParams();
   const [dialogOpen, setDialogOpen] = useState(false);
+  const [signInDialogOpen, setSignInDialogOpen] = useState(false);
+  const [isSigningIn, setIsSigningIn] = useState(false); // Add loading state
   const router = useRouter();
   const [flow, setFlow] = useState<FundingFlowResponse | null>(null);
   const [loading, setLoading] = useState(true);
   const [activeView, setActiveView] = useState("overview");
   const [currentUser, setCurrentUser] = useState<any>(null);
   const [user, setUser] = useState<AppUser | null>(null)
-  const { userProfile } = useProfile();
+  const { userProfile, signUserIn } = useProfile();
 
 
   interface Token {
@@ -115,6 +116,16 @@ export default function FlowDetailPage() {
     loadFlowData();
   }, [flowId]);
 
+  // Watch for userProfile changes
+  useEffect(() => {
+    // If user has successfully signed in and we were waiting for it
+    if (userProfile && isSigningIn) {
+      setIsSigningIn(false); // Reset loading state
+      setSignInDialogOpen(false); // Close sign in dialog
+      setDialogOpen(true); // Open contribute dialog
+    }
+  }, [userProfile, isSigningIn]);
+
   // Actions
   const handleContribute = () => {
     // router.push(`/flow/${flowId}/contribute`);
@@ -150,7 +161,13 @@ export default function FlowDetailPage() {
     // Logic for voting on a proposal
   };
 
-  const handleContributeClick = () => setDialogOpen(true);
+  const handleContributeClick = () => {
+    if (userProfile) {
+      setDialogOpen(true);
+    } else {
+      setSignInDialogOpen(true);
+    }
+  };
 
   const handleDialogContribute = () => {
     const parsed = parseFloat(amount);
@@ -160,6 +177,18 @@ export default function FlowDetailPage() {
       setAmount("");
     }
     // Optionally handle invalid input
+  };
+
+  const handleSignIn = async () => {
+    setIsSigningIn(true); // Set loading state
+    try {
+      await signUserIn();
+      // Don't close dialog yet - let the useEffect handle it when userProfile is set
+    } catch (error) {
+      console.error("Sign in failed:", error);
+      setIsSigningIn(false); // Reset loading on error
+      // Optionally show error message
+    }
   };
 
 
@@ -331,6 +360,40 @@ export default function FlowDetailPage() {
         onNavigate={handleNavigation}
         onAction={handleContributeClick}
       />
+
+      {/* Sign-in Dialog */}
+      <Dialog open={signInDialogOpen} onOpenChange={(open) => !isSigningIn && setSignInDialogOpen(open)}>
+        <DialogContent className="sm:max-w-[425px]">
+          <DialogHeader>
+            <DialogTitle>Sign in required</DialogTitle>
+            <DialogDescription>
+              You need to sign in before you can contribute to this funding flow.
+            </DialogDescription>
+          </DialogHeader>
+          <DialogFooter>
+            <Button 
+              variant="outline" 
+              onClick={() => setSignInDialogOpen(false)}
+              disabled={isSigningIn}
+            >
+              Cancel
+            </Button>
+            <Button 
+              onClick={handleSignIn}
+              disabled={isSigningIn}
+            >
+              {isSigningIn ? (
+                <>
+                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                  Signing In...
+                </>
+              ) : (
+                "Sign In"
+              )}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }

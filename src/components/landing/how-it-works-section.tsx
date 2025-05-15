@@ -16,7 +16,7 @@ export function HowItWorksSection() {
           {howItWorks.map((step, index) => (
             <div key={index} className="relative flex flex-col items-center p-6">
               <div className="text-4xl font-bold text-primary/20 dark:text-primary/30 mb-4">{step.step}</div>
-              <h3 className="text-xl font-bold mb-2">{step.title}</h3>
+              <h3 className="text-xl font-bold mb-2 text-center">{step.title}</h3>
               <p className="text-gray-500 dark:text-gray-400 text-center">{step.description}</p>
               {index < howItWorks.length - 1 && (
                 <div className="hidden lg:block absolute top-1/2 right-0 w-1/3 h-0.5 bg-gray-200 dark:bg-gray-800 transform translate-x-1/2"></div>

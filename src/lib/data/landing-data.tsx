@@ -12,36 +12,36 @@ export const features = [
     icon: "🎯"
   },
   {
-    title: "Escrow & Secure Transactions",
-    description: "Protect funds with conditional releases and multi-signature approvals.",
-    icon: "🔒"
-  },
-  {
     title: "Decentralized Governance & Voting",
     description: "Enable backers to participate in fund management and decision-making.",
     icon: "🗳️"
   },
   {
+    title: "Project Updates & Communication",
+    description: "Keep backers informed with integrated project update system and community feedback.",
+    icon: "💬"
+  },
+  {
+    title: "Escrow & Secure Transactions",
+    description: "Protect funds with conditional releases and multi-signature approvals.",
+    icon: "🔒"
+  },
+  {
     title: "On-Chain Transparency",
     description: "Every transaction is public and verifiable on the blockchain.",
     icon: "📊"
-  },
-  {
-    title: "Ecosystem Integration",
-    description: "Seamlessly connects with other Web3 tools and platforms.",
-    icon: "🔄"
   }
 ];
 
 export const useCases = [
   {
     title: "Crowdfunding & Donations",
-    description: "Raise funds with milestone-based payouts that ensure transparency and accountability.",
+    description: "Raise funds with flexible configurations that ensure transparency and accountability.",
     image: "/images/crowdfunding.svg"
   },
   {
     title: "Startup & Angel Investing",
-    description: "Back startups with conditional fund releases tied to business milestones.",
+    description: "Startups can raise from investors with conditional fund releases tied to business milestones.",
     image: "/images/investing.svg"
   },
   {
@@ -50,8 +50,13 @@ export const useCases = [
     image: "/images/grants.svg"
   },
   {
-    title: "Escrow Payments",
-    description: "Secure deals with controlled disbursements that protect all parties involved.",
+    title: "DAO Treasury Management",
+    description: "Enable community-governed fund allocation with transparent milestone verification and on-chain voting.",
+    image: "/images/investing.svg"
+  },
+  {
+    title: "Creator Economy Funding",
+    description: "Support creators while ensuring content delivery through milestone-based funding that protects backers.",
     image: "/images/escrow.svg"
   },
   {
@@ -64,23 +69,23 @@ export const useCases = [
 export const howItWorks = [
   {
     step: "01",
-    title: "Launch a Flow",
-    description: "Set up a funding model tailored to your specific needs and goals."
+    title: "Launch a Funding Flow",
+    description: "Set up milestone-based funding rules and governance options for your project"
   },
   {
     step: "02",
     title: "Receive Support",
-    description: "Allow donors or investors to contribute and participate in governance."
+    description: "Allow contributors to fund your project"
   },
   {
     step: "03",
-    title: "Unlock Funds",
-    description: "Funds are released only when predefined milestones are achieved."
+    title: "Track & Manage",
+    description: "Funds are released only when predefined milestones are met, with decisions governed on-chain by the contributors"
   },
   {
     step: "04",
-    title: "Track & Manage",
-    description: "Monitor progress and manage stakeholder relationships."
+    title: "Keep Everyone Updated",
+    description: "Share progress updates and engage with your contributors"
   }
 ];
 
@@ -88,25 +93,17 @@ export const footerLinks = [
   {
     title: "Platform",
     links: [
-      { label: "Features", href: "/features" },
-      { label: "Pricing", href: "/pricing" },
+      { label: "About", href: "/about" },
+      { label: "Contact", href: "/" },
       { label: "Use Cases", href: "/use-cases" }
     ]
   },
   {
     title: "Resources",
     links: [
-      { label: "Documentation", href: "/docs" },
-      { label: "Blog", href: "/blog" },
-      { label: "FAQs", href: "/faq" }
-    ]
-  },
-  {
-    title: "Company",
-    links: [
-      { label: "About", href: "/about" },
-      { label: "Careers", href: "/careers" },
-      { label: "Contact", href: "/contact" }
+      { label: "FAQs", href: "/faq" },
+      { label: "Blog", href: "/" },
+      { label: "Documentation", href: "/" },
     ]
   },
   {

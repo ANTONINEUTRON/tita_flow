@@ -17,9 +17,7 @@ export async function GET(req: NextRequest) {
         const userRecord = userId
             ? await userService.getUserRecord(userId ?? "")
             : await userService.getUserRecordByEmail(userEmail ?? "");
-        console.log(userRecord)
-        console.log(userRecord)
-        console.log(userRecord)
+            
         return NextResponse.json(userRecord);
     } catch (error) {
         console.log(error)

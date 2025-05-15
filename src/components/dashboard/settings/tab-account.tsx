@@ -27,7 +27,7 @@ const accountFormSchema = z.object({
 type AccountFormValues = z.infer<typeof accountFormSchema>;
 
 export default function TabAccount() {
-  const { userProfile, updateUserProfile, loading, signUserOut } = useProfile();
+  const { userProfile, updateUserProfile, loading, signUserOut, supportedCurrenciesBalances } = useProfile();
   const [copied, setCopied] = useState<string | null>(null);
   const [isUploading, setIsUploading] = useState(false);
   const [previewUrl, setPreviewUrl] = useState<string | null>(null);
@@ -196,7 +196,8 @@ export default function TabAccount() {
 
 
       {/* Wallet Section */}
-      <WalletCard />
+      <WalletCard 
+        supportedCurrenciesBalances={supportedCurrenciesBalances}/>
       
       {/* Wallet Information - Read Only */}
       <Card>

@@ -113,7 +113,7 @@ export default function useFlow() {
         const userPubKey = new PublicKey(fundingFlow.creator);
         const selectedTokenMint: PublicKey = new PublicKey(AppConstants.SUPPORTEDCURRENCIES.find((currency) => currency.name === fundingFlow.currency)!.address);
         const flowId: string = fundingFlow.id;
-        const goal: BN = new BN(fundingFlow.goal);
+        const goal: BN = new BN(fundingFlow.goal); //TODO MULTIPLY WITH DECIMALS
 
         // Handle start time - could be optional on chain
         let startTime: BN | null = null;

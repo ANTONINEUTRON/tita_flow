@@ -22,7 +22,7 @@ export function UseCasesSection() {
                   <p className="text-gray-500 dark:text-gray-400">{useCase.description}</p>
                 </div>
                 <div className="mt-4">
-                  <Link href={`/use-cases/${useCase.title.toLowerCase().replace(/\s+/g, '-')}`} className="text-primary hover:underline">
+                  <Link href={`/use-cases`} className="text-primary hover:underline">
                     Learn more →
                   </Link>
                 </div>

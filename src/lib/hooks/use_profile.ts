@@ -10,6 +10,12 @@ import { v4 as uuidv4, } from 'uuid';
 import airdropWallet from "../utils/airdrop_wallet";
 import { useUser, useWallet } from "@civic/auth-web3/react";
 import { userHasWallet } from "@civic/auth-web3";
+import { SupportCurrency } from "../types/supported_currencies";
+import { AppConstants } from "../app_constants";
+import { getAssetBalance } from "../utils/get_asset_balance";
+import { PublicKey } from "@solana/web3.js";
+import { set } from "@coral-xyz/anchor/dist/cjs/utils/features";
+
 
 export default function useProfile() {
     const [userProfile, setUserProfile] = useState<AppUser | null>(null);
@@ -18,18 +24,19 @@ export default function useProfile() {
     const router = useRouter();
     const userContext = useUser();
     const { address } = useWallet({ type: "solana" })
-    const [isFetching, setIsFetching] = useState(false);
     const walletInstance = userHasWallet(userContext)
         ? userContext.solana.wallet
         : undefined;
     const loadingRef = useRef(false);
+    const [supportedCurrenciesBalances, setSCurrenciesBalances] = useState<number[]>([]);
+    const [loadingSupportedCurrencies, setLoadingSupportedCurrencies] = useState(false);
 
     useEffect(() => {
-        console.log("User Profile: ", userContext.user);
+        // console.log("User Profile: ", userContext.user);
         if (userContext.user && !userProfile) {
             // router.push("/app/dashboard");
             if (!loadingRef.current) {
-            loadingRef.current = true;
+                loadingRef.current = true;
                 onLogin()
             }
         }
@@ -76,7 +83,7 @@ export default function useProfile() {
                 //// if it exists, set the user profile
                 setUserProfile(userRecord)
 
-                if(userRecord.profilePics == "" && userContext.user?.picture) {
+                if (!userRecord.profilePics && userContext.user?.picture) {
                     // update the profile picture
                     updateUserProfile(userRecord.id, { profilePics: userContext.user?.picture })
                 }
@@ -99,6 +106,7 @@ export default function useProfile() {
                 saveUserProfile(appUser)
             }
 
+            fetchUserBalance();
         } catch (error) {
             console.log("An error occurred while fetching user profile " + error);
             setError("An error occurred while fetching user profile");
@@ -106,6 +114,45 @@ export default function useProfile() {
 
         loadingRef.current = false;
         setLoading(false);
+    }
+
+    //If index is not specified, fetch all balances
+    const fetchUserBalance = async (indexToFetch?: number) => {
+        setLoadingSupportedCurrencies(true);
+        try {
+            if (indexToFetch) {
+                console.log("Fetching balance for index: ", indexToFetch);
+                // fetch
+                const balance = await getAssetBalance(
+                    AppConstants.SUPPORTEDCURRENCIES[indexToFetch].address,
+                    new PublicKey(userProfile?.wallet!),
+                )
+
+                const updatedBalances = [...supportedCurrenciesBalances!];
+                updatedBalances[indexToFetch] = balance;
+                console.log("Updated Balances: ", updatedBalances);
+                setSCurrenciesBalances(updatedBalances);
+            } else {
+                console.log("Fetching all balances");
+                // fetch all balances
+                const balances = await Promise.all(
+                    AppConstants.SUPPORTEDCURRENCIES.map(async (currency, index) => {
+                        const balance = await getAssetBalance(
+                            currency.address,
+                            new PublicKey(userProfile?.wallet!),
+                        )
+                        return balance;
+                    })
+                );
+console.log("Balances: ", balances);
+                setSCurrenciesBalances(balances);
+            }
+        } catch (error) {
+            console.error("An error occurred while fetching user balance", error);
+            setError("An error occurred while fetching user balance");
+        } finally {
+            setLoadingSupportedCurrencies(false);
+        }
     }
 
     const fetchProfile = async (userId: string): Promise<AppUser | null> => {
@@ -120,7 +167,6 @@ export default function useProfile() {
 
         return null
     }
-
 
     const fetchProfileWithEmail = async (userEmail: string): Promise<AppUser | null> => {
         try {
@@ -175,7 +221,7 @@ export default function useProfile() {
             const response = await axios.put(
                 `/api/user`,
                 {
-                    userId: id,
+                    id: id,
                     ...updatedUserProfileFields
                 }
             );
@@ -185,5 +231,5 @@ export default function useProfile() {
         }
     }
 
-    return { userProfile, loading, error, walletInstance, fetchProfile, updateUserProfile, signUserIn, signUserOut }
+    return { userProfile, loading, error, walletInstance, supportedCurrenciesBalances, fetchUserBalance, fetchProfile, updateUserProfile, signUserIn, signUserOut }
 }

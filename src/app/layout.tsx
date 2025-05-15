@@ -4,15 +4,15 @@ import { ReactQueryProvider } from './react-query-provider'
 import { Toaster } from 'react-hot-toast';
 
 export const metadata = {
-  title: 'TitaFlow',
-  description: 'Configurable rule based funding platform',
+  title: 'TitaFlow | Configurable Fundraising Protocol on Solana',
+  description: 'Secure transparent funding with configurable milestones and community governance. The most trusted fundraising platform for Web3 projects on Solana blockchain.',
+  keywords: 'solana fundraising, milestone funding, web3 crowdfunding, crypto fundraising, blockchain governance, defi fundraising',
+  openGraph: {
+    title: 'TitaFlow | Configurable Fundraising Protocol on Solana',
+    description: 'Secure transparent funding with configurable milestones and community governance.',
+    images: [{ url: '/logo.png' }],
+  },
 }
-
-const links: { label: string; path: string }[] = [
-  { label: 'Account', path: '/account' },
-  { label: 'Clusters', path: '/clusters' },
-  { label: 'Basic Program', path: '/basic' },
-]
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (

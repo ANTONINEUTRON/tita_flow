@@ -8,7 +8,7 @@ export function FeaturesSection() {
           <div className="space-y-2">
             <h2 className="text-3xl font-bold tracking-tighter sm:text-4xl md:text-5xl">Why Tita?</h2>
             <p className="mx-auto max-w-[700px] text-gray-500 md:text-xl dark:text-gray-400">
-              A decentralized platform that puts you in control of your funding flows.
+              A decentralized platform that helps fundraisers offer trust and accountability
             </p>
           </div>
         </div>
