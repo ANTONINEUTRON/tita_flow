@@ -16,6 +16,6 @@ export default interface AppUser {
   wallet: string;
   username: string;
   name: string;
-  profilePics?: string;
+  profile_pics?: string;
   preferences?: UserPreferences;
 }

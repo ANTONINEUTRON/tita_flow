@@ -18,11 +18,12 @@ import {
 import { Textarea } from "@/components/ui/textarea";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Label } from "@/components/ui/label";
-import { Flow, Proposal } from "@/lib/types/types";
+import { Flow, Proposal } from "@/lib/types/typesbbbb";
 import { formatDate } from "@/lib/utils";
-import { FundingFlow } from "@/lib/types/flow";
+import { FundingFlow } from "@/lib/types/funding_flow";
 import { fetchFlowData } from "@/lib/data/flow_item_data";
 import { FundingFlowResponse } from "@/lib/types/flow.response";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 
 interface ProposalsViewProps {
   flow: FundingFlowResponse;
@@ -33,6 +34,14 @@ interface ProposalsViewProps {
   };
   onCreateProposal?: (title: string, description: string, options: string[], endDate: string) => Promise<void>;
   onVote?: (proposalId: string, optionId: string) => Promise<void>;
+}
+
+// Define proposal types
+enum ProposalType {
+  MILESTONE_COMPLETION = "milestone_completion",
+  FLOW_CANCELLATION = "flow_cancellation",
+  MILESTONE_ADJUSTMENT = "milestone_adjustment",
+  FLOW_FUNDING_EXTENSION = "flow_funding_extension"
 }
 
 export function ProposalsView({ 
@@ -49,6 +58,14 @@ export function ProposalsView({
   const [activeProposal, setActiveProposal] = useState<Proposal | null>(null);
   const [selectedOption, setSelectedOption] = useState<string>('');
   const [showVotingDialog, setShowVotingDialog] = useState(false);
+  const [proposalType, setProposalType] = useState<ProposalType | null>(null);
+  const [selectedMilestoneId, setSelectedMilestoneId] = useState<number>(0);
+  const [newAmount, setNewAmount] = useState<string>('');
+  const [newDeadline, setNewDeadline] = useState<string>('');
+  const [newEndDate, setNewEndDate] = useState<string>('');
+  const [quorumPercentage, setQuorumPercentage] = useState<string>('');
+  const [approvalPercentage, setApprovalPercentage] = useState<string>('');
+
 
   const flow = fetchFlowData("1");
     // const [flow, setFlow] = useState<Flow>()
@@ -63,7 +80,7 @@ export function ProposalsView({
   
   const proposals = flow!.proposals || [];
   
-  const isCreator = currentUser?.id === flow!.creator.id;
+  const isCreator = true;//currentUser?.id === flow!.creator.id;
   const canCreateProposal = isCreator || flow!.settings?.communityProposals;
   
   const handleCreateProposal = async () => {
@@ -192,69 +209,172 @@ export function ProposalsView({
                 New Proposal
               </Button>
             </DialogTrigger>
-            <DialogContent className="sm:max-w-[600px]">
+            <DialogContent className="sm:max-w-md">
               <DialogHeader>
                 <DialogTitle>Create New Proposal</DialogTitle>
-                <DialogDescription>
-                  Create a proposal for the community to vote on.
-                </DialogDescription>
               </DialogHeader>
-              <div className="space-y-4">
+              
+              <div className="grid gap-4 py-4">
+                {/* Proposal Type Selection */}
+                <div className="space-y-2">
+                  <Label htmlFor="proposal-type">Proposal Type</Label>
+                  <Select 
+                    onValueChange={(value) => {
+                      setProposalType(value as ProposalType);
+                      // Reset type-specific fields when changing types
+                      setSelectedMilestoneId(0);
+                      setNewAmount("");
+                      setNewDeadline("");
+                      setNewEndDate("");
+                    }}
+                  >
+                    <SelectTrigger>
+                      <SelectValue placeholder="Select proposal type" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value={ProposalType.MILESTONE_COMPLETION}>Milestone Completion</SelectItem>
+                      <SelectItem value={ProposalType.FLOW_CANCELLATION}>Flow Cancellation</SelectItem>
+                      <SelectItem value={ProposalType.MILESTONE_ADJUSTMENT}>Milestone Adjustment</SelectItem>
+                      <SelectItem value={ProposalType.FLOW_FUNDING_EXTENSION}>Extend Funding Period</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+                
+                {/* Title */}
                 <div className="space-y-2">
                   <Label htmlFor="proposal-title">Title</Label>
                   <Input
                     id="proposal-title"
-                    placeholder="What are you proposing?"
                     value={newProposalTitle}
                     onChange={(e) => setNewProposalTitle(e.target.value)}
+                    placeholder="Proposal title"
                   />
                 </div>
                 
+                {/* Description */}
                 <div className="space-y-2">
                   <Label htmlFor="proposal-description">Description</Label>
                   <Textarea
                     id="proposal-description"
-                    placeholder="Provide details about your proposal..."
                     value={newProposalDescription}
                     onChange={(e) => setNewProposalDescription(e.target.value)}
-                    className="min-h-[100px]"
+                    placeholder="Explain the purpose of this proposal"
+                    rows={3}
                   />
                 </div>
                 
-                <div className="space-y-3">
-                  <Label>Options</Label>
-                  {newProposalOptions.map((option, index) => (
-                    <div key={index} className="flex gap-2">
-                      <Input
-                        placeholder={`Option ${index + 1}`}
-                        value={option}
-                        onChange={(e) => handleOptionChange(index, e.target.value)}
-                      />
-                      {newProposalOptions.length > 2 && (
-                        <Button 
-                          variant="outline" 
-                          size="icon" 
-                          type="button"
-                          onClick={() => handleRemoveOption(index)}
-                        >
-                          &times;
-                        </Button>
-                      )}
-                    </div>
-                  ))}
-                  
-                  <Button
-                    type="button"
-                    variant="outline"
-                    className="w-full"
-                    onClick={handleAddOption}
-                  >
-                    Add Option
-                  </Button>
-                </div>
+                {/* Dynamic fields based on proposal type */}
+                {proposalType === ProposalType.MILESTONE_COMPLETION && (
+                  <div className="space-y-2">
+                    <Label htmlFor="milestone-id">Select Milestone</Label>
+                    <Select onValueChange={(value) => setSelectedMilestoneId(parseInt(value))}>
+                      <SelectTrigger>
+                        <SelectValue placeholder="Select milestone to mark as complete" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {flow?.milestones?.map((milestone, index) => (
+                          <SelectItem key={milestone.id} value={milestone.id.toString()}>
+                            Milestone {index + 1}: {milestone.description.substring(0, 30)}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  </div>
+                )}
                 
+                {proposalType === ProposalType.MILESTONE_ADJUSTMENT && (
+                  <>
+                    <div className="space-y-2">
+                      <Label htmlFor="milestone-id">Select Milestone</Label>
+                      <Select onValueChange={(value) => setSelectedMilestoneId(parseInt(value))}>
+                        <SelectTrigger>
+                          <SelectValue placeholder="Select milestone to adjust" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          {flow?.milestones?.map((milestone, index) => (
+                            <SelectItem key={milestone.id} value={milestone.id.toString()}>
+                              Milestone {index + 1}: {milestone.description.substring(0, 30)}
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                    </div>
+                    
+                    <div className="space-y-2">
+                      <Label htmlFor="new-amount">New Amount (Optional)</Label>
+                      <Input
+                        id="new-amount"
+                        type="number"
+                        value={newAmount}
+                        onChange={(e) => setNewAmount(e.target.value)}
+                        placeholder={`Current: ${ 0} ${flow?.currency || ''}`}
+                      />
+                    </div>
+                    
+                    <div className="space-y-2">
+                      <Label htmlFor="new-deadline">New Deadline (Optional)</Label>
+                      <Input
+                        id="new-deadline"
+                        type="datetime-local"
+                        value={newDeadline}
+                        onChange={(e) => setNewDeadline(e.target.value)}
+                        min={new Date().toISOString().slice(0, 16)}
+                      />
+                    </div>
+                  </>
+                )}
+                
+                {proposalType === ProposalType.FLOW_FUNDING_EXTENSION && (
+                  <div className="space-y-2">
+                    <Label htmlFor="new-end-date">New Funding End Date</Label>
+                    <Input
+                      id="new-end-date"
+                      type="datetime-local"
+                      value={newEndDate}
+                      onChange={(e) => setNewEndDate(e.target.value)}
+                      min={new Date().toISOString().slice(0, 16)}
+                    />
+                  </div>
+                )}
+                
+                {/* Common proposal configuration */}
+                <Card>
+                  <CardContent className="pt-4">
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                      <div className="space-y-2">
+                        <Label htmlFor="quorum-percentage">Quorum Percentage</Label>
+                        <Input
+                          id="quorum-percentage"
+                          type="number"
+                          min="1"
+                          max="100"
+                          value={quorumPercentage}
+                          onChange={(e) => setQuorumPercentage(e.target.value)}
+                          placeholder="51"
+                        />
+                        <p className="text-xs text-muted-foreground">Minimum participation required</p>
+                      </div>
+                      
+                      <div className="space-y-2">
+                        <Label htmlFor="approval-percentage">Approval Percentage</Label>
+                        <Input
+                          id="approval-percentage"
+                          type="number"
+                          min="1"
+                          max="100"
+                          value={approvalPercentage}
+                          onChange={(e) => setApprovalPercentage(e.target.value)}
+                          placeholder="51"
+                        />
+                        <p className="text-xs text-muted-foreground">Percentage of 'Yes' votes needed</p>
+                      </div>
+                    </div>
+                  </CardContent>
+                </Card>
+                
+                {/* Proposal end date */}
                 <div className="space-y-2">
-                  <Label htmlFor="proposal-end-date">End Date</Label>
+                  <Label htmlFor="proposal-end-date">Voting End Date</Label>
                   <Input
                     id="proposal-end-date"
                     type="datetime-local"
@@ -264,16 +384,26 @@ export function ProposalsView({
                   />
                 </div>
               </div>
+              
               <DialogFooter>
                 <Button variant="outline" onClick={() => setIsCreatingProposal(false)}>
                   Cancel
                 </Button>
-                <Button onClick={handleCreateProposal} disabled={
-                  !newProposalTitle.trim() || 
-                  !newProposalDescription.trim() || 
-                  newProposalOptions.filter(o => o.trim()).length < 2 ||
-                  !newProposalEndDate
-                }>
+                <Button 
+                  onClick={handleCreateProposal} 
+                  disabled={
+                    !newProposalTitle.trim() || 
+                    !newProposalDescription.trim() || 
+                    !proposalType ||
+                    !newProposalEndDate ||
+                    (proposalType === ProposalType.MILESTONE_COMPLETION && !selectedMilestoneId) ||
+                    (proposalType === ProposalType.MILESTONE_ADJUSTMENT && 
+                      (!selectedMilestoneId || (!newAmount && !newDeadline))) ||
+                    (proposalType === ProposalType.FLOW_FUNDING_EXTENSION && !newEndDate) ||
+                    !quorumPercentage ||
+                    !approvalPercentage
+                  }
+                >
                   Create Proposal
                 </Button>
               </DialogFooter>

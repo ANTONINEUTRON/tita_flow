@@ -13,7 +13,7 @@ import {
 import { Download, Search, TrendingUp, Users } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Flow } from "@/lib/types/types";
+import { Flow } from "@/lib/types/typesbbbb";
 import { formatCurrency, formatDate } from "@/lib/utils";
 import { fetchFlowData } from "@/lib/data/flow_item_data";
 import { FundingFlowResponse } from "@/lib/types/flow.response";

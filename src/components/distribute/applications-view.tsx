@@ -8,7 +8,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useToast } from "@/lib/hooks/use-toast";
-import { Application, DistributeFlow, Flow } from "@/lib/types/types";
+import { Application, DistributeFlow, Flow } from "@/lib/types/typesbbbb";
 
 interface ApplicationsViewProps {
     flow: DistributeFlow;

@@ -1,5 +1,5 @@
 import { FlowService } from "@/lib/server_services/flow_service";
-import { FundingFlow } from "@/lib/types/flow";
+import { FundingFlow } from "@/lib/types/funding_flow";
 import { NextRequest, NextResponse } from "next/server";
 
 

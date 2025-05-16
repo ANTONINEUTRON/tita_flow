@@ -38,7 +38,7 @@ export default function TabAccount() {
     resolver: zodResolver(accountFormSchema),
     defaultValues: {
       name: userProfile?.name || "",
-      profilePics: userProfile?.profilePics || "",
+      profilePics: userProfile?.profile_pics || "",
       username: userProfile?.username || "",
     },
   });
@@ -48,7 +48,7 @@ export default function TabAccount() {
     if (userProfile) {
       form.reset({
         name: userProfile.name || "",
-        profilePics: userProfile.profilePics || "",
+        profilePics: userProfile.profile_pics || "",
         username: userProfile.username || ""
       });
     }
@@ -183,7 +183,7 @@ export default function TabAccount() {
       {/* Profile Preview - Shows current settings */}
       <div className="flex items-center gap-4">
         <Avatar className="h-16 w-16">
-          <AvatarImage src={userProfile.profilePics || ""} alt={userProfile.name || "User"} />
+          <AvatarImage src={userProfile.profile_pics || ""} alt={userProfile.name || "User"} />
           <AvatarFallback>
             <User className="h-6 w-6" />
           </AvatarFallback>

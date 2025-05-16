@@ -8,7 +8,7 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { VotingPowerModel } from "@/lib/types/flow";
+import { VotingPowerModel } from "@/lib/types/funding_flow";
 import {  formatDate, formatCurrency, cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import { FundingFlowResponse } from "@/lib/types/flow.response";

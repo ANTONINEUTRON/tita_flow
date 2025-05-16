@@ -8,10 +8,6 @@ pub enum ProposalType {
     MilestoneCompletion {
         milestone_id: u32,
     },
-    // FundRelease {
-    //     amount: u64,
-    //     recipient: Pubkey,
-    // },
     FlowCancellation,
     MilestoneAdjustment {
         milestone_id: u32,

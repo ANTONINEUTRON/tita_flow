@@ -1,4 +1,4 @@
-import { Milestone, VotingPowerModel } from "./flow";
+import { Milestone, VotingPowerModel } from "./funding_flow";
 import AppUser from "./user";
 
 export interface FundingFlowResponse {
@@ -24,6 +24,7 @@ export interface FundingFlowResponse {
     createdAt?: string,
     updatedAt?: string,
     address?: string,
+    transaction_signature?: string,
     //
     users: AppUser
 }

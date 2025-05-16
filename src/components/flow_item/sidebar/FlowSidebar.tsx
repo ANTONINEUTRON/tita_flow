@@ -4,7 +4,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardFooter } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
 
-import { NavItem } from "../../../lib/types/types";
+import { NavItem } from "../../../lib/types/typesbbbb";
 import { FlowHeader } from "./FlowHeader";
 import { FlowProgress } from "./FlowProgress";
 import { SidebarNavigation } from "./SidebarNavigation";

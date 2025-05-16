@@ -11,8 +11,8 @@ export function HeroSection() {
 
   // Stats data - replace with real API calls if available
   const [stats, setStats] = useState({
-    amountRaised: 1250000, // In USD or your base currency
-    flowsCreated: 128
+    amountRaised: 1000, // In USD or your base currency
+    flowsCreated: 22
   });
 
   useEffect(() => {
@@ -66,7 +66,7 @@ export function HeroSection() {
             <div className="grid grid-cols-2 gap-14 md:gap-24 my-12 mt-24 md:mt-24">
               <div className="flex flex-col items-center">
                 <span className="text-3xl md:text-5xl font-bold tracking-tight text-primary">
-                  ${(stats.amountRaised / 1000000).toFixed(1)}M+
+                  ${(stats.amountRaised / 1000000).toFixed(1)}K+
                 </span>
                 <span className="text-sm md:text-lg text-muted-foreground mt-2">
                   Total Funds Raised

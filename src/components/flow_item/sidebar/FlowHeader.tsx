@@ -15,8 +15,8 @@ export function FlowHeader({ flow }: FlowHeaderProps) {
           {flow.title}
         </CardTitle> */}
         <div className="flex items-center text-muted-foreground text-sm mt-2">
-          <Avatar className="h-5 w-5 mr-2">
-            <AvatarImage src={flow.users?.profilePics } alt={flow.users?.username} />
+          <Avatar className="h-8 w-8 mr-2">
+            <AvatarImage src={flow.users?.profile_pics } alt={flow.users?.username} />
             <AvatarFallback>{flow.users?.username.substring(0,2).toUpperCase()}</AvatarFallback>
           </Avatar>
           <span className="truncate">{flow.users?.username}</span>

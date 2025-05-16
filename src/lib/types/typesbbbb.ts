@@ -33,7 +33,7 @@ export interface Milestone {
   proofLink?: string;
 }
 
-export interface Contributor {
+export interface Contribution {
   id: string;
   name: string;
   avatarUrl?: string;
@@ -175,7 +175,7 @@ export interface Flow {
     transactionHash: string;
   }[];
   milestones?: Milestone[];
-  contributors?: Contributor[];
+  contributors?: Contribution[];
   weightedDistribution?: WeightedRecipient[];
   updates?: Update[];
   proposals?: Proposal[];

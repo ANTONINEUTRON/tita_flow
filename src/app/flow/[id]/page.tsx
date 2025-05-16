@@ -31,7 +31,7 @@ import { FlowDetailSkeleton } from "../../../components/flow_item/FlowSkeleton";
 import { FlowOverview } from "../../../components/flow_item/FlowOverview";
 import { FlowSidebar } from "../../../components/flow_item/sidebar";
 import { MobileFlowHeader, MobileBottomNav } from "../../../components/flow_item/mobile";
-import { ContributorsView } from "@/components/flow_item/contributors/ContributorsView";
+import { ContributorsView } from "@/components/flow_item/contribute/ContributorsView";
 import { UpdatesView } from "@/components/flow_item/UpdatesView";
 import { ProposalsView } from "@/components/flow_item/ProposalsView";
 import useFlow from "@/lib/hooks/use_flow";
@@ -40,7 +40,11 @@ import toast from "react-hot-toast";
 import { FundingFlowResponse } from "@/lib/types/flow.response";
 import useProfile from "@/lib/hooks/use_profile";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter, DialogDescription } from "@/components/ui/dialog";
-import { ContributeDialog } from "@/components/flow_item/contributors/ContributeDialog";
+import { ContributeDialog } from "@/components/flow_item/contribute/ContributeDialog";
+import { SupportCurrency } from "@/lib/types/supported_currencies";
+import { AppConstants } from "@/lib/app_constants";
+import useContribute from "@/lib/hooks/use_contribute";
+import { FundingFlow } from "@/lib/types/funding_flow";
 
 // Update the NavItem interface
 interface NavItem {
@@ -62,35 +66,10 @@ export default function FlowDetailPage() {
   const [activeView, setActiveView] = useState("overview");
   const [currentUser, setCurrentUser] = useState<any>(null);
   const [user, setUser] = useState<AppUser | null>(null)
-  const { userProfile, signUserIn } = useProfile();
-
-
-  interface Token {
-    symbol: string;
-    name: string;
-  }
-
-  const TOKENS: Token[] = [
-    { symbol: "USDC", name: "USD Coin" },
-    { symbol: "SOL", name: "Solana" },
-    { symbol: "ETH", name: "Ethereum" },
-  ];
-
-  // Mock user balances for demonstration
-  const USER_BALANCES: Record<string, number> = {
-    USDC: 120.5,
-    SOL: 3.14,
-    ETH: 0.25,
-  };
-
-
-  const [amount, setAmount] = useState("");
-  const [selectedToken, setSelectedToken] = useState<string>(TOKENS[1].symbol);
-
-  const userBalance = USER_BALANCES[selectedToken] ?? 0;
-
+  const { userProfile, signUserIn, walletInstance, supportedCurrenciesBalances } = useProfile();
   const flowId = params.id as string;
   const { getFlowById } = useFlow();
+  const {contribute} = useContribute()
 
   useEffect(() => {
 
@@ -99,10 +78,8 @@ export default function FlowDetailPage() {
       setLoading(true);
 
       try {
-        // Step 1: Fetch flow data
         let flowDetail = await getFlowById(flowId);
         console.log("Flow detail:", flowDetail);
-        // Step 3: Set flow data and finish loading
         setFlow(flowDetail);
       } catch (error) {
 
@@ -125,12 +102,6 @@ export default function FlowDetailPage() {
       setDialogOpen(true); // Open contribute dialog
     }
   }, [userProfile, isSigningIn]);
-
-  // Actions
-  const handleContribute = () => {
-    // router.push(`/flow/${flowId}/contribute`);
-    toast.success("Contribute action triggered!");
-  };
 
   const handleShareFlow = () => {
     navigator.clipboard.writeText(window.location.href);
@@ -169,14 +140,24 @@ export default function FlowDetailPage() {
     }
   };
 
-  const handleDialogContribute = () => {
-    const parsed = parseFloat(amount);
+  const handleDialogContribute = async (amount: number, token: SupportCurrency) => {
+    const parsed = amount;
     if (!isNaN(parsed) && parsed > 0) {
-      handleContribute();
-      setDialogOpen(false);
-      setAmount("");
+      // call contribute function to sign transaction and debit user wallet
+      try{
+        setDialogOpen(false);
+
+        await contribute(
+          amount, userProfile!, flow as any as FundingFlow, walletInstance!,
+        )
+
+        toast.success("You have contributed successfully to this flow");
+      }catch(error){
+        console.error("Contribution failed:", error);
+        toast.error("Contribution failed. Please try again.");
+      }
+
     }
-    // Optionally handle invalid input
   };
 
   const handleSignIn = async () => {
@@ -206,7 +187,7 @@ export default function FlowDetailPage() {
           </AlertDescription>
         </Alert>
         <Button variant="outline" className="mt-4" asChild>
-          <Link href="/app/flows">
+          <Link href="/app/dashboard">
             <ArrowLeft className="mr-2 h-4 w-4" />
             Back to Flows
           </Link>
@@ -270,7 +251,7 @@ export default function FlowDetailPage() {
                 <Download className="mr-2 h-4 w-4" />
                 Export Details
               </DropdownMenuItem>
-              <DropdownMenuItem onClick={handleDialogContribute}>
+              <DropdownMenuItem onClick={(handleContributeClick)}>
                 <Coins className="mr-2 h-4 w-4" />
                 Contribute
               </DropdownMenuItem>
@@ -299,11 +280,8 @@ export default function FlowDetailPage() {
         <ContributeDialog
           open={dialogOpen}
           onOpenChange={setDialogOpen}
-          selectedToken={selectedToken}
-          setSelectedToken={setSelectedToken}
-          amount={amount}
-          setAmount={setAmount}
-          userBalance={userBalance}
+          selectedToken={flow.currency}
+          userBalance={supportedCurrenciesBalances[AppConstants.SUPPORTEDCURRENCIES.findIndex(curr => curr.name === flow.currency)]}
           onContribute={handleDialogContribute}
         />
 
@@ -371,14 +349,14 @@ export default function FlowDetailPage() {
             </DialogDescription>
           </DialogHeader>
           <DialogFooter>
-            <Button 
-              variant="outline" 
+            <Button
+              variant="outline"
               onClick={() => setSignInDialogOpen(false)}
               disabled={isSigningIn}
             >
               Cancel
             </Button>
-            <Button 
+            <Button
               onClick={handleSignIn}
               disabled={isSigningIn}
             >

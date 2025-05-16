@@ -1,4 +1,4 @@
-import { Flow, FlowType, FlowStatus, MilestoneStatus } from "../types/types";
+import { Flow, FlowType, FlowStatus, MilestoneStatus } from "../types/typesbbbb";
 
 export function fetchFlowData(id: string): Flow {
   // In a real app, this would be a fetch call to your API

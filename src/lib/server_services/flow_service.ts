@@ -1,6 +1,6 @@
 import { SupabaseClient } from "@supabase/supabase-js";
 import { SUPABASE_CLIENT } from "../supabaseconfig";
-import { FundingFlow } from "../types/flow";
+import { FundingFlow } from "../types/funding_flow";
 import { AppConstants } from "../app_constants";
 import { objectToSnake, objectToCamel } from "ts-case-convert";
 
@@ -40,7 +40,7 @@ export class FlowService {
             }
 
             // Convert snake_case to camelCase and return as FundingFlow
-            return objectToCamel(data) as any as FundingFlow;
+            return data as any as FundingFlow;
         } catch (error) {
             console.error('Error in fetchFundingFlow:', error);
             throw error;
@@ -57,7 +57,7 @@ export class FlowService {
                 throw error;
             }
         } catch (error) {
-            console.error("Error saving campaign to DB:", error);
+            console.error("Error saving flow to DB:", error);
             throw error;
         }
     }

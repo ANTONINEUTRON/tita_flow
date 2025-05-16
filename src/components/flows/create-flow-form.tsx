@@ -14,7 +14,7 @@ import { LucideArrowRight, LucideArrowLeft, Check } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { v4 as uuidv4 } from 'uuid';
 import { GovernanceConfiguration } from "./governance-config";
-import { FundingFlow, VotingPowerModel } from "@/lib/types/flow";
+import { FundingFlow, VotingPowerModel } from "@/lib/types/funding_flow";
 import toast from "react-hot-toast";
 import useProfile from "@/lib/hooks/use_profile";
 import useFlow from "@/lib/hooks/use_flow";
@@ -80,7 +80,7 @@ const createFlowValidationSchema = z.object({
 export type FlowCreationValues = z.infer<typeof createFlowValidationSchema>;
 
 export default function CreateFlowForm() {
-  const { userProfile, walletInstance } = useProfile();
+  const { userProfile, walletInstance, supportedCurrenciesBalances } = useProfile();
   const router = useRouter();
   const [currentStep, setCurrentStep] = useState<FormStep>(FormStep.BASIC_INFO);
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -171,19 +171,19 @@ export default function CreateFlowForm() {
       }
 
       // Show loading toast
-      toast("Uploading media and creating your funding flow");
+      toast("Uploading media and creating the funding flow");
 
       // Submit the flow data with the uploaded media URLs
       const flowId = uuidv4().substring(0, 22)
 
       const fflow = await prepareFlowData(flowId, values, userProfile?.wallet!, userProfile?.id!,);
       
-      let flowAddress = await createFlowTransaction(fflow, walletInstance!);
+      let {flowAddress, signature} = await createFlowTransaction(fflow, walletInstance!);
 
-      await saveFlowToStore({...fflow, address: flowAddress});
+      await saveFlowToStore({...fflow, address: flowAddress, transaction_signature: signature});
 
       // Success notification
-      toast.success("Your raise flow has been created.");
+      toast.success("Your funding flow has been created.");
 
       router.push(`/flow/${flowId}`);
 
@@ -235,13 +235,13 @@ export default function CreateFlowForm() {
   return (
     <Card className="w-full max-w-4xl mx-auto">
       <CardHeader>
-        <CardTitle>Create a Raise Flow</CardTitle>
+        <CardTitle>Create a Fundraising Flow</CardTitle>
         <CardDescription>
           Create a flow to collect funds from donors, investors, or customers
         </CardDescription>
 
         {/* Step Indicator */}
-        <div className="mt-6">
+        <div className="mt-12">
           <div className="flex justify-between">
             {["Basic Info", "Rules & Config", "Preview"].map((step, index) => (
               <div key={index} className="flex flex-col items-center">
@@ -365,7 +365,18 @@ export default function CreateFlowForm() {
             {/* Step 3: Preview & Submit */}
             {currentStep === FormStep.PREVIEW && (
               <div className="space-y-6">
-                <h3 className="text-lg font-medium">Review & Submit</h3>
+                <div className="flex justify-between items-center">
+                  <h3 className="text-lg font-medium">Review & Submit</h3>
+                  <div>
+                    {
+                      supportedCurrenciesBalances && supportedCurrenciesBalances[0] < 0 && (
+                        <div>
+                          <p className="text-sm text-destructive">You don't have enough balance to create a flow</p>
+                        </div>
+                      )
+                    }
+                  </div>
+                </div>
                 <p className="text-sm text-muted-foreground mb-6">
                   Review your raise flow configuration before creating it.
                 </p>
@@ -379,7 +390,8 @@ export default function CreateFlowForm() {
                     <span className="text-muted-foreground">Description:</span>
                     <span className="truncate">{form.getValues("description")}</span>
                     <span className="text-muted-foreground">Goal:</span>
-                    <span>{form.getValues("goal")}</span>
+                    <span>{form.getValues("goal")} {form.getValues("currency")}</span>
+                    
                     <span className="text-muted-foreground">Start Date:</span>
                     <span>{new Date(form.getValues("startdate")).toLocaleDateString()}</span>
                     <span className="text-muted-foreground">End Date:</span>

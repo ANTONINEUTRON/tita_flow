@@ -1,6 +1,6 @@
 import clsx, { ClassValue } from "clsx";
 import { twMerge } from "tailwind-merge";
-import { FlowStatus, MilestoneStatus } from "./types/types";
+import { FlowStatus, MilestoneStatus } from "./types/typesbbbb";
 import { Badge } from "@/components/ui/badge";
 
 export function formatCurrency(amount: number, symbol: string = "$"): string {

@@ -4,7 +4,7 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
 import { Progress } from "@/components/ui/progress";
 import { formatCurrency } from "../../../lib/utils";
-import { FundingFlow } from "@/lib/types/flow";
+import { FundingFlow } from "@/lib/types/funding_flow";
 import App from "next/app";
 import AppUser from "@/lib/types/user";
 import { SupportCurrency } from "@/lib/types/supported_currencies";
@@ -34,7 +34,7 @@ export function MobileFlowHeader({ flow, creator, progress, remainingDays }: Mob
         <Badge className="mb-2">{flow.status}</Badge>
         <div className="flex items-center text-muted-foreground text-xs">
           <Avatar className="h-4 w-4 mr-1">
-            <AvatarImage src={creator?.profilePics} alt={creator?.name} />
+            <AvatarImage src={creator?.profile_pics} alt={creator?.name} />
             <AvatarFallback>{creator?.username.substring(0,2).toUpperCase()}</AvatarFallback>
           </Avatar>
           <span>{creator?.username}</span>

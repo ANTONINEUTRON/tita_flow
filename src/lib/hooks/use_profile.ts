@@ -90,9 +90,9 @@ export default function useProfile() {
                 //// if it exists, set the user profile
                 setUserProfile(userRecord)
 
-                if (!userRecord.profilePics && userContext.user?.picture) {
+                if (!userRecord.profile_pics && userContext.user?.picture) {
                     // update the profile picture
-                    updateUserProfile(userRecord.id, { profilePics: userContext.user?.picture })
+                    updateUserProfile(userRecord.id, { profile_pics: userContext.user?.picture })
                 }
             } else {
                 //// if it does not exist, create a new user record
@@ -105,7 +105,7 @@ export default function useProfile() {
                         3
                     ),
                     name: "",
-                    profilePics: userContext.user?.picture,
+                    profile_pics: userContext.user?.picture,
                 }
 
                 setUserProfile(appUser)

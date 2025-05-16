@@ -21,7 +21,7 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { EllipsisVertical } from "lucide-react";
-import { Flow, Update } from "@/lib/types/types";
+import { Flow, Update } from "@/lib/types/typesbbbb";
 import { formatDate } from "@/lib/utils";
 import { fetchFlowData } from "@/lib/data/flow_item_data";
 import { FundingFlowResponse } from "@/lib/types/flow.response";
@@ -61,7 +61,7 @@ export function UpdatesView({
     
   const updates = flow!.updates || [];
   
-  const isCreator = currentUser?.id === flow!.creator.id;
+  const isCreator = true;//currentUser?.id === flow!.creator.id;
   
   const handleCreateUpdate = async () => {
     if (!onCreateUpdate || !newUpdateContent.trim()) return;

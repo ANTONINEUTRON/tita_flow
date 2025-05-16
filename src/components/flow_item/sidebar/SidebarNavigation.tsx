@@ -2,7 +2,7 @@ import React from "react";
 import { ChevronRight } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { cn } from "@/lib/utils";
-import { NavItem } from "../../../lib/types/types";
+import { NavItem } from "../../../lib/types/typesbbbb";
 
 interface SidebarNavigationProps {
   navItems: NavItem[];

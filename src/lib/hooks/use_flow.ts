@@ -1,7 +1,7 @@
 "use client"
 
 import { useState } from "react";
-import { FundingFlow, anchorAnumBasedOnVotingPowerModel, VotingPowerModel } from "../types/flow";
+import { FundingFlow, anchorAnumBasedOnVotingPowerModel, VotingPowerModel } from "../types/funding_flow";
 import { FlowCreationValues } from "@/components/flows/create-flow-form";
 import toast from "react-hot-toast";
 import { getTitaFlowProgram } from "@project/anchor";
@@ -106,14 +106,17 @@ export default function useFlow() {
     const createFlowTransaction = async (
         fundingFlow: FundingFlow,
         solanaWallet: SolanaWallet
-    ): Promise<string> => {
+    ): Promise<any> => {
         const connection = AppConstants.APP_CONNECTION;
         const program = getTitaFlowProgram({ connection } as any);
 
         const userPubKey = new PublicKey(fundingFlow.creator);
-        const selectedTokenMint: PublicKey = new PublicKey(AppConstants.SUPPORTEDCURRENCIES.find((currency) => currency.name === fundingFlow.currency)!.address);
+
+        const selectedCurrency = AppConstants.SUPPORTEDCURRENCIES.find((currency) => currency.name === fundingFlow.currency)!;
+        const selectedTokenMint: PublicKey = new PublicKey(selectedCurrency.address);
+        
         const flowId: string = fundingFlow.id;
-        const goal: BN = new BN(fundingFlow.goal); //TODO MULTIPLY WITH DECIMALS
+        const goal: BN = new BN(Number(fundingFlow.goal) * Math.pow(10, selectedCurrency.decimals));
 
         // Handle start time - could be optional on chain
         let startTime: BN | null = null;
@@ -192,17 +195,6 @@ export default function useFlow() {
         }).instruction();
 
         const blockhash = await connection.getLatestBlockhash();
-        console.log("blockhash", blockhash.blockhash);
-        // create v0 compatible message
-        // const insructions = [inx];
-        // const messageV0 = new TransactionMessage({
-        //     instructions: insructions,
-        //     payerKey: userPubKey,
-        //     recentBlockhash: blockhash.blockhash,
-        // }).compileToV0Message();
-
-        // const transferTransaction = new VersionedTransaction(messageV0);
-        // console.log(messageV0.recentBlockhash);
 
         const trx = new Transaction({
             ...blockhash,
@@ -215,7 +207,8 @@ export default function useFlow() {
         
         await connection.confirmTransaction({ signature, ...blockhash });
 
-        return signature;
+        const flowAddress = flowPda.toString();
+        return {flowAddress, signature};
     }
 
     const saveFlowToStore = async (flowToSubmitted: FundingFlow) => {

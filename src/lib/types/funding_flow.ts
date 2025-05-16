@@ -26,6 +26,7 @@ export interface FundingFlow{
     createdAt?: string,
     updatedAt?: string,
     address?: string,
+    transaction_signature?: string,
 }
 
 export enum VotingPowerModel{

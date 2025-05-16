@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import Link from "next/link";
 import {
     ActivityIcon, SettingsIcon,
@@ -23,13 +23,26 @@ import { ActivityContent } from "@/components/dashboard/activity-content";
 import { SettingsContent } from "@/components/dashboard/settings/settings-content";
 import useProfile from "@/lib/hooks/use_profile";
 import formatWalletAddress from "@/lib/utils/format_wallet_address";
+import useFlow from "@/lib/hooks/use_flow";
 
 export default function DashboardPage() {
     const [sidebarExpanded, setSidebarExpanded] = useState(true);
     const [activeView, setActiveView] = useState("overview");
     const [showNotifications, setShowNotifications] = useState(false);
     const { userProfile } = useProfile()
+    const { getUserFlows, flows } = useFlow();
 
+    useEffect(() => {
+        if (userProfile) {
+            getUserFlows(userProfile?.id ?? "").then((res) => {
+                console.log("User flows", flows);
+                console.log("User flows", res);
+            }
+            ).catch((error) => {
+                console.error("Error fetching user flows:", error);
+            });
+        }
+    }, [userProfile])
     // Navigation items (used for both sidebar and bottom nav)
     const navItems = [
         { id: "overview", label: "Overview", icon: LayoutDashboardIcon },
@@ -104,7 +117,7 @@ export default function DashboardPage() {
             case "overview":
                 return <OverviewContent />;
             case "flows":
-                return <FlowsContent />;
+                return <FlowsContent flows={flows}/>;
             case "activity":
                 return <ActivityContent />;
             case "settings":
@@ -150,7 +163,7 @@ export default function DashboardPage() {
                     !sidebarExpanded && "justify-center"
                 )}>
                     <Avatar className="h-10 w-10">
-                        <AvatarImage src={userProfile?.profilePics} alt="User" />
+                        <AvatarImage src={userProfile?.profile_pics} alt="User" />
                         <AvatarFallback>{userProfile?.username.substring(0,2).toUpperCase()}</AvatarFallback>
                     </Avatar>
                     {sidebarExpanded && (

@@ -6,35 +6,13 @@ import { useEffect } from "react";
 import useFlow from "@/lib/hooks/use_flow";
 import useProfile from "@/lib/hooks/use_profile";
 import { cn } from "@/lib/utils";
+import { FundingFlow } from "@/lib/types/funding_flow";
 
-export function FlowsContent() {
-  // Mock data
-  const flowsData = [
-    { id: 1, name: "Community Grant Program", status: "active", raised: 25000, target: 50000, milestones: 4, completedMilestones: 2 },
-    { id: 2, name: "DeFi Startup Funding", status: "active", raised: 75000, target: 100000, milestones: 5, completedMilestones: 3 },
-    { id: 3, name: "NFT Project Launch", status: "pending", raised: 0, target: 30000, milestones: 3, completedMilestones: 0 },
-    { id: 4, name: "Technical Bounty Fund", status: "completed", raised: 15000, target: 15000, milestones: 6, completedMilestones: 6 },
-  ];
+interface FlowsContentProps {
+  flows: FundingFlow[]
+}
 
-  const { getUserFlows,flows } = useFlow();
-  const {userProfile, } = useProfile();
- 
-  useEffect(() => {
-    if(userProfile){
-      getUserFlows(userProfile?.id ?? "").then((res) => {
-        console.log("User flows", flows);
-        console.log("User flows", res);
-      }
-      ).catch((error) => {
-        console.error("Error fetching user flows:", error);
-      });
-    }
-  },[userProfile])
-
-  useEffect(()=>{
-    console.log("Flows efeefcet", flows);
-  },[flows])
-
+export function FlowsContent({ flows }: FlowsContentProps) {
   return (
     <div className="space-y-6">
       <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
@@ -61,7 +39,9 @@ export function FlowsContent() {
                   <div className="space-y-1">
                     <div className="flex justify-between text-sm">
                       <span className="text-muted-foreground">Raised</span>
-                      <span className="font-medium">${flow.raised.toLocaleString()} of ${flow.goal.toLocaleString()}</span>
+                      <span className="font-medium">
+                        {flow.raised.toLocaleString()} of {flow.goal.toLocaleString()} {flow.currency}
+                      </span>
                     </div>
                     <div className="h-2 bg-muted rounded-full overflow-hidden">
                       <div
