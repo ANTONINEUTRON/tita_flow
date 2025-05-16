@@ -37,19 +37,7 @@ export default function WalletCard({ supportedCurrenciesBalances }:WalletCardPro
                                     )
                                 })
                             }
-                            
-                            
-
-                            {/* USDC Balance */}
-                            <div className="flex justify-between items-center">
-                                <div className="flex items-center">
-                                    <div className="h-8 w-8 rounded-full bg-blue-500 flex items-center justify-center mr-2">
-                                        <Image src={"/icon/usdc.png"} width={30} height={30} alt="sol icon" className=" text-white" />
-                                    </div>
-                                    <span>USDC</span>
-                                </div>
-                                <span className="font-medium">125.50 USDC</span>
-                            </div>
+                        
                         </div>
                     </CardContent>
                 </Card>

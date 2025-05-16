@@ -22,8 +22,8 @@ export default function useProfile() {
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState<string | null>(null);
     const router = useRouter();
-    const userContext = useUser();
     const { address } = useWallet({ type: "solana" })
+    const userContext = useUser();
     const walletInstance = userHasWallet(userContext)
         ? userContext.solana.wallet
         : undefined;
@@ -41,6 +41,13 @@ export default function useProfile() {
             }
         }
     }, [userContext.user])
+
+    useEffect(() => {
+        if(userProfile?.wallet && supportedCurrenciesBalances.length === 0) {
+            // fetch user balance
+            fetchUserBalance();
+        }
+    },[userProfile?.wallet])
 
     const signUserIn = async () => {
         setLoading(true);
@@ -106,7 +113,6 @@ export default function useProfile() {
                 saveUserProfile(appUser)
             }
 
-            fetchUserBalance();
         } catch (error) {
             console.log("An error occurred while fetching user profile " + error);
             setError("An error occurred while fetching user profile");
@@ -144,7 +150,7 @@ export default function useProfile() {
                         return balance;
                     })
                 );
-console.log("Balances: ", balances);
+                console.log("Balances: ", balances);
                 setSCurrenciesBalances(balances);
             }
         } catch (error) {
@@ -231,5 +237,17 @@ console.log("Balances: ", balances);
         }
     }
 
-    return { userProfile, loading, error, walletInstance, supportedCurrenciesBalances, fetchUserBalance, fetchProfile, updateUserProfile, signUserIn, signUserOut }
+    return { 
+        userProfile, 
+        loading, 
+        error, 
+        walletInstance, 
+        supportedCurrenciesBalances, 
+        loadingSupportedCurrencies, 
+        fetchUserBalance,
+        fetchProfile, 
+        updateUserProfile, 
+        signUserIn, 
+        signUserOut 
+    }
 }
