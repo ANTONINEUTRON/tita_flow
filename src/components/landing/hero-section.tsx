@@ -50,10 +50,10 @@ export function HeroSection() {
             }}
           >
             <h1 className="text-4xl md:text-6xl font-bold mb-4">
-              Fundraising with accountability and transparency
+                Welcome to Titaflow
             </h1>
-            <p className="text-xl text-muted-foreground max-w-2xl mb-4">
-              Create, fund and manage any project or cause with full transparency and control
+            <p className="text-xl text-muted-foreground mb-10">
+              Configurable fundraising for any project or cause with transparency and control
             </p>
             <div className="space-x-4">
               <HeroGetStartedButton />
