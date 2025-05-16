@@ -1,119 +1,95 @@
-# legacy-tita
+# TitaFlow
 
-## Getting Started
+TitaFlow is a configurable fundraising protocol built on Solana that enables transparent, milestone-based funding with community governance. The platform solves the trust deficit in crowdfunding by ensuring funds are only released when project milestones are verifiably achieved.
 
-### Prerequisites
+![TitaFlow Banner](public/logo.png)
 
-- Node v18.18.0 or higher
+## 🚀 Key Features
 
-- Rust v1.77.2 or higher
-- Anchor CLI 0.30.1 or higher
-- Solana CLI 1.18.17 or higher
+- **Milestone-Based Disbursement**: Funds are released only when goals are met and verified
+- **On-Chain Transparency**: Every transaction is public and verifiable on the blockchain
+- **Decentralized Governance**: Enable backers to participate in fund management through on-chain voting
+- **Configurable Funding Flows**: Customize funding structures for various use cases
+- **Secure Fund Protection**: Smart contracts safeguard contributions until milestone completion
+
+## 🛠️ Tech Stack
+
+- **Frontend**: Next.js, React, TypeScript, TailwindCSS, shadcn/ui
+- **Blockchain**: Solana, Anchor Framework
+- **Auth Solution**: Civic Auth
+
+## 📋 Prerequisites
+
+- Node.js 18+
+- Solana CLI tools
+- Anchor Framework
+- Rust (for smart contract development)
+
+## 🔧 Getting Started
 
 ### Installation
 
-#### Clone the repo
+```bash
+# Clone the repository
+git clone https://github.com/yourusername/tita-flow.git
+cd tita-flow
 
-```shell
-git clone <repo-url>
-cd <repo-name>
+# Install dependencies
+npm install
+
+# Set up environment variables
+cp .env.example .env.local
+
+# Run the Development Server
+npm run dev
 ```
 
-#### Install Dependencies
+Visit [http://localhost:3000](http://localhost:3000) to see the application.
 
-```shell
-pnpm install
-```
+## 🌐 Usage
 
-#### Start the web app
+### Creating a Funding Flow
 
-```
-pnpm dev
-```
+1. Connect your wallet using Civic Auth
+2. Select "Create Flow" from the dashboard
+3. Configure your funding flow settings:
+   - Basic info (title, description, goal)
+   - Optional milestone configuration
+   - Optional governance settings
+4. Review and submit
 
-## Apps
+### Contributing to a Flow
 
-### anchor
+1. Browse active flows
+2. Select a flow to view details
+3. Connect your wallet
+4. Enter contribution amount and submit
 
-This is a Solana program written in Rust using the Anchor framework.
+### Governance
 
-#### Commands
+Project stakeholders can:
+- Create proposals for milestone completion
+- Vote on proposals based on the configured voting model
+- Track proposal status and execution
 
-You can use any normal anchor commands. Either move to the `anchor` directory and run the `anchor` command or prefix the
-command with `pnpm`, eg: `pnpm anchor`.
+## 🏗️ Architecture
 
-#### Sync the program id:
+TitaFlow consists of:
 
-Running this command will create a new keypair in the `anchor/target/deploy` directory and save the address to the
-Anchor config file and update the `declare_id!` macro in the `./src/lib.rs` file of the program.
+1. **Smart Contracts**: Anchor programs that handle fund escrow, milestone verification, and governance
+2. **Next.js Frontend**: User interface for interacting with the protocol
+3. **Supabase Database**: Stores flow metadata, user profiles, and contribution history
 
-You will manually need to update the constant in `anchor/lib/basic-exports.ts` to match the new program id.
+## 🤝 Contributing
 
-```shell
-pnpm anchor keys sync
-```
+We welcome contributions to TitaFlow! Please see our [Contributing Guide](CONTRIBUTING.md) for more details.
 
-#### Build the program:
+## 📜 License
 
-```shell
-pnpm anchor-build
-```
+This project is licensed under the CUSTOM License - see the [LICENSE](LICENSE) file for details.
 
-#### Start the test validator with the program deployed:
+## 📞 Contact
 
-```shell
-pnpm anchor-localnet
-```
-
-#### Run the tests
-
-```shell
-pnpm anchor-test
-```
-
-#### Deploy to Devnet
-
-```shell
-pnpm anchor deploy --provider.cluster devnet
-```
-
-### web
-
-This is a React app that uses the Anchor generated client to interact with the Solana program.
-
-#### Commands
-
-Start the web app
-
-```shell
-pnpm dev
-```
-
-Build the web app
-
-```shell
-pnpm build
-```
-
-## Architecture Overview
-
-The system architecture is designed as follows:
-
-┌─────────────────┐     ┌─────────────────────────────────────┐     ┌───────────────────┐
-│                 │     │                                     │     │                   │
-│  Next.js App    │────▶│  Backend Services (API Layer)       │────▶│  Blockchain       │
-│  (Frontend)     │◀────│  - Express/Nest.js/Next.js API      │◀────│  Infrastructure   │
-│                 │     │                                     │     │                   │
-└─────────────────┘     └─────────────────────────────────────┘     └───────────────────┘
-         │                               │                                    │
-         │                               │                                    │
-         ▼                               ▼                                    ▼
-┌─────────────────┐     ┌─────────────────────────────────────┐     ┌───────────────────┐
-│                 │     │                                     │     │                   │
-│  Authentication │     │  Database                           │     │  Web3 Services    │
-│  - NextAuth.js  │     │  - PostgreSQL/MongoDB               │     │  - Smart Contracts│
-│  - Web3Auth     │     │  - Redis (for caching)              │     │  - IPFS           │
-│                 │     │                                     │     │                   │
-└─────────────────┘     └─────────────────────────────────────┘     └───────────────────┘
-
+- Website: [titaflow.setita.com](https://titaflow.setita.com)
+- Twitter: [@titaflow_](https://twitter.com/titaflow_)
 

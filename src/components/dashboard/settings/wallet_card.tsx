@@ -25,7 +25,7 @@ export default function WalletCard({ supportedCurrenciesBalances }:WalletCardPro
                             {
                                 AppConstants.SUPPORTEDCURRENCIES.map((currency, index) => {
                                     return (
-                                        <div className="flex justify-between items-center">
+                                        <div key={index} className="flex justify-between items-center">
                                             <div className="flex items-center">
                                                 <div className="h-8 w-8 rounded-full bg-gradient-to-r from-purple-500 to-blue-500 flex items-center justify-center mr-2">
                                                     <Image src={currency.logo} width={30} height={30} alt="sol icon" className="text-white" />
