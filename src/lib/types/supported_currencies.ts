@@ -3,4 +3,5 @@ export interface SupportCurrency {
     address: string;
     decimals: number; // Adding the decimals field
     logo: string;
+    canBeUsed?: boolean;
 }

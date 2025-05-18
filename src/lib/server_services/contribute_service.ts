@@ -27,7 +27,7 @@ export class ContributeService {
     public async saveContribution(contribution: Contribution): Promise<void> {
         try {
             const { data, error } = await (await this.client)
-                .from(AppConstants.FLOW_TABLE)
+                .from(AppConstants.CONT_TABLE)
                 .insert(contribution); //format object keys to snake_case
 
             if (error) {

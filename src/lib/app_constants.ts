@@ -43,28 +43,32 @@ export class AppConstants {
   // The DB Tables
   public static readonly FLOW_TABLE = "funding_flows";
   public static readonly USER_TABLE = "users";
+  public static readonly CONT_TABLE = "contributions";
   public static readonly TITA_FLOW_SEED = Buffer.from("tita-flow");
   public static readonly TITA_FLOW_TA_SEED = Buffer.from("tita-flow-ta");
   public static readonly TITA_CONTRIBUTION_SEED = Buffer.from("tita-contribution");
 
   public static readonly SUPPORTEDCURRENCIES: SupportCurrency[] = [
-    // {
-    //   name: "SOL",
-    //   address: "So11111111111111111111111111111111111111112",
-    //   decimals: 9,
-    //   logo: "/icon/solana.png"
-    // },
+    {
+      name: "SOL",
+      address: "So11111111111111111111111111111111111111112",
+      decimals: 9,
+      logo: "/icon/solana.png",
+      canBeUsed: false
+    },
     {
       name: "tUSDC",
       address: "61DVYzrDYcAqx8oVQ8jixoEYfGhLz1dvmcYic3qJEzYU",//"EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v", 
       decimals: 6,
-      logo: "/icon/usdc.png"
+      logo: "/icon/usdc.png",
+      canBeUsed: true
     },
     {
         name: "tUSDT",
         address: "Gh9ZwEmdLJ8DscKNTkTqPbNwLNNBjuSzaG9Vp2KGtKJr",//"Es9vMFrzaCERmJfrF4H2FYD4KCoNkY11McCe8BenwNYB", 
         decimals: 6,
-        logo: "/icon/usdt.png"
+        logo: "/icon/usdt.png",
+        canBeUsed: true
     },
     // {
     //     name: "SEND",

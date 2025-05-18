@@ -4,7 +4,7 @@ import { useEffect, useState } from "react";
 import Link from "next/link";
 import {
     ActivityIcon, SettingsIcon,
-    LayoutDashboardIcon, FolderIcon, BarChartIcon,
+    LayoutDashboardIcon, FolderIcon, 
     MenuIcon, ChevronLeftIcon, BellIcon, PlusCircleIcon,
     XIcon, CheckCircleIcon, AlertCircleIcon, ClockIcon
 } from "lucide-react";
@@ -14,7 +14,6 @@ import { AppConstants } from "@/lib/app_constants";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 import { ScrollArea } from "@/components/ui/scroll-area";
-import { Separator } from "@/components/ui/separator";
 
 // Import dashboard components
 import { OverviewContent } from "@/components/dashboard/overview-content";
@@ -24,6 +23,7 @@ import { SettingsContent } from "@/components/dashboard/settings/settings-conten
 import useProfile from "@/lib/hooks/use_profile";
 import formatWalletAddress from "@/lib/utils/format_wallet_address";
 import useFlow from "@/lib/hooks/use_flow";
+import { useRouter, useSearchParams } from "next/navigation";
 
 export default function DashboardPage() {
     const [sidebarExpanded, setSidebarExpanded] = useState(true);
@@ -31,12 +31,20 @@ export default function DashboardPage() {
     const [showNotifications, setShowNotifications] = useState(false);
     const { userProfile } = useProfile()
     const { getUserFlows, flows } = useFlow();
+    const searchParams = useSearchParams();
+    const router = useRouter();
+
+    useEffect(() => {
+        const tabParam = searchParams.get('tab');
+        if (tabParam && ['overview', 'flows', 'activity', 'settings'].includes(tabParam)) {
+            setActiveView(tabParam);
+        }
+    }, [searchParams]);
 
     useEffect(() => {
         if (userProfile) {
             getUserFlows(userProfile?.id ?? "").then((res) => {
                 console.log("User flows", flows);
-                console.log("User flows", res);
             }
             ).catch((error) => {
                 console.error("Error fetching user flows:", error);

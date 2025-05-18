@@ -163,12 +163,12 @@ export default function FlowDetailPage() {
   const handleSignIn = async () => {
     setIsSigningIn(true); // Set loading state
     try {
+      setSignInDialogOpen(false)
       await signUserIn();
-      // Don't close dialog yet - let the useEffect handle it when userProfile is set
     } catch (error) {
       console.error("Sign in failed:", error);
-      setIsSigningIn(false); // Reset loading on error
-      // Optionally show error message
+      setIsSigningIn(false); 
+      toast.error("Sign in failed. Please try again.");
     }
   };
 

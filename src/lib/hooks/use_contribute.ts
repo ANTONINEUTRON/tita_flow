@@ -8,6 +8,7 @@ import { ASSOCIATED_TOKEN_PROGRAM_ID, getAssociatedTokenAddress, TOKEN_PROGRAM_I
 import { initSolTokenAccountInstruction } from "../utils/create_n_fund_ta";
 import { Contribution } from "../types/contribution";
 import AppUser from "../types/user";
+import toast from "react-hot-toast";
 
 const connection = AppConstants.APP_CONNECTION;
 
@@ -24,7 +25,6 @@ export default function useContribute() {
 
         const selectedCurrency = AppConstants.SUPPORTEDCURRENCIES.find((currency) => currency.name === flow.currency)!;
         const selectedTokenMint: PublicKey = new PublicKey(selectedCurrency.address);
-console.log(flow.address)
         const flowPDA = new PublicKey(flow.address!);
         const flowAccount = await program.account.flow.fetch(flowPDA);
         const flowTA = flowAccount.flowTa;
@@ -125,12 +125,12 @@ console.log(flow.address)
 
             // If successful, save the real data
             const contribution: Contribution = {
-                address: trxAddress,
+                signature: signature,
+                pda: trxAddress,
                 amount: amount,
                 flow_id: flow.id!,
                 contributor: user.wallet,
                 currency: flow.currency,
-                transaction_signature: signature,
                 created_at: new Date().toISOString()
             };
 
@@ -138,20 +138,7 @@ console.log(flow.address)
             
         } catch (error) {
             console.error("Transaction failed:", error);
-            
-            // Save failed transaction with proper status
-            const failedContribution: Contribution = {
-                address: "pending", // Will be updated 
-                amount: amount,
-                flow_id: flow.id!,
-                contributor: user.wallet,
-                currency: flow.currency,
-                transaction_signature: "failed",
-                created_at: new Date().toISOString(),
-            };
-            
-            await saveToDB(failedContribution);
-            
+            toast.error("Couldn't complete contribution. Please try again.");   
         }
     }
 

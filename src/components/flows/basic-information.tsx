@@ -167,7 +167,7 @@ export function BasicInformation({ form, minDateString, }: BasicInformationProps
             <FormControl>
               <Textarea 
                 placeholder={ "Describe what you're raising funds for..."} 
-                className="min-h-[120px]"
+                className="min-h-[120px] resize-y"
                 {...field} 
               />
             </FormControl>
@@ -211,18 +211,21 @@ export function BasicInformation({ form, minDateString, }: BasicInformationProps
                   </SelectTrigger>
                 </FormControl>
                 <SelectContent>
-                  {AppConstants.SUPPORTEDCURRENCIES.map((currency) => (
-                    <SelectItem key={currency.name} value={currency.name}>
-                      <div className="flex items-center">
-                        {/* <span className="mr-2">{currency.icon}</span> */}
-                        <img
-                          src={currency.logo}
-                          alt={currency.name}
-                          className="w-6 h-6 mr-2"/>
-                        <span>{currency.name}</span>
-                      </div>
-                    </SelectItem>
-                  ))}
+                  {AppConstants.SUPPORTEDCURRENCIES.map((currency) => {
+                    if(!currency.canBeUsed)return;
+
+                    return (
+                      <SelectItem key={currency.name} value={currency.name}>
+                        <div className="flex items-center">
+                          <img
+                            src={currency.logo}
+                            alt={currency.name}
+                            className="w-6 h-6 mr-2" />
+                          <span>{currency.name}</span>
+                        </div>
+                      </SelectItem>
+                    )
+                  })}
                 </SelectContent>
               </Select>
               <FormMessage />
@@ -271,10 +274,6 @@ export function BasicInformation({ form, minDateString, }: BasicInformationProps
       
       {/* Media Upload Section */}
       <div className="space-y-4 mt-8 border rounded-lg">
-        {/* <h3 className="text-lg font-medium">Media</h3> */}
-        {/* <FormDescription>
-          You can upload up to 5 images (max 5MB each) and 1 video (max 50MB).
-        </FormDescription> */}
         <div
           className="p-4 flex justify-between items-center cursor-pointer"
           onClick={() => setIsMediaExpanded(!isMediaExpanded)}
@@ -410,44 +409,6 @@ export function BasicInformation({ form, minDateString, }: BasicInformationProps
           )
         }
         
-        {/* Media metadata editor for the selected item would go here */}
-        {(form.getValues('media')?.length > 0) && (
-          <div className="mt-4 mx-4">
-            <h4 className="text-sm font-medium">Media Description</h4>
-            <FormDescription className="mt-1">
-              Add descriptions to your media to provide context.
-            </FormDescription>
-            
-            <div className="space-y-4 mt-2">
-              {form.getValues('media')?.map((media: MediaItem) => (
-                <div key={`desc-${media.id}`} className="flex gap-4 items-start">
-                  <div className="w-20 h-20 flex-shrink-0 rounded overflow-hidden">
-                    {media.type === 'image' ? (
-                      <img 
-                        src={media.previewUrl} 
-                        alt={media.title} 
-                        className="w-full h-full object-cover"
-                      />
-                    ) : (
-                      <div className="bg-muted w-full h-full flex items-center justify-center">
-                        <FileVideo className="w-6 h-6 text-muted-foreground" />
-                      </div>
-                    )}
-                  </div>
-                  <div className="flex-1">
-                    <p className="text-sm font-medium mb-1">{media.title}</p>
-                    <Textarea
-                      placeholder="Add a description for this media (optional)"
-                      value={media.description || ''}
-                      onChange={(e) => handleUpdateMediaMetadata(media.id, 'description', e.target.value)}
-                      className="min-h-[80px]"
-                    />
-                  </div>
-                </div>
-              ))}
-            </div>
-          </div>
-        )}
       </div>
     </div>
   );

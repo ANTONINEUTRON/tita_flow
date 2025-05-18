@@ -66,10 +66,9 @@ export default function useProfile() {
         try {
             userContext.signOut();
 
-            setUserProfile(null);
-            setLoading(false);
-            setError(null);
             router.push("/")
+            setUserProfile(null);
+            setError(null);
         } catch (e) {
             console.log(e);
             toast.error("An error occurred during sign-in");

@@ -1,10 +1,10 @@
 
 export interface Contribution {
-    address: string;
+    signature: string;
     amount: number;
     flow_id: string;
     contributor: string;
     currency: string;
-    transaction_signature: string;
+    pda: string;
     created_at: string;
 }
