@@ -33,7 +33,6 @@ export class AppConstants {
    */
   public static readonly SUPPORT_EMAIL = "support@tita.com";
 
-
   public static readonly APP_URL = "https://beta.setita.com"
 
   public static readonly APP_RPC_ENDPOINT = "https://devnet.helius-rpc.com/?api-key=" + process.env.NEXT_PUBLIC_HELIUS_API_KEY;
@@ -43,32 +42,30 @@ export class AppConstants {
 
   // The DB Tables
   public static readonly FLOW_TABLE = "funding_flows";
-
   public static readonly USER_TABLE = "users";
-
   public static readonly TITA_FLOW_SEED = Buffer.from("tita-flow");
   public static readonly TITA_FLOW_TA_SEED = Buffer.from("tita-flow-ta");
   public static readonly TITA_CONTRIBUTION_SEED = Buffer.from("tita-contribution");
 
   public static readonly SUPPORTEDCURRENCIES: SupportCurrency[] = [
+    // {
+    //   name: "SOL",
+    //   address: "So11111111111111111111111111111111111111112",
+    //   decimals: 9,
+    //   logo: "/icon/solana.png"
+    // },
     {
-      name: "SOL",
-      address: "So11111111111111111111111111111111111111112",
-      decimals: 9,
-      logo: "/icon/solana.png"
-    },
-    {
-      name: "USDC",//Devnet USDC
+      name: "tUSDC",
       address: "61DVYzrDYcAqx8oVQ8jixoEYfGhLz1dvmcYic3qJEzYU",//"EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v", 
       decimals: 6,
       logo: "/icon/usdc.png"
     },
-    // {
-    //     name: "USDT",
-    //     address: "Es9vMFrzaCERmJfrF4H2FYD4KCoNkY11McCe8BenwNYB", 
-    //     decimals: 6,
-    //     logo: "/icon/usdt.png"
-    // },
+    {
+        name: "tUSDT",
+        address: "Gh9ZwEmdLJ8DscKNTkTqPbNwLNNBjuSzaG9Vp2KGtKJr",//"Es9vMFrzaCERmJfrF4H2FYD4KCoNkY11McCe8BenwNYB", 
+        decimals: 6,
+        logo: "/icon/usdt.png"
+    },
     // {
     //     name: "SEND",
     //     address: "SENDdRQtYMWaQrBroBrJ2Q53fgVuq95CV9UPGEvpCxa", 

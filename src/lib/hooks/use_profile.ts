@@ -22,7 +22,7 @@ export default function useProfile() {
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState<string | null>(null);
     const router = useRouter();
-    const { address } = useWallet({ type: "solana" })
+    const { address,  } = useWallet({ type: "solana" })
     const userContext = useUser();
     const walletInstance = userHasWallet(userContext)
         ? userContext.solana.wallet

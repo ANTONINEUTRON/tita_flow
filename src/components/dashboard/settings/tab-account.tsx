@@ -1,9 +1,9 @@
-import { useState, useEffect, useRef, use } from "react";
+import { useState, useEffect, useRef } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
 import { toast } from "react-hot-toast";
-import { Copy, Check, Wallet, User, Upload, Loader2, RefreshCw, LogOut, DollarSignIcon } from "lucide-react";
+import { Copy, Check, Wallet, User, Loader2, LogOut } from "lucide-react";
 
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -14,7 +14,6 @@ import { Label } from "@/components/ui/label";
 import { Form, FormControl, FormDescription, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
 import { Separator } from "@/components/ui/separator";
 import useProfile from "@/lib/hooks/use_profile";
-import Image from "next/image";
 import WalletCard from "./wallet_card";
 
 // Simplified form schema for only editable fields
@@ -27,7 +26,7 @@ const accountFormSchema = z.object({
 type AccountFormValues = z.infer<typeof accountFormSchema>;
 
 export default function TabAccount() {
-  const { userProfile, updateUserProfile, loading, signUserOut, supportedCurrenciesBalances } = useProfile();
+  const { userProfile, updateUserProfile, loading, signUserOut, supportedCurrenciesBalances, fetchUserBalance } = useProfile();
   const [copied, setCopied] = useState<string | null>(null);
   const [isUploading, setIsUploading] = useState(false);
   const [previewUrl, setPreviewUrl] = useState<string | null>(null);
@@ -197,7 +196,9 @@ export default function TabAccount() {
 
       {/* Wallet Section */}
       <WalletCard 
-        supportedCurrenciesBalances={supportedCurrenciesBalances}/>
+        user={userProfile}
+        supportedCurrenciesBalances={supportedCurrenciesBalances}
+        fetchBalance={fetchUserBalance}/>
       
       {/* Wallet Information - Read Only */}
       <Card>

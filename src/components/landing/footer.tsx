@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { footerLinks, socialLinks } from "@/lib/data/landing-data";
+import { AppConstants } from "@/lib/app_constants";
 
 export function Footer() {
   return (
@@ -22,7 +23,7 @@ export function Footer() {
           ))}
         </div>
         <div className="flex flex-col md:flex-row justify-between items-center mt-8 pt-8 border-t border-gray-200 dark:border-gray-800">
-          <p className="text-gray-500 dark:text-gray-400">© {new Date().getFullYear()} Tita. All rights reserved.</p>
+          <p className="text-gray-500 dark:text-gray-400">© {new Date().getFullYear()} {AppConstants.APP_NAME}. All rights reserved.</p>
           <SocialLinks />
         </div>
       </div>
