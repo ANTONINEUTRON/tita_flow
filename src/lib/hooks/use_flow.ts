@@ -6,11 +6,10 @@ import { FlowCreationValues } from "@/components/flows/create-flow-form";
 import toast from "react-hot-toast";
 import { getTitaFlowProgram } from "@project/anchor";
 import { AppConstants } from "../app_constants";
-import { PublicKey, SystemProgram, Transaction, TransactionMessage, VersionedTransaction } from "@solana/web3.js";
+import { PublicKey, SystemProgram, Transaction } from "@solana/web3.js";
 import BN from "bn.js";
 import { TOKEN_PROGRAM_ID } from "@solana/spl-token";
-import { useUser } from "@civic/auth-web3/react";
-import { SolanaWallet, userHasWallet } from "@civic/auth-web3";
+import { SolanaWallet } from "@civic/auth-web3";
 import { FundingFlowResponse } from "../types/flow.response";
 
 interface FetchFlowOptions {
@@ -25,11 +24,26 @@ interface FetchFlowOptions {
     sortOrder?: 'asc' | 'desc';
 }
 
+const connection = AppConstants.APP_CONNECTION;
+const program = getTitaFlowProgram({ connection } as any);
+
 export default function useFlow() {
     const [error, setError] = useState<string | null>(null);
     const [loading, setLoading] = useState(false);
     const [flows, setFlows] = useState<FundingFlow[]>([]);
     const [pagination, setPagination] = useState({})
+    const [activeFlow, setActiveFlow] = useState<any>(null);
+
+    const fetchFlowOC = async (address: string) => {
+        try {
+            const flow = await program.account.flow.fetch(new PublicKey(address));
+            console.log("Flow data:", flow.raised.toString());
+            setActiveFlow(flow);
+        }catch (error) {
+            console.error("Error fetching flow:", error);
+            setError("Failed to fetch flow data");
+        }
+    }
 
     const prepareFlowData = async (flowId: string, formValues: FlowCreationValues, creator: string, creator_id: string): Promise<FundingFlow> => {
         const mediaUploadRes = (formValues.media && formValues.media.length > 0)
@@ -64,15 +78,12 @@ export default function useFlow() {
     }> => {
         try {
             // Prepare for media upload
-            const mediaFiles = formValues.media!.filter(item => item.file); // Only items with files need upload
+            const mediaFiles = formValues.media!.filter(item => item.file); 
 
-            // Create FormData for file upload
             const formData = new FormData();
 
-            // Append each media file to FormData
             mediaFiles.forEach((mediaItem, index) => {
                 formData.append(mediaItem.type, mediaItem.file);
-
             });
 
             // Upload the media files
@@ -107,9 +118,6 @@ export default function useFlow() {
         fundingFlow: FundingFlow,
         solanaWallet: SolanaWallet
     ): Promise<any> => {
-        const connection = AppConstants.APP_CONNECTION;
-        const program = getTitaFlowProgram({ connection } as any);
-
         const userPubKey = new PublicKey(fundingFlow.creator);
 
         const selectedCurrency = AppConstants.SUPPORTEDCURRENCIES.find((currency) => currency.name === fundingFlow.currency)!;
@@ -255,7 +263,6 @@ export default function useFlow() {
             if (!response.ok) {
                 const error = await response.json();
                 setError(error.message || 'Failed to fetch user flows');
-                //    throw new Error(error.message || 'Failed to fetch user flows');
             }
             let data = await response.json()
             console.log("Response", data)
@@ -267,11 +274,8 @@ export default function useFlow() {
                 totalPages: data.pagination.totalPages,
             });
 
-            // return response.json();
-
         } catch (error) {
             console.error("Error fetching user flows:", error);
-            //    throw new Error('Failed to fetch user flows');
         }
         setLoading(false);
     }
@@ -312,6 +316,8 @@ export default function useFlow() {
         prepareFlowData, 
         createFlowTransaction, 
         saveFlowToStore, 
+        fetchFlowOC,
+        activeFlow,
         loading, 
         error, 
         flows, 

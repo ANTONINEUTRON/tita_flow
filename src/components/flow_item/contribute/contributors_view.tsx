@@ -5,7 +5,6 @@ import { Input } from '@/components/ui/input';
 import {
   Card,
   CardContent,
-  CardDescription,
   CardHeader,
   CardTitle,
 } from '@/components/ui/card';
@@ -27,7 +26,6 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import {
   BarChart,
   User,
-  ListFilter,
   ChevronDown,
   Search,
   Clock,
@@ -103,13 +101,13 @@ export function ContributorsView({ flow }: ContributorsViewProps) {
     
     switch (timeRange) {
       case 'day':
-        cutoffTimestamp = now - 86400000; // 24 hours in milliseconds
+        cutoffTimestamp = now - 86400000; 
         break;
       case 'week':
-        cutoffTimestamp = now - 604800000; // 7 days in milliseconds
+        cutoffTimestamp = now - 604800000;
         break;
       case 'month':
-        cutoffTimestamp = now - 2592000000; // 30 days in milliseconds
+        cutoffTimestamp = now - 2592000000;
         break;
       default:
         return filteredContributions;
@@ -141,7 +139,6 @@ export function ContributorsView({ flow }: ContributorsViewProps) {
 
   return (
     <div className="space-y-4">
-      {/* Header with controls */}
       <div className="flex flex-col sm:flex-row justify-between gap-4">
         <div className="relative w-full sm:w-64">
           <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />

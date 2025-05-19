@@ -11,6 +11,7 @@ import { SupportCurrency } from "@/lib/types/supported_currencies";
 import { AppConstants } from "@/lib/app_constants";
 import Image from "next/image";
 import { FundingFlowResponse } from "@/lib/types/flow.response";
+import useFlow from "@/lib/hooks/use_flow";
 
 interface MobileFlowHeaderProps {
   flow: FundingFlowResponse;
@@ -21,11 +22,32 @@ interface MobileFlowHeaderProps {
 
 export function MobileFlowHeader({ flow, creator, progress, remainingDays }: MobileFlowHeaderProps) {
   const [currency, setCurrency] = useState<SupportCurrency | null>(null);
+  const { activeFlow, fetchFlowOC } = useFlow();
 
   useEffect(() => {
     const curr = AppConstants.SUPPORTEDCURRENCIES.find((c) => c.name === flow.currency);
-    setCurrency(curr!)
-  });
+    if (curr) setCurrency(curr);
+
+    fetchFlowOC(flow.address!);
+  }, [flow.currency]);
+
+  // Calculate values
+  const decimals = currency?.decimals || 9;
+  const raised = activeFlow ? Number(activeFlow.raised) / Math.pow(10, decimals) : 0;
+  const goal = activeFlow ? Number(activeFlow.goal) / Math.pow(10, decimals) : 0;
+  const progressPercentage = goal > 0 ? Math.min((raised / goal) * 100, 100) : 0;
+
+  // Format values for display
+  const formatAmount = (amount: number) => {
+    return amount.toLocaleString(undefined, {
+      minimumFractionDigits: 2,
+      maximumFractionDigits: amount < 0.01 ? 6 : amount < 1 ? 4 : 2
+    });
+  };
+
+  const formattedRaised = formatAmount(raised);
+  const formattedGoal = formatAmount(goal);
+  const currencySymbol = currency?.name || '';
 
   return (
     <div className="block md:hidden w-full mb-4 px-1">
@@ -44,21 +66,24 @@ export function MobileFlowHeader({ flow, creator, progress, remainingDays }: Mob
       {/* Mobile progress for Raise Flow */}
       <div className="mt-2">
         <div className="flex justify-between items-center mb-1 text-sm">
-          <Image src={currency?.logo!} alt={currency?.name!} width={26} height={26}/>
           <div className="font-semibold">
-            {flow.raised!}
+            {formattedRaised}
           </div>
           <div className="text-muted-foreground text-xs">
-            {progress}% of {flow.goal}
+            of {formattedGoal}  {currencySymbol}
           </div>
         </div>
-        <Progress value={progress} className="h-2" />
-        {remainingDays !== null && (
-          <div className="flex items-center mt-1 text-xs text-muted-foreground">
-            <Clock className="mr-1 h-3 w-3" />
-            {remainingDays} days left
-          </div>
-        )}
+        <Progress value={progressPercentage} className="h-2" />
+        <div className="flex justify-between items-center mt-1">
+          <div className="text-xs text-muted-foreground">{progressPercentage}% completed</div>
+          {remainingDays !== null && (
+            <div className="flex items-center mt-1 text-xs text-muted-foreground">
+              <Clock className="mr-1 h-3 w-3" />
+              {remainingDays} days left
+            </div>
+          )}
+        </div>
+        
       </div>
     </div>
   );
