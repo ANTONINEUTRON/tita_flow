@@ -9,10 +9,63 @@ import { initSolTokenAccountInstruction } from "../utils/create_n_fund_ta";
 import { Contribution } from "../types/contribution";
 import AppUser from "../types/user";
 import toast from "react-hot-toast";
-
-const connection = AppConstants.APP_CONNECTION;
+import { useState } from "react";
+import { FundingFlowResponse } from "../types/flow.response";
 
 export default function useContribute() {
+    const connection = AppConstants.APP_CONNECTION;
+    const program = getTitaFlowProgram({ connection } as any);
+    const [contributions, setContributions] = useState<any[]>([]);// holds the contributions from chain
+
+    const getContributions = async (contribution: Contribution) => {
+        const contributorPubkey = new PublicKey(contribution);
+
+        // Create a memcmp filter for the contributor field
+        // Note: The contributor field is at 8 + 32 = 40 bytes offset
+        // 8 bytes for the account discriminator, 32 bytes for the flow pubkey
+        const filter = [
+            {
+                memcmp: {
+                    offset: 8 + 32, // discriminator + flow pubkey
+                    bytes: contributorPubkey.toBase58()
+                }
+            }
+        ];
+
+        program.account.contribution.all(filter)
+            .then((contributions) => {
+                console.log("Contributions: ", contributions);
+            }
+            ).catch((error) => {
+                console.error("Error fetching contributions: ", error);
+            }
+            )
+    }
+
+    const getContributionsByFlow = async (flow: FundingFlowResponse) => {
+        console.log("Flow: ", flow);
+        const flowPDA = new PublicKey(flow.address!);
+        
+        const filter = [
+            {
+                memcmp: {
+                    offset: 8,
+                    bytes: flowPDA.toBase58()
+                }
+            }
+        ];
+
+        const contributions = await program.account.contribution.all(filter);
+        return contributions;
+        
+            // .then((contributions) => {
+            //     console.log("Contributions: ", contributions);
+            // }
+            // ).catch((error) => {
+            //     console.error("Error fetching contributions: ", error);
+            // }
+            // )
+    }
 
     const contributeTrx = async (
         amount: number,
@@ -20,7 +73,6 @@ export default function useContribute() {
         flow: FundingFlow,
         solanaWallet: SolanaWallet
     ) => {
-        const program = getTitaFlowProgram({ connection } as any);
         const userPubKey = new PublicKey(userAddress);
 
         const selectedCurrency = AppConstants.SUPPORTEDCURRENCIES.find((currency) => currency.name === flow.currency)!;
@@ -88,7 +140,7 @@ export default function useContribute() {
 
         const trxAddress = contributionPda.toString();
 
-        return {trxAddress, signature};
+        return { trxAddress, signature };
     }
 
 
@@ -135,12 +187,12 @@ export default function useContribute() {
             };
 
             await saveToDB(contribution);
-            
+
         } catch (error) {
             console.error("Transaction failed:", error);
-            toast.error("Couldn't complete contribution. Please try again.");   
+            toast.error("Couldn't complete contribution. Please try again.");
         }
     }
 
-    return { contribute }
+    return {  contributions, contribute, getContributionsByFlow }
 }
