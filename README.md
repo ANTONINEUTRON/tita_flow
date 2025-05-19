@@ -31,7 +31,7 @@ TitaFlow is a configurable fundraising protocol built on Solana that enables tra
 
 ```bash
 # Clone the repository
-git clone https://github.com/yourusername/tita-flow.git
+git clone https://github.com/antonineutron/tita-flow.git
 cd tita-flow
 
 # Install dependencies
@@ -53,17 +53,15 @@ Visit [http://localhost:3000](http://localhost:3000) to see the application.
 1. Connect your wallet using Civic Auth
 2. Select "Create Flow" from the dashboard
 3. Configure your funding flow settings:
-   - Basic info (title, description, goal)
+   - Basic info (title, description, goal, etc.)
    - Optional milestone configuration
    - Optional governance settings
 4. Review and submit
 
 ### Contributing to a Flow
 
-1. Browse active flows
-2. Select a flow to view details
-3. Connect your wallet
-4. Enter contribution amount and submit
+1. Get the url to a flow to view details
+2. Enter contribution amount and submit
 
 ### Governance
 
