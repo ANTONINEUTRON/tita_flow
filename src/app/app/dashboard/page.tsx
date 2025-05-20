@@ -16,9 +16,9 @@ import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/comp
 import { ScrollArea } from "@/components/ui/scroll-area";
 
 // Import dashboard components
-import { OverviewContent } from "@/components/dashboard/overview-content";
-import { FlowsContent } from "@/components/dashboard/flows-content";
-import { ActivityContent } from "@/components/dashboard/activity-content";
+import { OverviewContent } from "@/components/dashboard/overview_content";
+import { FlowsContent } from "@/components/dashboard/flows_content";
+import { ActivityContent } from "@/components/dashboard/activity_content";
 import { SettingsContent } from "@/components/dashboard/settings/settings-content";
 import useProfile from "@/lib/hooks/use_profile";
 import formatWalletAddress from "@/lib/utils/format_wallet_address";

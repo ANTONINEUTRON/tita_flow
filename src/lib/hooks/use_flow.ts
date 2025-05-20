@@ -236,15 +236,12 @@ export default function useFlow() {
         const flowData = await response.json();
     }
 
-    /**
-     * Fetches flows for a given user with optional pagination, filters, and sorting.
-     * @param userId - The ID of the user whose flows to fetch.
-     * @param options - Optional parameters for pagination, filters, and sorting.
-     * @returns A promise that resolves to the fetched flows and pagination metadata.
-     */
+    
     const getUserFlows = async (userId: string, options: FetchFlowOptions = {}) => {
+        setLoading(true);
+        setError('');
+        
         try {
-            setLoading(true);
             const response = await fetch('/api/user/flows', {
                 method: 'POST',
                 headers: {
@@ -262,23 +259,57 @@ export default function useFlow() {
 
             if (!response.ok) {
                 const error = await response.json();
-                setError(error.message || 'Failed to fetch user flows');
+                throw new Error(error.message || 'Failed to fetch user flows');
             }
-            let data = await response.json()
-            console.log("Response", data)
-
+            
+            let data = await response.json();
+            
+            // Update flows with blockchain data
+            const updatedFlows = await Promise.all(
+                data.flows.map(async (flow: any) => {
+                    // Only fetch on-chain data if the flow has an address
+                    if (flow.address) {
+                        const onChainData = await fetchFlowOnChainData(flow.address);
+                        
+                        if (onChainData) {
+                            // Return flow with updated on-chain data
+                            return {
+                                ...flow,
+                                raised: onChainData.raised,
+                                goal: onChainData.goal,
+                                completedMilestones: onChainData.completedMilestones,
+                            };
+                        }
+                    }
+                    // If no address or error fetching on-chain data, return original flow
+                    return flow;
+                })
+            );
+            
+            // Update data with enriched flows
+            data = {
+                ...data,
+                flows: updatedFlows
+            };
+            
+            console.log("Flows with on-chain data:", updatedFlows);
+            
             setFlows(data.flows);
             setPagination({
                 total: data.pagination.total,
                 page: data.pagination.page,
                 totalPages: data.pagination.totalPages,
             });
-
-        } catch (error) {
-            console.error("Error fetching user flows:", error);
+            
+            return data.flows;
+        } catch (error: any) {
+            console.error("Error in getUserFlows:", error);
+            setError(error.toString() || 'An error occurred while fetching flows');
+            return [];
+        } finally {
+            setLoading(false);
         }
-        setLoading(false);
-    }
+    };
 
     // Function to fetch a specific flow by ID
     const getFlowById = async (id: string): Promise<FundingFlowResponse | null> => {
@@ -307,6 +338,22 @@ export default function useFlow() {
         } catch (error) {
             console.error('Error fetching flow:', error);
             throw new Error(error instanceof Error ? error.message : 'An unknown error occurred');
+        }
+    };
+
+    // Fetch a flow's on-chain data and return it (instead of setting state)
+    const fetchFlowOnChainData = async (address: string) => {
+        try {
+            const flow = await program.account.flow.fetch(new PublicKey(address));
+            let completedMilestones = !flow.milestones ? 0 : flow.milestones.filter((m: any) => m.completed).length;
+            return {
+                raised: flow.raised.toString(),
+                goal: flow.goal.toString(),
+                completedMilestones: completedMilestones,
+            };
+        } catch (error) {
+            console.error(`Error fetching on-chain data for flow ${address}:`, error);
+            return null;
         }
     };
 

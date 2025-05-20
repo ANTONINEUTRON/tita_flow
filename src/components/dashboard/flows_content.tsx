@@ -7,51 +7,56 @@ import useFlow from "@/lib/hooks/use_flow";
 import useProfile from "@/lib/hooks/use_profile";
 import { cn } from "@/lib/utils";
 import { FundingFlow } from "@/lib/types/funding_flow";
+import { SupportCurrency } from "@/lib/types/supported_currencies";
+import { AppConstants } from "@/lib/app_constants";
 
 interface FlowsContentProps {
   flows: FundingFlow[]
 }
 
 export function FlowsContent({ flows }: FlowsContentProps) {
+
   return (
     <div className="space-y-6">
       <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
-        {flows.map((flow) => (
-          <Card key={flow.id} className={cn(flow.status === "cancelled" ? "border-dashed" : "", "flex flex-col justify-between")}>
-            <div>
-              <CardHeader className="pb-3">
-                <div className="flex items-center justify-between">
-                  <CardTitle className="text-base">{flow.title}</CardTitle>
-                  <div className={`px-2 py-1 rounded-full text-xs font-medium capitalize
+        {flows.map((flow) => {
+          const currency: SupportCurrency = AppConstants.SUPPORTEDCURRENCIES.find((c) => c.name === flow.currency) || AppConstants.SUPPORTEDCURRENCIES[0];
+
+          return (
+            <Card key={flow.id} className={cn(flow.status === "cancelled" ? "border-dashed" : "", "flex flex-col justify-between")}>
+              <div>
+                <CardHeader className="pb-3">
+                  <div className="flex items-center justify-between">
+                    <CardTitle className="text-base">{flow.title}</CardTitle>
+                    <div className={`px-2 py-1 rounded-full text-xs font-medium capitalize
                   ${flow.status === "active" ? "bg-green-100 text-green-800" : ""}
                   ${flow.status === "cancelled" ? "bg-yellow-100 text-yellow-800" : ""}
                   ${flow.status === "completed" ? "bg-blue-100 text-blue-800" : ""}
                 `}>
-                    {flow.status}
-                  </div>
-                </div>
-              </CardHeader>
-              <CardContent className="pb-3">
-                <div className="space-y-3">
-                  <div>
-                    <p className="text-sm text-muted-foreground line-clamp-2">{flow.description}</p>
-                  </div>
-                  <div className="space-y-1">
-                    <div className="flex justify-between text-sm">
-                      <span className="text-muted-foreground">Raised</span>
-                      <span className="font-medium">
-                        {flow.raised.toLocaleString()} of {flow.goal.toLocaleString()} {flow.currency}
-                      </span>
-                    </div>
-                    <div className="h-2 bg-muted rounded-full overflow-hidden">
-                      <div
-                        className="h-full bg-primary"
-                        style={{ width: `${(Number(flow.raised) / Number(flow.goal)) * 100}%` }}
-                      ></div>
+                      {flow.status}
                     </div>
                   </div>
-                  {
-                    flow.rules.milestone && (
+                </CardHeader>
+                <CardContent className="pb-3">
+                  <div className="space-y-3">
+                    <div>
+                      <p className="text-sm text-muted-foreground line-clamp-2">{flow.description}</p>
+                    </div>
+                    <div className="space-y-1">
+                      <div className="flex justify-between text-sm">
+                        <span className="text-muted-foreground">Raised</span>
+                        <span className="font-medium">
+                          {(flow.raised / Math.pow(10, currency.decimals)).toLocaleString()} of {(Number(flow.goal) / Math.pow(10, currency.decimals)).toLocaleString()} {flow.currency}
+                        </span>
+                      </div>
+                      <div className="h-2 bg-muted rounded-full overflow-hidden">
+                        <div
+                          className="h-full bg-primary"
+                          style={{ width: `${(Number(flow.raised) / Number(flow.goal)) * 100}%` }}
+                        ></div>
+                      </div>
+                    </div>
+                    {flow.rules.milestone && (
                       <div className="space-y-1">
                         <div className="flex justify-between text-sm">
                           <span className="text-muted-foreground">Milestones</span>
@@ -64,18 +69,18 @@ export function FlowsContent({ flows }: FlowsContentProps) {
                           ></div>
                         </div>
                       </div>
-                    )
-                  }
-                </div>
-              </CardContent>
-            </div>
-            <CardFooter>
-              <Button variant="outline" size="sm" className="w-full" asChild>
-                <Link href={`/flow/${flow.id}`}>Manage Flow</Link>
-              </Button>
-            </CardFooter>
-          </Card>
-        ))}
+                    )}
+                  </div>
+                </CardContent>
+              </div>
+              <CardFooter>
+                <Button variant="outline" size="sm" className="w-full" asChild>
+                  <Link href={`/flow/${flow.id}`}>Manage Flow</Link>
+                </Button>
+              </CardFooter>
+            </Card>
+          );
+        })}
         
         <Card className="border-dashed flex flex-col items-center justify-center h-full min-h-[220px]">
           <CardContent className="pt-6 flex flex-col items-center text-center space-y-3">

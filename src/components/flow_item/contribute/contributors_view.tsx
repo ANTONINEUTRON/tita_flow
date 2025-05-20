@@ -62,8 +62,6 @@ export function ContributorsView({ flow }: ContributorsViewProps) {
       setLoading(true);
       try {
         let contributionss = await getContributionsByFlow(flow);
-        console.log(contributionss)
-        console.log("Curenee", currency)
 
         if (contributionss) {
           contributionss = contributionss.map((contribution: any) => ({

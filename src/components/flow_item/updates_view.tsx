@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react";
-import { 
-  Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle 
+import {
+  Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle
 } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
@@ -8,9 +8,9 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
 import { AlertTriangle, FileText, MessageSquare, Plus, ThumbsUp } from "lucide-react";
-import { 
-  Dialog, DialogContent, DialogDescription, DialogFooter, 
-  DialogHeader, DialogTitle, DialogTrigger 
+import {
+  Dialog, DialogContent, DialogDescription, DialogFooter,
+  DialogHeader, DialogTitle, DialogTrigger
 } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -25,21 +25,19 @@ import { Flow, Update } from "@/lib/types/typesbbbb";
 import { formatDate } from "@/lib/utils";
 import { fetchFlowData } from "@/lib/data/flow_item_data";
 import { FundingFlowResponse } from "@/lib/types/flow.response";
+import AppUser from "@/lib/types/user";
+import useUpdates from "@/lib/hooks/use_updates";
 
 interface UpdatesViewProps {
   flow: FundingFlowResponse;
-  currentUser?: {
-    id: string;
-    name: string;
-    avatarUrl?: string;
-  };
+  currentUser?: AppUser;
   onCreateUpdate?: (content: string, attachments: File[]) => Promise<void>;
   onComment?: (updateId: string, content: string) => Promise<void>;
   onLike?: (updateId: string) => Promise<void>;
 }
 
-export function UpdatesView({ 
-  // flow, 
+export function UpdatesView({
+  flow : ffflow, 
   currentUser,
   onCreateUpdate,
   onComment,
@@ -51,22 +49,29 @@ export function UpdatesView({
   const [expandedUpdateId, setExpandedUpdateId] = useState<string | null>(null);
   const [attachments, setAttachments] = useState<File[]>([]);
   const flow = fetchFlowData("1");
-  // const [flow, setFlow] = useState<Flow>()
-  
-  // useEffect(()=>{
-  //   fetchFlowData("1").then(data => {
-  //     setFlow(data);
-  //   });
-  // })
-    
+  const { createUpdate, fetchUpdates, loading } = useUpdates();
+
   const updates = flow!.updates || [];
-  
-  const isCreator = true;//currentUser?.id === flow!.creator.id;
-  
+
+  const isCreator = true;
+
   const handleCreateUpdate = async () => {
     if (!onCreateUpdate || !newUpdateContent.trim()) return;
-    
+
     try {
+      await createUpdate({
+        id: currentUser?.id+"_"+Date.now().toString(),
+        description: newUpdateContent,
+        flow_id: ffflow!.id,
+        user_id: currentUser?.id || "",
+        files: attachments.map(file => ({
+          type: file.type,
+          url: URL.createObjectURL(file),
+          created_at: new Date().toISOString(),
+        })),
+        created_at: new Date().toISOString(),
+        updated_at: new Date().toISOString(),
+      });
       await onCreateUpdate(newUpdateContent, attachments);
       setNewUpdateContent('');
       setAttachments([]);
@@ -75,13 +80,13 @@ export function UpdatesView({
       console.error('Failed to create update:', error);
     }
   };
-  
+
   const handleAddComment = async (updateId: string) => {
     if (!onComment) return;
-    
+
     const content = commentText[updateId];
     if (!content || !content.trim()) return;
-    
+
     try {
       await onComment(updateId, content);
       setCommentText(prev => ({ ...prev, [updateId]: '' }));
@@ -89,27 +94,27 @@ export function UpdatesView({
       console.error('Failed to add comment:', error);
     }
   };
-  
+
   const handleLike = async (updateId: string) => {
     if (!onLike) return;
-    
+
     try {
       await onLike(updateId);
     } catch (error) {
       console.error('Failed to like update:', error);
     }
   };
-  
+
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files) {
       setAttachments(Array.from(e.target.files));
     }
   };
-  
+
   const toggleExpandUpdate = (updateId: string) => {
     setExpandedUpdateId(expandedUpdateId === updateId ? null : updateId);
   };
-  
+
   if (updates.length === 0 && !isCreator) {
     return (
       <Card className="flex flex-col items-center justify-center text-center p-10">
@@ -121,7 +126,7 @@ export function UpdatesView({
       </Card>
     );
   }
-  
+
   return (
     <div className="space-y-6">
       <div className="flex justify-between items-center">
@@ -131,7 +136,7 @@ export function UpdatesView({
             {updates.length} update{updates.length !== 1 ? 's' : ''} from the flow creator
           </p>
         </div>
-        
+
         {isCreator && (
           <Dialog open={isCreatingUpdate} onOpenChange={setIsCreatingUpdate}>
             <DialogTrigger asChild>
@@ -156,10 +161,10 @@ export function UpdatesView({
                 />
                 <div className="space-y-2">
                   <Label htmlFor="attachments">Attachments (optional)</Label>
-                  <Input 
-                    id="attachments" 
-                    type="file" 
-                    multiple 
+                  <Input
+                    id="attachments"
+                    type="file"
+                    multiple
                     onChange={handleFileChange}
                   />
                   {attachments.length > 0 && (
@@ -183,10 +188,16 @@ export function UpdatesView({
                 </div>
               </div>
               <DialogFooter>
-                <Button variant="outline" onClick={() => setIsCreatingUpdate(false)}>
+                <Button 
+                  variant="outline" 
+                  disabled={loading} 
+                  onClick={() => setIsCreatingUpdate(false)}>
                   Cancel
                 </Button>
-                <Button onClick={handleCreateUpdate} disabled={!newUpdateContent.trim()}>
+                <Button 
+                  isLoading={loading} 
+                  onClick={handleCreateUpdate} 
+                  disabled={!newUpdateContent.trim()}>
                   Post Update
                 </Button>
               </DialogFooter>
@@ -194,7 +205,7 @@ export function UpdatesView({
           </Dialog>
         )}
       </div>
-      
+
       <div className="space-y-6">
         {updates.length === 0 && isCreator ? (
           <Card className="flex flex-col items-center justify-center text-center p-10">
@@ -230,7 +241,7 @@ export function UpdatesView({
                       </p>
                     </div>
                   </div>
-                  
+
                   {isCreator && update.author.id === currentUser?.id && (
                     <DropdownMenu>
                       <DropdownMenuTrigger asChild>
@@ -249,7 +260,7 @@ export function UpdatesView({
               </CardHeader>
               <CardContent className="pb-3">
                 <div className="whitespace-pre-line">{update.content}</div>
-                
+
                 {update.attachments && update.attachments.length > 0 && (
                   <div className="mt-4 flex flex-wrap gap-2">
                     {update.attachments.map((attachment) => (
@@ -267,33 +278,33 @@ export function UpdatesView({
                   </div>
                 )}
               </CardContent>
-              
+
               <CardFooter className="flex flex-col items-stretch pt-1">
                 <div className="flex items-center gap-2 py-2">
-                  <Button 
-                    variant="ghost" 
-                    size="sm" 
+                  <Button
+                    variant="ghost"
+                    size="sm"
                     className="text-muted-foreground h-8"
                     onClick={() => handleLike(update.id)}
                   >
                     <ThumbsUp className="h-4 w-4 mr-1" />
                     <span>Like</span>
                   </Button>
-                  <Button 
-                    variant="ghost" 
-                    size="sm" 
+                  <Button
+                    variant="ghost"
+                    size="sm"
                     className="text-muted-foreground h-8"
                     onClick={() => toggleExpandUpdate(update.id)}
                   >
                     <MessageSquare className="h-4 w-4 mr-1" />
                     <span>
-                      {update.comments && update.comments.length > 0 
+                      {update.comments && update.comments.length > 0
                         ? `Comments (${update.comments.length})`
                         : "Comment"}
                     </span>
                   </Button>
                 </div>
-                
+
                 {expandedUpdateId === update.id && (
                   <>
                     <Separator />
@@ -325,11 +336,11 @@ export function UpdatesView({
                         ))}
                       </div>
                     )}
-                    
+
                     {currentUser && (
                       <div className="flex gap-3 pt-3">
                         <Avatar className="h-8 w-8">
-                          <AvatarImage src={currentUser.avatarUrl} alt={currentUser.name} />
+                          <AvatarImage src={currentUser.profile_pics} alt={currentUser.name} />
                           <AvatarFallback>{currentUser.name.charAt(0)}</AvatarFallback>
                         </Avatar>
                         <div className="flex-1 flex gap-2">
@@ -339,8 +350,8 @@ export function UpdatesView({
                             onChange={(e) => setCommentText(prev => ({ ...prev, [update.id]: e.target.value }))}
                             className="min-h-[80px] flex-1"
                           />
-                          <Button 
-                            className="self-end" 
+                          <Button
+                            className="self-end"
                             onClick={() => handleAddComment(update.id)}
                             disabled={!commentText[update.id]?.trim()}
                           >

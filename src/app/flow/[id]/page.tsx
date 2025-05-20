@@ -27,13 +27,13 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
-import { FlowDetailSkeleton } from "../../../components/flow_item/FlowSkeleton";
-import { FlowOverview } from "../../../components/flow_item/FlowOverview";
+import { FlowDetailSkeleton } from "../../../components/flow_item/flow_skeleton";
+import { FlowOverview } from "../../../components/flow_item/flow_overview";
 import { FlowSidebar } from "../../../components/flow_item/sidebar";
 import { MobileFlowHeader, MobileBottomNav } from "../../../components/flow_item/mobile";
 import { ContributorsView } from "@/components/flow_item/contribute/contributors_view";
-import { UpdatesView } from "@/components/flow_item/UpdatesView";
-import { ProposalsView } from "@/components/flow_item/ProposalsView";
+import { UpdatesView } from "@/components/flow_item/updates_view";
+import { ProposalsView } from "@/components/flow_item/proposals_view";
 import useFlow from "@/lib/hooks/use_flow";
 import AppUser from "@/lib/types/user";
 import toast from "react-hot-toast";
@@ -221,7 +221,7 @@ export default function FlowDetailPage() {
           {
             userProfile && (
               <Button variant="outline" size="sm" asChild className="h-9">
-                <Link href="/app/flows">
+                <Link href="/app/dashboard?tab=flows">
                   <ArrowLeft className="mr-2 h-4 w-4" />
                   Back to Flows
                 </Link>
@@ -308,10 +308,10 @@ export default function FlowDetailPage() {
           )} */}
 
           {/* Updates view */}
-          {activeView === "updates" && (
+          {activeView === "updates" && userProfile && (
             <UpdatesView
               flow={flow}
-              currentUser={currentUser}
+              currentUser={userProfile}
               onCreateUpdate={handleCreateUpdate}
               onComment={handleCommentOnUpdate}
               onLike={handleLikeUpdate}
