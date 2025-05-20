@@ -7,16 +7,17 @@ export async function POST(req: NextRequest) {
     try {
         const formData = await req.formData();
         const uploadedImages: string[] = [];
+        const uploadedFiles: string[] = [];
         let uploadedVideo: string | null = null;
-        const campaignFileId = uuidv4();//formData.get("trxHash") as any as string;
-        console.log("Campaign file ID:", campaignFileId);
+        const flowFileId = uuidv4();
+        
         const images = formData.getAll("image");
 
         if (images) {
             for (let i = 0; i < images.length; i++) {
                 const image = images[i];
 
-                let imageUrl = await UploadToCloudinary(image as any as File, `campaign_images/${campaignFileId}_${i}`);
+                let imageUrl = await UploadToCloudinary(image as any as File, `flow_images/${flowFileId}_${i}`);
 
                 uploadedImages.push(imageUrl as string); // Collect image URLs
             }
@@ -24,18 +25,29 @@ export async function POST(req: NextRequest) {
 
         const video = formData.get("video") as File;
         if (video) {
-            let res = await UploadToCloudinary(video, `campaign_videos/${campaignFileId}`);
+            let res = await UploadToCloudinary(video, `flow_videos/${flowFileId}`);
 
             if (res) {
                 uploadedVideo = res as string;
             }
         }
-        console.log("Uploaded images:", uploadedImages);
-        console.log("Uploaded video:", uploadedVideo);
+
+        const generalFile = formData.getAll("files") as File[];
+        if (generalFile) {
+            for (let i = 0; i < generalFile.length; i++) {
+                const file = generalFile[i];
+
+                let fileUrl = await UploadToCloudinary(file as any as File, `flow_files/${flowFileId}_${i}`);
+
+                uploadedFiles.push(fileUrl as string); // Collect file URLs
+            }
+        }
+
         // Return the URLs
         return NextResponse.json({
             imageUrls: uploadedImages,
             videoUrl: uploadedVideo,
+            files: uploadedFiles,
         });
     } catch (error) {
         console.log("Error uploading media:", error);

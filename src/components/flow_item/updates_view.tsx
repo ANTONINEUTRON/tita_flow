@@ -27,6 +27,9 @@ import { fetchFlowData } from "@/lib/data/flow_item_data";
 import { FundingFlowResponse } from "@/lib/types/flow.response";
 import AppUser from "@/lib/types/user";
 import useUpdates from "@/lib/hooks/use_updates";
+import { v4 } from "uuid";
+import toast from "react-hot-toast";
+import { UpdateFile } from "@/lib/types/update";
 
 interface UpdatesViewProps {
   flow: FundingFlowResponse;
@@ -49,8 +52,8 @@ export function UpdatesView({
   const [expandedUpdateId, setExpandedUpdateId] = useState<string | null>(null);
   const [attachments, setAttachments] = useState<File[]>([]);
   const flow = fetchFlowData("1");
-  const { createUpdate, fetchUpdates, loading } = useUpdates();
-
+  const { createUpdate, fetchUpdates, uploadFile, loading } = useUpdates();
+  
   const updates = flow!.updates || [];
 
   const isCreator = true;
@@ -58,21 +61,50 @@ export function UpdatesView({
   const handleCreateUpdate = async () => {
     if (!onCreateUpdate || !newUpdateContent.trim()) return;
 
+    if (!newUpdateContent.trim()) {
+      toast.error("Update content cannot be empty");
+      return;
+    }
+    if (attachments.length > 3) {
+      toast.error("You can only attach up to 3 files");
+      return;
+    }
+    if (attachments.some(file => file.size > 5 * 1024 * 1024)) {
+      toast.error("Each file must be less than 5MB");
+      return;
+    }
+
+    if (newUpdateContent.length > 1000) {
+      toast.error("Update content cannot exceed 1000 characters");
+      return;
+    }
+    
+    if (attachments.some(file => file.type !== "image/png" && file.type !== "image/jpeg" && file.type !== "application/pdf")) {
+      toast.error("Only PNG, JPEG and PDF files are allowed");
+      return;
+    }
+
     try {
+
+      // If there are attachments, upload them first
+      let fileUrls: UpdateFile[] = [];
+
+      if (attachments.length > 0) {
+        fileUrls = await uploadFile(attachments, ffflow!.id);
+      }
+
       await createUpdate({
-        id: currentUser?.id+"_"+Date.now().toString(),
+        id: v4(),
         description: newUpdateContent,
         flow_id: ffflow!.id,
         user_id: currentUser?.id || "",
-        files: attachments.map(file => ({
-          type: file.type,
-          url: URL.createObjectURL(file),
-          created_at: new Date().toISOString(),
-        })),
+        files: fileUrls,
         created_at: new Date().toISOString(),
         updated_at: new Date().toISOString(),
       });
+
       await onCreateUpdate(newUpdateContent, attachments);
+
       setNewUpdateContent('');
       setAttachments([]);
       setIsCreatingUpdate(false);

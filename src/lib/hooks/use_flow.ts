@@ -91,15 +91,13 @@ export default function useFlow() {
                 method: 'POST',
                 body: formData,
             });
-            console.log("Upload response:", uploadResponse);
+            
             if (!uploadResponse.ok) {
                 throw new Error('Failed to upload media files');
             }
 
             // Get the uploaded media URLs
             const uploadedMedia = await uploadResponse.json();
-
-            console.log("Uploaded media:", uploadedMedia);
 
 
             return {
