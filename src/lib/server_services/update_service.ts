@@ -45,7 +45,7 @@ export class UpdateService {
         try {
             const { data: updates, error } = await (await this.client)
                 .from(AppConstants.UPDATE_TABLE)
-                .select("*")
+                .select("*, users(*)")
                 .eq("flow_id", flowId);
 
             if (error) {

@@ -4,22 +4,27 @@ import * as Ably from 'ably';
 import { Update, UpdateFile } from '../types/update';
 import { useState } from 'react';
 import axios from 'axios';
+import { UpdateResponse } from '../types/update.response';
 
 export default function useUpdates() {
     // const roomOptions: RoomOptions = {};
     // const ablyClient = new Ably.Realtime({authUrl: '/api/ably', clientId: 'ably-chat-demo'});
     // const chatClient = new ChatClient(ablyClient);
-    const [updates, setUpdates] = useState<Update[]>([]);
+    const [updates, setUpdates] = useState<UpdateResponse[]>([]);
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState<string | null>(null);
 
-    const fetchUpdates = async (campaignId: string) => {
+    const fetchUpdates = async (flowId: string) => {
         setLoading(true);
         try {
-            const response = await fetch('/api/updates?id=' + campaignId);
+            const response = await fetch('/api/updates?id=' + flowId);
             const updates = await response.json();
 
-            setUpdates(updates);
+            const sortedUpdates = updates.sort((a: UpdateResponse, b: UpdateResponse) => {
+                return new Date(b.created_at).getTime() - new Date(a.created_at).getTime();
+            });
+
+            setUpdates(sortedUpdates);
             setLoading(false);
         } catch (e) {
             console.log(e);
@@ -32,7 +37,7 @@ export default function useUpdates() {
         setLoading(true);
         try {
             await axios.post('/api/updates', update);
-fetchUpdates(update.flow_id);
+            fetchUpdates(update.flow_id);
             setLoading(false);
             return true
         } catch (e) {
@@ -62,15 +67,28 @@ fetchUpdates(update.flow_id);
 
         // Get the uploaded file URLs from the response
         const uploadResult = await uploadResponse.json();
-        
+
         // Transform the upload results into the UpdateFile format
         return uploadResult.files.map((url: string, index: number) => {
-            // Determine file type based on extension or mime type
-            const fileType = attachments[index].type.match(/\.(jpeg|jpg|png|gif)$/i)
-                ? "image"
-                : url.match(/\.(mp4|webm|mov)$/i)
-                    ? "video"
-                    : "document";
+            // Get the MIME type from the attachment
+            const mimeType = attachments[index].type; // e.g. "image/jpeg", "video/mp4"
+
+            // Determine file type based on MIME type first
+            let fileType;
+            if (mimeType.startsWith('image/')) {
+                fileType = "image";
+            } else if (mimeType.startsWith('video/')) {
+                fileType = "video";
+            } else {
+                // Fallback to URL extension check if MIME type is ambiguous
+                if (url.match(/\.(jpeg|jpg|png|gif|webp|svg)$/i)) {
+                    fileType = "image";
+                } else if (url.match(/\.(mp4|webm|mov|avi|mkv|flv)$/i)) {
+                    fileType = "video";
+                } else {
+                    fileType = "document";
+                }
+            }
 
             return {
                 url,

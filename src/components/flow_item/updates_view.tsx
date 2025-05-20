@@ -7,7 +7,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
-import { AlertTriangle, FileText, MessageSquare, Plus, ThumbsUp } from "lucide-react";
+import { AlertTriangle, FileIcon, FileText, FileTextIcon, ImageIcon, Loader2Icon, MessageSquare, MessageSquareIcon, PaperclipIcon, Plus, PlusCircleIcon, ThumbsUp, VideoIcon, X } from "lucide-react";
 import {
   Dialog, DialogContent, DialogDescription, DialogFooter,
   DialogHeader, DialogTitle, DialogTrigger
@@ -30,6 +30,16 @@ import useUpdates from "@/lib/hooks/use_updates";
 import { v4 } from "uuid";
 import toast from "react-hot-toast";
 import { UpdateFile } from "@/lib/types/update";
+import { UpdateResponse } from "@/lib/types/update.response";
+import { formatDistanceToNow } from "date-fns";
+import {
+  Sheet,
+  SheetContent,
+  SheetHeader,
+  SheetTitle,
+  SheetClose,
+} from "@/components/ui/sheet";
+import Image from "next/image";
 
 interface UpdatesViewProps {
   flow: FundingFlowResponse;
@@ -37,27 +47,41 @@ interface UpdatesViewProps {
   onCreateUpdate?: (content: string, attachments: File[]) => Promise<void>;
   onComment?: (updateId: string, content: string) => Promise<void>;
   onLike?: (updateId: string) => Promise<void>;
+  updates: UpdateResponse[];
+  refreshUpdates: (flowId: string) => Promise<void>;
 }
 
 export function UpdatesView({
-  flow : ffflow, 
+  flow, 
+  updates,
   currentUser,
   onCreateUpdate,
   onComment,
-  onLike
+  onLike,
+  refreshUpdates,
 }: UpdatesViewProps) {
-  const [commentText, setCommentText] = useState<Record<string, string>>({});
+  const [commentText, setCommentText] = useState<string>('');
   const [isCreatingUpdate, setIsCreatingUpdate] = useState(false);
   const [newUpdateContent, setNewUpdateContent] = useState('');
-  const [expandedUpdateId, setExpandedUpdateId] = useState<string | null>(null);
   const [attachments, setAttachments] = useState<File[]>([]);
-  const flow = fetchFlowData("1");
-  const { createUpdate, fetchUpdates, uploadFile, loading } = useUpdates();
-  
-  const updates = flow!.updates || [];
+  const [sidebarOpen, setSidebarOpen] = useState(false);
+  const [selectedUpdate, setSelectedUpdate] = useState<UpdateResponse | null>(null);
+  const { createUpdate, loading } = useUpdates();
 
   const isCreator = true;
 
+  // Open sidebar with selected update
+  const openSidebar = (update: UpdateResponse) => {
+    setSelectedUpdate(update);
+    setSidebarOpen(true);
+  };
+
+  // Close sidebar
+  const closeSidebar = () => {
+    setSidebarOpen(false);
+    setTimeout(() => setSelectedUpdate(null), 300);
+  };
+  
   const handleCreateUpdate = async () => {
     if (!onCreateUpdate || !newUpdateContent.trim()) return;
 
@@ -65,46 +89,16 @@ export function UpdatesView({
       toast.error("Update content cannot be empty");
       return;
     }
+    
     if (attachments.length > 3) {
       toast.error("You can only attach up to 3 files");
       return;
     }
-    if (attachments.some(file => file.size > 5 * 1024 * 1024)) {
-      toast.error("Each file must be less than 5MB");
-      return;
-    }
-
-    if (newUpdateContent.length > 1000) {
-      toast.error("Update content cannot exceed 1000 characters");
-      return;
-    }
-    
-    if (attachments.some(file => file.type !== "image/png" && file.type !== "image/jpeg" && file.type !== "application/pdf")) {
-      toast.error("Only PNG, JPEG and PDF files are allowed");
-      return;
-    }
 
     try {
-
-      // If there are attachments, upload them first
-      let fileUrls: UpdateFile[] = [];
-
-      if (attachments.length > 0) {
-        fileUrls = await uploadFile(attachments, ffflow!.id);
-      }
-
-      await createUpdate({
-        id: v4(),
-        description: newUpdateContent,
-        flow_id: ffflow!.id,
-        user_id: currentUser?.id || "",
-        files: fileUrls,
-        created_at: new Date().toISOString(),
-        updated_at: new Date().toISOString(),
-      });
-
       await onCreateUpdate(newUpdateContent, attachments);
-
+      refreshUpdates(flow!.id);
+      toast.success("Update created successfully");
       setNewUpdateContent('');
       setAttachments([]);
       setIsCreatingUpdate(false);
@@ -113,54 +107,23 @@ export function UpdatesView({
     }
   };
 
-  const handleAddComment = async (updateId: string) => {
-    if (!onComment) return;
-
-    const content = commentText[updateId];
-    if (!content || !content.trim()) return;
+  const handleAddComment = async () => {
+    if (!selectedUpdate || !onComment || !commentText.trim()) return;
 
     try {
-      await onComment(updateId, content);
-      setCommentText(prev => ({ ...prev, [updateId]: '' }));
+      await onComment(selectedUpdate.id, commentText);
+      setCommentText('');
+      refreshUpdates(flow.id);
+      toast.success("Comment added");
     } catch (error) {
       console.error('Failed to add comment:', error);
+      toast.error("Failed to add comment");
     }
   };
-
-  const handleLike = async (updateId: string) => {
-    if (!onLike) return;
-
-    try {
-      await onLike(updateId);
-    } catch (error) {
-      console.error('Failed to like update:', error);
-    }
-  };
-
-  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    if (e.target.files) {
-      setAttachments(Array.from(e.target.files));
-    }
-  };
-
-  const toggleExpandUpdate = (updateId: string) => {
-    setExpandedUpdateId(expandedUpdateId === updateId ? null : updateId);
-  };
-
-  if (updates.length === 0 && !isCreator) {
-    return (
-      <Card className="flex flex-col items-center justify-center text-center p-10">
-        <MessageSquare className="h-12 w-12 text-muted-foreground mb-4" />
-        <h3 className="text-lg font-medium mb-2">No Updates Yet</h3>
-        <p className="text-muted-foreground mb-6">
-          There are no updates for this flow yet. Check back later for news and progress updates.
-        </p>
-      </Card>
-    );
-  }
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-6 relative">
+      {/* Create Update Button & Form */}
       <div className="flex justify-between items-center">
         <div>
           <h2 className="text-2xl font-bold">Updates</h2>
@@ -191,44 +154,42 @@ export function UpdatesView({
                   onChange={(e) => setNewUpdateContent(e.target.value)}
                   className="min-h-[150px]"
                 />
-                <div className="space-y-2">
-                  <Label htmlFor="attachments">Attachments (optional)</Label>
-                  <Input
-                    id="attachments"
-                    type="file"
-                    multiple
-                    onChange={handleFileChange}
-                  />
-                  {attachments.length > 0 && (
-                    <div className="mt-2">
-                      <p className="text-sm text-muted-foreground mb-1">
-                        {attachments.length} file{attachments.length !== 1 ? 's' : ''} selected:
-                      </p>
-                      <ul className="text-sm space-y-1">
-                        {attachments.map((file, index) => (
-                          <li key={index} className="flex items-center">
-                            <FileText className="h-3 w-3 mr-1 flex-shrink-0" />
-                            <span className="truncate">{file.name}</span>
-                            <span className="text-muted-foreground ml-1">
-                              ({(file.size / 1024).toFixed(1)} KB)
-                            </span>
-                          </li>
-                        ))}
-                      </ul>
+                <div className="flex items-center gap-2">
+                  <Label htmlFor="file-upload" className="cursor-pointer">
+                    <div className="flex items-center gap-2 px-3 py-2 bg-muted rounded-md hover:bg-muted/80">
+                      <PaperclipIcon className="h-4 w-4" />
+                      <span>Attach Files</span>
                     </div>
+                    <input
+                      id="file-upload"
+                      type="file"
+                      multiple
+                      onChange={(e) => {
+                        if (e.target.files) {
+                          setAttachments(Array.from(e.target.files).slice(0, 3));
+                        }
+                      }}
+                      className="hidden"
+                    />
+                  </Label>
+
+                  {attachments.length > 0 && (
+                    <span className="text-sm text-muted-foreground">
+                      {attachments.length} file{attachments.length > 1 ? 's' : ''} selected
+                    </span>
                   )}
                 </div>
               </div>
               <DialogFooter>
-                <Button 
-                  variant="outline" 
-                  disabled={loading} 
+                <Button
+                  variant="outline"
+                  disabled={loading}
                   onClick={() => setIsCreatingUpdate(false)}>
                   Cancel
                 </Button>
-                <Button 
-                  isLoading={loading} 
-                  onClick={handleCreateUpdate} 
+                <Button
+                  isLoading={loading}
+                  onClick={handleCreateUpdate}
                   disabled={!newUpdateContent.trim()}>
                   Post Update
                 </Button>
@@ -238,167 +199,198 @@ export function UpdatesView({
         )}
       </div>
 
-      <div className="space-y-6">
-        {updates.length === 0 && isCreator ? (
-          <Card className="flex flex-col items-center justify-center text-center p-10">
-            <AlertTriangle className="h-12 w-12 text-muted-foreground mb-4" />
-            <h3 className="text-lg font-medium mb-2">No Updates Yet</h3>
-            <p className="text-muted-foreground mb-6">
-              You haven't posted any updates for this flow yet. Keep your contributors informed about your progress!
-            </p>
-            <Button onClick={() => setIsCreatingUpdate(true)}>
-              <Plus className="h-4 w-4 mr-2" />
-              Create First Update
-            </Button>
+      {/* Updates List */}
+      <div className="space-y-4">
+        {updates.length === 0 ? (
+          <Card className="p-8 flex flex-col items-center justify-center">
+            <FileTextIcon className="h-12 w-12 text-muted-foreground mb-4" />
+            <p className="text-lg font-medium">No updates yet</p>
+            <p className="text-muted-foreground">Check back later for project updates</p>
           </Card>
         ) : (
-          updates.map((update: Update) => (
-            <Card key={update.id} className="overflow-hidden">
-              <CardHeader className="pb-3">
-                <div className="flex justify-between">
-                  <div className="flex items-center gap-3">
+          updates.map((update) => (
+            <Card 
+              key={update.id} 
+              className="cursor-pointer hover:shadow-md transition-shadow"
+              onClick={() => openSidebar(update)}
+            >
+              <CardHeader>
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center space-x-2">
                     <Avatar>
-                      <AvatarImage src={update.author.avatarUrl} alt={update.author.name} />
-                      <AvatarFallback>{update.author.name.charAt(0)}</AvatarFallback>
+                      <AvatarImage src={update.users?.profile_pics || ''} />
+                      <AvatarFallback>{update.users?.username?.charAt(0) || 'U'}</AvatarFallback>
                     </Avatar>
                     <div>
-                      <div className="flex items-center gap-2">
-                        <span className="font-medium">{update.author.name}</span>
-                        {update.author.id === flow!.creator.id && (
-                          <Badge variant="outline">Creator</Badge>
-                        )}
-                      </div>
-                      <p className="text-sm text-muted-foreground">
-                        {formatDate(update?.createdAt ?? "")}
+                      <p className="font-medium">{update.users?.username || 'Unknown User'}</p>
+                      <p className="text-xs text-muted-foreground">
+                        {formatDistanceToNow(new Date(update.created_at), { addSuffix: true })}
                       </p>
                     </div>
                   </div>
-
-                  {isCreator && update.author.id === currentUser?.id && (
-                    <DropdownMenu>
-                      <DropdownMenuTrigger asChild>
-                        <Button variant="ghost" size="icon" className="h-8 w-8">
-                          <EllipsisVertical className="h-4 w-4" />
-                          <span className="sr-only">Actions</span>
-                        </Button>
-                      </DropdownMenuTrigger>
-                      <DropdownMenuContent align="end">
-                        <DropdownMenuItem>Edit Update</DropdownMenuItem>
-                        <DropdownMenuItem className="text-destructive">Delete Update</DropdownMenuItem>
-                      </DropdownMenuContent>
-                    </DropdownMenu>
-                  )}
                 </div>
               </CardHeader>
-              <CardContent className="pb-3">
-                <div className="whitespace-pre-line">{update.content}</div>
-
-                {update.attachments && update.attachments.length > 0 && (
-                  <div className="mt-4 flex flex-wrap gap-2">
-                    {update.attachments.map((attachment) => (
-                      <a
-                        key={attachment.url}
-                        href={attachment.url}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="flex items-center gap-1.5 text-sm bg-secondary px-3 py-1.5 rounded-md hover:bg-secondary/80"
-                      >
-                        <FileText className="h-3.5 w-3.5" />
-                        <span className="truncate max-w-[150px]">{attachment.name}</span>
-                      </a>
-                    ))}
-                  </div>
-                )}
-              </CardContent>
-
-              <CardFooter className="flex flex-col items-stretch pt-1">
-                <div className="flex items-center gap-2 py-2">
-                  <Button
-                    variant="ghost"
-                    size="sm"
-                    className="text-muted-foreground h-8"
-                    onClick={() => handleLike(update.id)}
-                  >
-                    <ThumbsUp className="h-4 w-4 mr-1" />
-                    <span>Like</span>
-                  </Button>
-                  <Button
-                    variant="ghost"
-                    size="sm"
-                    className="text-muted-foreground h-8"
-                    onClick={() => toggleExpandUpdate(update.id)}
-                  >
-                    <MessageSquare className="h-4 w-4 mr-1" />
-                    <span>
-                      {update.comments && update.comments.length > 0
-                        ? `Comments (${update.comments.length})`
-                        : "Comment"}
-                    </span>
-                  </Button>
+              
+              <CardContent>
+                <p className="line-clamp-3">{update.description}</p>
+                
+                {/* Attachment and comment indicators */}
+                <div className="flex items-center mt-4 text-sm text-muted-foreground">
+                  {update.files?.length > 0 && (
+                    <div className="flex items-center mr-4">
+                      <PaperclipIcon className="h-4 w-4 mr-1" />
+                      <span>{update.files.length} attachment{update.files.length !== 1 ? 's' : ''}</span>
+                    </div>
+                  )}
+                  
+                  {(update.comments?.length ?? 0) > 0 && (
+                    <div className="flex items-center">
+                      <MessageSquareIcon className="h-4 w-4 mr-1" />
+                      <span>{update.comments!.length} comment{update.comments!.length !== 1 ? 's' : ''}</span>
+                    </div>
+                  )}
                 </div>
-
-                {expandedUpdateId === update.id && (
-                  <>
-                    <Separator />
-                    {update.comments && update.comments.length > 0 && (
-                      <div className="py-3 space-y-3">
-                        {update.comments.map((comment) => (
-                          <div key={comment.id} className="flex gap-3">
-                            <Avatar className="h-8 w-8">
-                              <AvatarImage src={comment.author.avatarUrl} alt={comment.author.name} />
-                              <AvatarFallback>{comment.author.name.charAt(0)}</AvatarFallback>
-                            </Avatar>
-                            <div className="flex-1">
-                              <div className="bg-secondary p-3 rounded-lg">
-                                <div className="flex items-center justify-between mb-1">
-                                  <div className="flex items-center gap-2">
-                                    <span className="font-medium text-sm">{comment.author.name}</span>
-                                    {comment.author.id === flow!.creator.id && (
-                                      <Badge variant="outline" className="text-[10px] h-4 px-1">Creator</Badge>
-                                    )}
-                                  </div>
-                                  <span className="text-xs text-muted-foreground">
-                                    {formatDate(comment?.createdAt ?? "")}
-                                  </span>
-                                </div>
-                                <p className="text-sm">{comment.content}</p>
-                              </div>
-                            </div>
-                          </div>
-                        ))}
-                      </div>
-                    )}
-
-                    {currentUser && (
-                      <div className="flex gap-3 pt-3">
-                        <Avatar className="h-8 w-8">
-                          <AvatarImage src={currentUser.profile_pics} alt={currentUser.name} />
-                          <AvatarFallback>{currentUser.name.charAt(0)}</AvatarFallback>
-                        </Avatar>
-                        <div className="flex-1 flex gap-2">
-                          <Textarea
-                            placeholder="Write a comment..."
-                            value={commentText[update.id] || ''}
-                            onChange={(e) => setCommentText(prev => ({ ...prev, [update.id]: e.target.value }))}
-                            className="min-h-[80px] flex-1"
-                          />
-                          <Button
-                            className="self-end"
-                            onClick={() => handleAddComment(update.id)}
-                            disabled={!commentText[update.id]?.trim()}
-                          >
-                            Post
-                          </Button>
-                        </div>
-                      </div>
-                    )}
-                  </>
-                )}
-              </CardFooter>
+              </CardContent>
             </Card>
           ))
         )}
       </div>
+
+      {/* Right Sidebar for Update Details */}
+      <Sheet open={sidebarOpen} onOpenChange={setSidebarOpen}>
+        <SheetContent className="w-full sm:max-w-md overflow-y-auto">
+          <SheetHeader className="border-b pb-4">
+            <SheetTitle>Update Details</SheetTitle>
+            <SheetClose className="absolute right-4 top-4" />
+          </SheetHeader>
+          
+          <div className="py-6 space-y-6">
+            {/* Update header */}
+            <div className="flex items-center space-x-2">
+              <Avatar>
+                <AvatarImage src={selectedUpdate?.users?.profile_pics || ''} />
+                <AvatarFallback>{selectedUpdate?.users?.username?.charAt(0) || 'U'}</AvatarFallback>
+              </Avatar>
+              <div>
+                <p className="font-medium">{selectedUpdate?.users?.username || 'Unknown User'}</p>
+                <p className="text-xs text-muted-foreground">
+                  {formatDistanceToNow(new Date(selectedUpdate?.created_at || Date.now()), { addSuffix: true })}
+                </p>
+              </div>
+            </div>
+            
+            {/* Update description */}
+            <div className="space-y-4">
+              <p className="whitespace-pre-wrap text-sm">{selectedUpdate?.description}</p>
+            </div>
+            
+            {/* Files/attachments section (if present) */}
+            {selectedUpdate?.files && selectedUpdate.files.length > 0 && (
+              <div className="space-y-4">
+                <h4 className="text-sm font-medium">Attachments ({selectedUpdate.files.length})</h4>
+                <div className="grid grid-cols-1 gap-4">
+                  {selectedUpdate.files.map((file, idx) => (
+                    <div key={idx} className="border rounded-md overflow-hidden">
+                      {file.type === 'image' ? (
+                        // Display image preview
+                        <div className="space-y-2">
+                          <div className="relative w-full h-48">
+                            <img
+                              src={file.url} 
+                              alt="Attached image" 
+                              className="object-cover w-full h-full rounded-t-md"
+                            />
+                          </div>
+                          <div className="p-2 flex justify-between">
+                            <a 
+                              href={file.url}
+                              target="_blank"
+                              rel="noopener noreferrer" 
+                              className="text-xs text-primary hover:underline"
+                            >
+                              View full size
+                            </a>
+                          </div>
+                        </div>
+                      ) : file.type === 'video' ? (
+                        // Display video player
+                        <div className="space-y-2">
+                          <video 
+                            controls 
+                            className="w-full rounded-t-md"
+                            preload="metadata"
+                          >
+                            <source src={file.url} />
+                            Your browser does not support the video tag.
+                          </video>
+                          <div className="p-2 flex justify-between">
+                            <span className="text-xs truncate">
+                              {file.url.split('/').pop() || 'Video'}
+                            </span>
+                            <a 
+                              href={file.url}
+                              target="_blank"
+                              rel="noopener noreferrer"
+                              className="text-xs text-primary hover:underline"
+                            >
+                              Download
+                            </a>
+                          </div>
+                        </div>
+                      ) : (
+                        // Other file types
+                        <a 
+                          href={file.url}
+                          target="_blank"
+                          rel="noopener noreferrer" 
+                          className="flex items-center p-4 hover:bg-muted"
+                        >
+                          <div className="bg-muted rounded-md p-2 mr-3">
+                            <FileIcon className="h-6 w-6 text-muted-foreground" />
+                          </div>
+                          <div className="flex-1 min-w-0">
+                            <p className="text-sm font-medium truncate">
+                              {file.url.split('/').pop() || 'File'}
+                            </p>
+                            <p className="text-xs text-muted-foreground">
+                              Click to download
+                            </p>
+                          </div>
+                        </a>
+                      )}
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
+            
+            {/* Comments section would go here */}
+            {/* ... */}
+          </div>
+          
+          {/* Comment input */}
+          {currentUser && (
+            <div className="border-t p-4 mt-auto">
+              <div className="flex space-x-2">
+                <Textarea
+                  placeholder="Add a comment..."
+                  value={commentText}
+                  onChange={(e) => setCommentText(e.target.value)}
+                  className="flex-1 min-h-[60px]"
+                />
+                <Button 
+                  size="sm" 
+                  className="self-end"
+                  disabled={!commentText.trim()}
+                  onClick={handleAddComment}
+                >
+                  Send
+                </Button>
+              </div>
+            </div>
+          )}
+        </SheetContent>
+      </Sheet>
     </div>
   );
 }

@@ -45,34 +45,33 @@ import { SupportCurrency } from "@/lib/types/supported_currencies";
 import { AppConstants } from "@/lib/app_constants";
 import useContribute from "@/lib/hooks/use_contribute";
 import { FundingFlow } from "@/lib/types/funding_flow";
+import useUpdates from "@/lib/hooks/use_updates";
 
-// Update the NavItem interface
 interface NavItem {
   title: string;
   href: string;
   icon: LucideIcon;
   badge?: number;
-  highlight?: boolean; // Add this property
+  highlight?: boolean; 
 }
 
 export default function FlowDetailPage() {
   const params = useParams();
   const [dialogOpen, setDialogOpen] = useState(false);
   const [signInDialogOpen, setSignInDialogOpen] = useState(false);
-  const [isSigningIn, setIsSigningIn] = useState(false); // Add loading state
+  const [isSigningIn, setIsSigningIn] = useState(false); 
   const router = useRouter();
   const [flow, setFlow] = useState<FundingFlowResponse | null>(null);
   const [loading, setLoading] = useState(true);
   const [activeView, setActiveView] = useState("overview");
   const [currentUser, setCurrentUser] = useState<any>(null);
-  const [user, setUser] = useState<AppUser | null>(null)
   const { userProfile, signUserIn, walletInstance, supportedCurrenciesBalances } = useProfile();
   const flowId = params.id as string;
   const { getFlowById } = useFlow();
-  const {contribute} = useContribute()
+  const { contribute } = useContribute();
+  const { updates, fetchUpdates, loading: updateLoading } = useUpdates();
 
   useEffect(() => {
-
     const loadFlowData = async () => {
       // Reset loading state when component mounts
       setLoading(true);
@@ -81,6 +80,9 @@ export default function FlowDetailPage() {
         let flowDetail = await getFlowById(flowId);
         console.log("Flow detail:", flowDetail);
         setFlow(flowDetail);
+
+        // fetch updates
+        fetchUpdates(flowId);
       } catch (error) {
 
         console.error("Failed to load flow:", error);
@@ -144,7 +146,7 @@ export default function FlowDetailPage() {
     const parsed = amount;
     if (!isNaN(parsed) && parsed > 0) {
       // call contribute function to sign transaction and debit user wallet
-      try{
+      try {
         setDialogOpen(false);
 
         await contribute(
@@ -152,7 +154,7 @@ export default function FlowDetailPage() {
         )
 
         toast.success("You have contributed successfully to this flow");
-      }catch(error){
+      } catch (error) {
         console.error("Contribution failed:", error);
         toast.error("Contribution failed. Please try again.");
       }
@@ -167,7 +169,7 @@ export default function FlowDetailPage() {
       await signUserIn();
     } catch (error) {
       console.error("Sign in failed:", error);
-      setIsSigningIn(false); 
+      setIsSigningIn(false);
       toast.error("Sign in failed. Please try again.");
     }
   };
@@ -274,7 +276,7 @@ export default function FlowDetailPage() {
         />
 
         {/* Mobile title and progress */}
-        <MobileFlowHeader flow={flow} creator={user} progress={progress} remainingDays={remainingDays} />
+        <MobileFlowHeader flow={flow} creator={userProfile} progress={progress} remainingDays={remainingDays} />
 
         {/* Contribute dialog */}
         <ContributeDialog
@@ -308,24 +310,38 @@ export default function FlowDetailPage() {
           )} */}
 
           {/* Updates view */}
-          {activeView === "updates" && userProfile && (
-            <UpdatesView
-              flow={flow}
-              currentUser={userProfile}
-              onCreateUpdate={handleCreateUpdate}
-              onComment={handleCommentOnUpdate}
-              onLike={handleLikeUpdate}
-            />
+          {activeView === "updates" && (
+            userProfile ? (
+              <UpdatesView
+                flow={flow}
+                currentUser={userProfile}
+                onCreateUpdate={handleCreateUpdate}
+                onComment={handleCommentOnUpdate}
+                onLike={handleLikeUpdate}
+                updates={updates}
+                refreshUpdates={fetchUpdates}
+              />
+            ) : (
+              <div className="flex items-center justify-center h-full">
+                <p className="text-gray-500">Please sign in to view updates.</p>
+              </div>
+            )
           )}
 
           {/* Proposals view */}
           {activeView === "proposals" && (
-            <ProposalsView
-              flow={flow}
-              currentUser={currentUser}
-              onCreateProposal={handleCreateProposal}
-              onVote={handleVoteOnProposal}
-            />
+            userProfile ? (
+              <ProposalsView
+                flow={flow}
+                currentUser={currentUser}
+                onCreateProposal={handleCreateProposal}
+                onVote={handleVoteOnProposal}
+              />
+            ) : (
+              <div className="flex items-center justify-center h-full">
+                <p className="text-gray-500">Please sign in to view proposals.</p>
+              </div>
+            )
           )}
         </div>
       </div>
