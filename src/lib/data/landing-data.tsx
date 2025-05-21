@@ -22,9 +22,9 @@ export const features = [
     icon: "💬"
   },
   {
-    title: "Escrow & Secure Transactions",
-    description: "Protect funds with conditional releases and multi-signature approvals.",
-    icon: "🔒"
+    title: "Funding Without Borders",
+    description: "Enable truly global funding opportunities with blockchain technology. Creators can receive support from anywhere in the world without currency conversion fees, banking restrictions, or geographic limitations",
+    icon: "🌎"
   },
   {
     title: "On-Chain Transparency",
@@ -136,6 +136,5 @@ const DiscordIcon = (props: React.SVGProps<SVGSVGElement>) => (
 
 export const socialLinks = [
     { name: "Twitter", href: AppConstants.SOCIAL_LINKS.TWITTER, icon: TwitterIcon },
-    // { name: "GitHub", href: AppConstants.SOCIAL_LINKS.GITHUB, icon: GitHubIcon },
     { name: "Discord", href: AppConstants.SOCIAL_LINKS.DISCORD, icon: DiscordIcon }
 ];

@@ -70,10 +70,8 @@ export default function useUpdates() {
 
         // Transform the upload results into the UpdateFile format
         return uploadResult.files.map((url: string, index: number) => {
-            // Get the MIME type from the attachment
-            const mimeType = attachments[index].type; // e.g. "image/jpeg", "video/mp4"
+            const mimeType = attachments[index].type;
 
-            // Determine file type based on MIME type first
             let fileType;
             if (mimeType.startsWith('image/')) {
                 fileType = "image";
