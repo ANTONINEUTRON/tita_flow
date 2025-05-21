@@ -1,5 +1,5 @@
 import React from "react";
-import { Coins } from "lucide-react";
+import { ArrowDownIcon, Coins, LogInIcon } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardFooter } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
@@ -16,6 +16,8 @@ interface FlowSidebarProps {
   navItems: NavItem[];
   progress: number;
   remainingDays: number | null;
+  isSignedIn: boolean;
+  canContribute: boolean;
   handleContributeClick: () => void;
   onNavigate: (view: string) => void;
 }
@@ -26,6 +28,8 @@ export function FlowSidebar({
   navItems,
   progress,
   remainingDays,
+  isSignedIn,
+  canContribute,
   onNavigate,
   handleContributeClick,
 }: FlowSidebarProps) {
@@ -53,8 +57,26 @@ export function FlowSidebar({
 
         <CardFooter>
           <Button className="w-full" onClick={handleContributeClick}>
-            <Coins className="mr-2 h-4 w-4" />
-            Contribute to Flow
+            {
+              isSignedIn ?(
+                canContribute ? (
+                  <div className="flex items-center">
+                    <Coins className="mr-2 h-4 w-4" />
+                    Contribute to Flow
+                  </div>
+                ):(
+                    <div className="flex items-center">
+                      <ArrowDownIcon className="mr-2 h-4 w-4" />
+                      Withdraw
+                    </div>
+                )
+              ):(
+                <div className="flex items-center">
+                  <LogInIcon className="mr-2 h-4 w-4" />
+                  Sign in to Contribute
+                </div>
+              )
+            }
           </Button>
         </CardFooter>
       </Card>

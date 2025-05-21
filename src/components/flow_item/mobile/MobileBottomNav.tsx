@@ -1,22 +1,24 @@
 import React from "react";
-import { Coins, FileText } from "lucide-react";
+import { ArrowDownIcon, Coins, FileText, LogInIcon } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import { FlowType, NavItem } from "../../../lib/types/typesbbbb";
 
 interface MobileBottomNavProps {
-  actionButtonText: string;
   mobileNavItems: NavItem[];
   activeView: string;
+    isSignedIn: boolean;
+    canContribute: boolean;
   onNavigate: (view: string) => void;
   onAction: () => void;
 }
 
 export function MobileBottomNav({
-  actionButtonText,
   mobileNavItems,
   activeView,
+  isSignedIn,
+  canContribute,
   onNavigate,
   onAction
 }: MobileBottomNavProps) {
@@ -28,8 +30,26 @@ export function MobileBottomNav({
           className="h-14 w-14 rounded-full shadow-lg flex items-center justify-center"
           onClick={onAction}
         >
-          <Coins className="h-6 w-6" />
-          <span className="sr-only">{actionButtonText}</span>
+          {
+            isSignedIn ? (
+              canContribute ? (
+                <div>
+                  <Coins className="h-6 w-6" />
+                  <span className="sr-only">Contribute</span>
+                </div>
+              ):(
+                <div>
+                    <ArrowDownIcon className="h-6 w-6" />
+                    <span className="sr-only">Withdraw</span>
+                </div>
+              )
+            ):(
+              <div>
+                  <LogInIcon className="h-6 w-6" />
+                  <span className="sr-only">Sign in to contribute</span>
+              </div>
+            )
+          }
         </Button>
       </div>
       

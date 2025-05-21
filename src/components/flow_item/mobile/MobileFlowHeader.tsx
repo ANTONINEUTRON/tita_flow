@@ -20,7 +20,12 @@ interface MobileFlowHeaderProps {
   remainingDays: number | null;
 }
 
-export function MobileFlowHeader({ flow, creator, progress, remainingDays }: MobileFlowHeaderProps) {
+export function MobileFlowHeader({
+  flow,
+  creator,
+  progress,
+  remainingDays,
+}: MobileFlowHeaderProps) {
   const [currency, setCurrency] = useState<SupportCurrency | null>(null);
   const { activeFlow, fetchFlowOC } = useFlow();
 
@@ -57,12 +62,12 @@ export function MobileFlowHeader({ flow, creator, progress, remainingDays }: Mob
         <div className="flex items-center text-muted-foreground text-xs">
           <Avatar className="h-4 w-4 mr-1">
             <AvatarImage src={creator?.profile_pics} alt={creator?.name} />
-            <AvatarFallback>{creator?.username.substring(0,2).toUpperCase()}</AvatarFallback>
+            <AvatarFallback>{creator?.username.substring(0, 2).toUpperCase()}</AvatarFallback>
           </Avatar>
           <span>{creator?.username}</span>
         </div>
       </div>
-      
+
       {/* Mobile progress for Raise Flow */}
       <div className="mt-2">
         <div className="flex justify-between items-center mb-1 text-sm">
@@ -83,7 +88,7 @@ export function MobileFlowHeader({ flow, creator, progress, remainingDays }: Mob
             </div>
           )}
         </div>
-        
+
       </div>
     </div>
   );

@@ -222,6 +222,14 @@ export default function FlowDetailPage() {
               </Button>
             )
           }
+          {
+            isSigningIn && (
+              <div className="flex gap-1 items-center">
+                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                <p className="hidden md:inline-flex">Signing In...</p>
+              </div>
+            )
+          }
         </div>
         <div className="flex items-center gap-2">
           {/* Premium AI Assistant Button with Animation */}
@@ -284,12 +292,18 @@ export default function FlowDetailPage() {
           navItems={navItems}
           progress={progress}
           remainingDays={remainingDays}
+          isSignedIn={!!userProfile}
+          canContribute={userProfile?.wallet !== flow.creator}
           onNavigate={handleNavigation}
           handleContributeClick={handleContributeClick}
         />
 
         {/* Mobile title and progress */}
-        <MobileFlowHeader flow={flow} creator={userProfile} progress={progress} remainingDays={remainingDays} />
+        <MobileFlowHeader 
+          flow={flow} 
+          creator={userProfile} 
+          progress={progress} 
+          remainingDays={remainingDays} />
 
         {/* Contribute dialog */}
         <ContributeDialog
@@ -358,11 +372,12 @@ export default function FlowDetailPage() {
 
       {/* Mobile Bottom Navigation */}
       <MobileBottomNav
-        actionButtonText={"Contribute"}
         mobileNavItems={mobileNavItems}
         activeView={activeView}
         onNavigate={handleNavigation}
         onAction={handleContributeClick}
+        isSignedIn={!!userProfile}
+        canContribute={userProfile?.wallet !== flow.creator}
       />
 
       {/* Sign-in Dialog */}
@@ -398,6 +413,7 @@ export default function FlowDetailPage() {
           </DialogFooter>
         </DialogContent>
       </Dialog>
+
       {/* AI Assistant Dialog */}
       <Dialog open={agentDialogOpen} onOpenChange={setAgentDialogOpen}>
         <DialogContent className="sm:max-w-md">

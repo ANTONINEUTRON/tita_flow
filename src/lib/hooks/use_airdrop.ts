@@ -16,7 +16,7 @@ export function useAirdrop() {
             });
 
             const result = await response.json();
-            toast.success('Request for '+currency.name+' sent successfully!');
+            // toast.success('Request for '+currency.name+' sent successfully!');
         } catch (error) {
             console.error('Failed to request USDC:', error);
             toast.error("Request for airdrop failed")

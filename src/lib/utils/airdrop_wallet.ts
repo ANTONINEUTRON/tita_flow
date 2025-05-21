@@ -3,7 +3,6 @@ import { AppConstants } from "../app_constants";
 
 export default async function airdropWallet(walletAddress: string){
     try {
-        // Step 1: Connect to the Solana Devnet
         const connection = AppConstants.APP_CONNECTION;
         
         // Airdrop SOL

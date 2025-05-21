@@ -57,7 +57,7 @@ export function UpdatesView({
     loading 
   } = useUpdates();
 
-  const isCreator = true;
+  const isCreator = currentUser.id === flow.users.id;
 
   useEffect(() => {
     if (selectedUpdate && sidebarOpen) {
@@ -218,10 +218,14 @@ export function UpdatesView({
             <FileTextIcon className="h-12 w-12 text-muted-foreground mb-4" />
             <p className="text-lg font-medium">No updates yet</p>
             <p className="text-muted-foreground">Check back later for project updates</p>
-            <Button onClick={() => setIsCreatingUpdate(true)} className="mt-4">
-              <Plus className="h-4 w-4 mr-2" />
-              New Update
-            </Button>
+            {
+              isCreator && (
+                <Button onClick={() => setIsCreatingUpdate(true)} className="mt-4">
+                  <Plus className="h-4 w-4 mr-2" />
+                  New Update
+                </Button>
+              )
+            }
           </Card>
         ) : (
           updates.map((update) => (

@@ -200,11 +200,15 @@ export default function useProfile() {
                 setUserProfile(updatedProfile);
                 userProfile = updatedProfile;
 
-                // airdrop the wallet
-                await airdropWallet(address!);
+                toast.success("Wallet created successfully");
+                toast.success("Airdropping tokens to wallet");
                 
                 await requestDevnetToken(userProfile, AppConstants.SUPPORTEDCURRENCIES[1]);
                 await requestDevnetToken(userProfile, AppConstants.SUPPORTEDCURRENCIES[2]);
+                // airdrop the wallet
+                await airdropWallet(userProfile.wallet);
+
+                toast.success("Airdrop completed successfully");
             }
 
 

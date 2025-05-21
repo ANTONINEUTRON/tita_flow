@@ -7,6 +7,7 @@ import { AppConstants } from "@/lib/app_constants";
 import { SupportCurrency } from "@/lib/types/supported_currencies";
 import { PlusCircle, AlertCircle } from "lucide-react";
 import { Alert, AlertDescription } from "@/components/ui/alert";
+import Link from "next/link";
 
 interface ContributeDialogProps {
     open: boolean;
@@ -104,18 +105,17 @@ export function ContributeDialog({
                             <div className="text-xs text-muted-foreground mt-1">
                                 <b>Balance:</b> {userBalance} {selectedToken}
                             </div>
-                            <Button
-                                variant="ghost"
-                                size="sm"
-                                className="h-6 w-6 p-0"
-                                onClick={() => {
-                                    alert("Top up requested");
-                                }}
-                                title="Add funds to your wallet"
-                            >
-                                <PlusCircle className="h-4 w-4" />
-                                <span className="sr-only">Add funds</span>
-                            </Button>
+                            <Link href="/app/dashboard?tab=settings">
+                                <Button
+                                    variant="ghost"
+                                    size="sm"
+                                    className="h-6 w-6 p-0"
+                                    title="Add funds to your wallet"
+                                >
+                                    <PlusCircle className="h-4 w-4" />
+                                    <span className="sr-only">Add funds</span>
+                                </Button>
+                            </Link>
                         </div>
                     </div>
                 </div>
