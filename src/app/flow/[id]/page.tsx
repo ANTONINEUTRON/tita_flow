@@ -16,6 +16,10 @@ import {
   LucideIcon,
   MoreHorizontal,
   Loader2,
+  Sparkles,
+  InfoIcon,
+  Edit2Icon,
+  ShieldCheckIcon,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
@@ -65,6 +69,7 @@ export default function FlowDetailPage() {
   const [loading, setLoading] = useState(true);
   const [activeView, setActiveView] = useState("overview");
   const [currentUser, setCurrentUser] = useState<any>(null);
+  const [agentDialogOpen, setAgentDialogOpen] = useState(false);
   const { userProfile, signUserIn, walletInstance, supportedCurrenciesBalances } = useProfile();
   const flowId = params.id as string;
   const { getFlowById } = useFlow();
@@ -232,6 +237,20 @@ export default function FlowDetailPage() {
           }
         </div>
         <div className="flex items-center gap-2">
+          {/* Premium AI Assistant Button with Animation */}
+          <Button 
+            onClick={() => setAgentDialogOpen(true)} 
+            className="h-9 relative overflow-hidden bg-gradient-to-br from-indigo-600 via-purple-500 to-pink-500 text-white border-0 hover:shadow-lg transition-all duration-300 group"
+            size="sm">
+            {/* Animated glow effect */}
+            <div className="absolute inset-0 bg-gradient-to-r from-blue-400 to-purple-500 opacity-0 group-hover:opacity-30 transition-opacity duration-300 blur-xl"></div>
+            
+            {/* Button content */}
+            <div className="relative flex items-center">
+              <Sparkles className="mr-2 h-4 w-4 text-white animate-pulse" />
+              <span className="hidden sm:inline font-medium">AI Assistant</span>
+            </div>
+          </Button>
           <Button variant="outline" size="sm" onClick={handleShareFlow} className="h-9">
             <Share2 className="mr-2 h-4 w-4" />
             <span className="hidden sm:inline">Share</span>
@@ -246,17 +265,24 @@ export default function FlowDetailPage() {
             <DropdownMenuContent align="end">
               <DropdownMenuLabel>Flow Actions</DropdownMenuLabel>
               <DropdownMenuSeparator />
+              {flow?.address && (
+                <Link href={`https://solscan.io/address/${flow.address}`} target="_blank" rel="noopener noreferrer">
+                  <DropdownMenuItem>
+                    <ShieldCheckIcon className="h-4 w-4 mr-2" />
+                    Verify 
+                  </DropdownMenuItem>
+                </Link>
+                
+              )}
               <DropdownMenuItem onClick={() => router.push(`/flow/${flowId}/edit`)}>
+                <Edit2Icon className="mr-2 h-4 w-4" />
                 Edit Flow
               </DropdownMenuItem>
               <DropdownMenuItem onClick={() => window.print()}>
                 <Download className="mr-2 h-4 w-4" />
                 Export Details
               </DropdownMenuItem>
-              <DropdownMenuItem onClick={(handleContributeClick)}>
-                <Coins className="mr-2 h-4 w-4" />
-                Contribute
-              </DropdownMenuItem>
+              
             </DropdownMenuContent>
           </DropdownMenu>
         </div>
@@ -384,6 +410,50 @@ export default function FlowDetailPage() {
               ) : (
                 "Sign In"
               )}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+      {/* AI Assistant Dialog */}
+      <Dialog open={agentDialogOpen} onOpenChange={setAgentDialogOpen}>
+        <DialogContent className="sm:max-w-md">
+          <DialogHeader>
+            <DialogTitle className="flex items-center">
+              <Sparkles className="h-5 w-5 mr-2 text-primary" />
+              Meet Leah, Your Project Guide
+            </DialogTitle>
+            <DialogDescription>
+              Your personal project assistant with answers to all your questions.
+            </DialogDescription>
+          </DialogHeader>
+
+          <div className="py-4">
+            <div className="space-y-4">
+              <p>
+                Leah is designed to help you understand this project better by:
+              </p>
+              
+              <ul className="list-disc pl-5 space-y-2">
+                <li>Answering questions about project goals and milestones</li>
+                <li>Providing context on updates and progress</li>
+                <li>Explaining technical aspects in simple terms</li>
+                <li>Summarizing key information for quick understanding</li>
+              </ul>
+              
+              <div className="bg-muted p-4 rounded-md flex items-start">
+                <div className="bg-primary/10 p-2 rounded-full mr-3">
+                  <InfoIcon className="h-5 w-5 text-primary" />
+                </div>
+                <p className="text-sm">
+                  <strong>Coming Soon:</strong> We're currently teaching Leah everything about this project. She'll be ready to assist you in the next update!
+                </p>
+              </div>
+            </div>
+          </div>
+
+          <DialogFooter>
+            <Button onClick={() => setAgentDialogOpen(false)}>
+              Got it
             </Button>
           </DialogFooter>
         </DialogContent>

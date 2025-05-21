@@ -15,6 +15,7 @@ import { AppConstants } from "../app_constants";
 import { getAssetBalance } from "../utils/get_asset_balance";
 import { PublicKey } from "@solana/web3.js";
 import { set } from "@coral-xyz/anchor/dist/cjs/utils/features";
+import { useAirdrop } from "./use_airdrop";
 
 
 export default function useProfile() {
@@ -30,6 +31,7 @@ export default function useProfile() {
     const loadingRef = useRef(false);
     const [supportedCurrenciesBalances, setSCurrenciesBalances] = useState<number[]>([]);
     const [loadingSupportedCurrencies, setLoadingSupportedCurrencies] = useState(false);
+    const { requestDevnetToken } = useAirdrop();
 
     useEffect(() => {
         // console.log("User Profile: ", userContext.user);
@@ -199,7 +201,10 @@ export default function useProfile() {
                 userProfile = updatedProfile;
 
                 // airdrop the wallet
-                airdropWallet(address!);
+                await airdropWallet(address!);
+                
+                await requestDevnetToken(userProfile, AppConstants.SUPPORTEDCURRENCIES[1]);
+                await requestDevnetToken(userProfile, AppConstants.SUPPORTEDCURRENCIES[2]);
             }
 
 
