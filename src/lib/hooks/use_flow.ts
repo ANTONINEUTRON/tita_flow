@@ -37,7 +37,7 @@ export default function useFlow() {
     const fetchFlowOC = async (address: string) => {
         try {
             const flow = await program.account.flow.fetch(new PublicKey(address));
-            console.log("Flow data:", flow.raised.toString());
+             
             setActiveFlow(flow);
         }catch (error) {
             console.error("Error fetching flow:", error);
@@ -322,8 +322,6 @@ export default function useFlow() {
                     'Content-Type': 'application/json',
                 }
             });
-
-            console.log("Flow response:", response);
             
             if (!response.ok) {
                 const errorData = await response.json();
@@ -331,7 +329,6 @@ export default function useFlow() {
             }
             
             const flowData = await response.json();
-            console.log("Flow responseJSJSJS:", flowData);
             return flowData;
         } catch (error) {
             console.error('Error fetching flow:', error);

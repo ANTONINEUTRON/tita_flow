@@ -83,7 +83,6 @@ export default function FlowDetailPage() {
 
       try {
         let flowDetail = await getFlowById(flowId);
-        console.log("Flow detail:", flowDetail);
         setFlow(flowDetail);
 
         // fetch updates
@@ -117,18 +116,6 @@ export default function FlowDetailPage() {
 
   const handleNavigation = (view: string) => {
     setActiveView(view);
-  };
-
-  const handleCreateUpdate = async (content: string, attachments: File[]): Promise<void> => {
-    // Logic for creating an update
-  };
-
-  const handleCommentOnUpdate = async (updateId: string, content: string): Promise<void> => {
-    // Logic for commenting on an update
-  };
-
-  const handleLikeUpdate = async (updateId: string): Promise<void> => {
-    // Logic for liking an update
   };
 
   const handleCreateProposal = async (title: string, description: string, options: string[], endDate: string): Promise<void> => {
@@ -341,9 +328,6 @@ export default function FlowDetailPage() {
               <UpdatesView
                 flow={flow}
                 currentUser={userProfile}
-                onCreateUpdate={handleCreateUpdate}
-                onComment={handleCommentOnUpdate}
-                onLike={handleLikeUpdate}
                 updates={updates}
                 refreshUpdates={fetchUpdates}
               />

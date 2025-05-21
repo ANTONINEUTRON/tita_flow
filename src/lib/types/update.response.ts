@@ -1,4 +1,5 @@
-import { Comment, UpdateFile } from "./update";
+import { Comment } from "./comment";
+import { UpdateFile } from "./update";
 import AppUser from "./user";
 
 export interface UpdateResponse {

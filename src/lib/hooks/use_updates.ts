@@ -5,6 +5,8 @@ import { Update, UpdateFile } from '../types/update';
 import { useState } from 'react';
 import axios from 'axios';
 import { UpdateResponse } from '../types/update.response';
+import AppUser from '../types/user';
+import { Comment, CommentResponse } from '../types/comment';
 
 export default function useUpdates() {
     // const roomOptions: RoomOptions = {};
@@ -13,6 +15,8 @@ export default function useUpdates() {
     const [updates, setUpdates] = useState<UpdateResponse[]>([]);
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState<string | null>(null);
+    const [comments, setComments] = useState<CommentResponse[]>([]);
+    const [loadingComments, setLoadingComments] = useState(false);
 
     const fetchUpdates = async (flowId: string) => {
         setLoading(true);
@@ -47,6 +51,63 @@ export default function useUpdates() {
         }
     }
 
+    const addComment = async (comment: Comment) => {
+        
+        try {
+            const response = await fetch('/api/updates/comments', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify(comment)
+            });
+            fetchComments(comment.update_id);
+            // // Update local state to include the new comment
+            // setUpdates(prevUpdates =>
+            //     prevUpdates.map(update => {
+            //         if (update.id === updateId) {
+            //             return {
+            //                 ...update,
+            //                 comments: [
+            //                     ...(update.comments || []),
+            //                     {
+            //                         id: `temp-${Date.now()}`,
+            //                         user: currentUser!,
+            //                         content: comment,
+            //                         createdAt: new Date().toISOString()
+            //                     }
+            //                 ]
+            //             };
+            //         }
+            //         return update;
+            //     })
+            // );
+
+        } catch (error) {
+            console.error("Error adding comment:", error);
+            setError("Failed to add comment");
+            return false;
+        }
+    };
+
+    const fetchComments = async (updateId: string) => {
+        setLoadingComments(true);
+        setComments([]);
+        try {
+            const response = await fetch(`/api/updates/comments?id=${updateId}`);
+
+            const comments: CommentResponse[] = await response.json();
+
+            setComments(comments);
+        } catch (error) {
+            console.error("Error fetching comments:", error);
+            setError("Failed to fetch comments");
+            return [];
+        } finally {
+            setLoadingComments(false);
+        }
+    };
+
     const uploadFile = async (attachments: File[], id: string) => {
         setLoading(true);
         const formData = new FormData();
@@ -55,9 +116,6 @@ export default function useUpdates() {
         attachments.forEach(file => {
             formData.append("files", file);
         });
-
-        // Add flow ID to form data
-        // formData.append("flowId", id);
 
         // Upload the files
         const uploadResponse = await fetch("/api/upload-flow-media", {
@@ -98,10 +156,14 @@ export default function useUpdates() {
     
     return {
         updates,
+        comments,
         loading,
         error,
         uploadFile,
         createUpdate,
         fetchUpdates,
+        addComment,
+        fetchComments,
+        loadingComments
     };
 }

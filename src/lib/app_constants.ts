@@ -45,6 +45,7 @@ export class AppConstants {
   public static readonly USER_TABLE = "users";
   public static readonly CONT_TABLE = "contributions";
   public static readonly UPDATE_TABLE = "updates";
+  public static readonly COMMENT_TABLE = "comments";
 
   public static readonly TITA_FLOW_SEED = Buffer.from("tita-flow");
   public static readonly TITA_FLOW_TA_SEED = Buffer.from("tita-flow-ta");

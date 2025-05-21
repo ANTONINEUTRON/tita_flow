@@ -1,35 +1,20 @@
 import React, { useEffect, useState } from "react";
 import {
-  Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle
-} from "@/components/ui/card";
+  Card, CardContent, CardHeader} from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { Badge } from "@/components/ui/badge";
-import { Separator } from "@/components/ui/separator";
-import { AlertTriangle, FileIcon, FileText, FileTextIcon, ImageIcon, Loader2Icon, MessageSquare, MessageSquareIcon, PaperclipIcon, Plus, PlusCircleIcon, ThumbsUp, VideoIcon, X } from "lucide-react";
+import { FileIcon, FileTextIcon, Loader2, MessageSquareIcon, PaperclipIcon, Plus } from "lucide-react";
 import {
   Dialog, DialogContent, DialogDescription, DialogFooter,
   DialogHeader, DialogTitle, DialogTrigger
 } from "@/components/ui/dialog";
-import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
-import { EllipsisVertical } from "lucide-react";
-import { Flow, Update } from "@/lib/types/typesbbbb";
-import { formatDate } from "@/lib/utils";
-import { fetchFlowData } from "@/lib/data/flow_item_data";
 import { FundingFlowResponse } from "@/lib/types/flow.response";
 import AppUser from "@/lib/types/user";
 import useUpdates from "@/lib/hooks/use_updates";
 import { v4 } from "uuid";
 import toast from "react-hot-toast";
-import { UpdateFile } from "@/lib/types/update";
 import { UpdateResponse } from "@/lib/types/update.response";
 import { formatDistanceToNow } from "date-fns";
 import {
@@ -39,11 +24,10 @@ import {
   SheetTitle,
   SheetClose,
 } from "@/components/ui/sheet";
-import Image from "next/image";
 
 interface UpdatesViewProps {
   flow: FundingFlowResponse;
-  currentUser?: AppUser;
+  currentUser: AppUser;
   onCreateUpdate?: (content: string, attachments: File[]) => Promise<void>;
   onComment?: (updateId: string, content: string) => Promise<void>;
   onLike?: (updateId: string) => Promise<void>;
@@ -55,9 +39,6 @@ export function UpdatesView({
   flow, 
   updates,
   currentUser,
-  onCreateUpdate,
-  onComment,
-  onLike,
   refreshUpdates,
 }: UpdatesViewProps) {
   const [commentText, setCommentText] = useState<string>('');
@@ -66,24 +47,36 @@ export function UpdatesView({
   const [attachments, setAttachments] = useState<File[]>([]);
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [selectedUpdate, setSelectedUpdate] = useState<UpdateResponse | null>(null);
-  const { createUpdate, loading } = useUpdates();
+  const { 
+    createUpdate, 
+    uploadFile, 
+    addComment, 
+    fetchComments, 
+    comments, 
+    loadingComments,
+    loading 
+  } = useUpdates();
 
   const isCreator = true;
+
+  useEffect(() => {
+    if (selectedUpdate && sidebarOpen) {
+      fetchComments(selectedUpdate.id)
+        .catch((error) => {
+          console.error('Failed to fetch comments:', error);
+          toast.error("Failed to fetch comments");
+        });
+    }
+  }, [sidebarOpen, selectedUpdate]);
 
   // Open sidebar with selected update
   const openSidebar = (update: UpdateResponse) => {
     setSelectedUpdate(update);
     setSidebarOpen(true);
   };
-
-  // Close sidebar
-  const closeSidebar = () => {
-    setSidebarOpen(false);
-    setTimeout(() => setSelectedUpdate(null), 300);
-  };
   
   const handleCreateUpdate = async () => {
-    if (!onCreateUpdate || !newUpdateContent.trim()) return;
+    if (!newUpdateContent.trim()) return;
 
     if (!newUpdateContent.trim()) {
       toast.error("Update content cannot be empty");
@@ -96,9 +89,21 @@ export function UpdatesView({
     }
 
     try {
-      await onCreateUpdate(newUpdateContent, attachments);
+      
+      await createUpdate({
+        id: v4(),
+        description: newUpdateContent,
+        flow_id: flow.id,
+        user_id: currentUser.id,
+        files: await uploadFile(attachments, flow.id),
+        created_at: new Date().toISOString(),
+        updated_at: new Date().toISOString(),
+      });
+
       refreshUpdates(flow!.id);
+
       toast.success("Update created successfully");
+
       setNewUpdateContent('');
       setAttachments([]);
       setIsCreatingUpdate(false);
@@ -108,13 +113,20 @@ export function UpdatesView({
   };
 
   const handleAddComment = async () => {
-    if (!selectedUpdate || !onComment || !commentText.trim()) return;
+    if (!selectedUpdate || !commentText.trim()) return;
 
     try {
-      await onComment(selectedUpdate.id, commentText);
+      await addComment({
+        id: v4(),
+        update_id: selectedUpdate.id,
+        user_id: currentUser.id,
+        content: commentText,
+        created_at: new Date().toISOString(),
+        updated_at: new Date().toISOString(),
+      });
       setCommentText('');
-      refreshUpdates(flow.id);
-      toast.success("Comment added");
+      // refreshUpdates(flow.id);
+      // toast.success("Comment added");
     } catch (error) {
       console.error('Failed to add comment:', error);
       toast.error("Failed to add comment");
@@ -135,7 +147,7 @@ export function UpdatesView({
         {isCreator && (
           <Dialog open={isCreatingUpdate} onOpenChange={setIsCreatingUpdate}>
             <DialogTrigger asChild>
-              <Button>
+              <Button className="display-none md:inline-flex">
                 <Plus className="h-4 w-4 mr-2" />
                 New Update
               </Button>
@@ -206,6 +218,10 @@ export function UpdatesView({
             <FileTextIcon className="h-12 w-12 text-muted-foreground mb-4" />
             <p className="text-lg font-medium">No updates yet</p>
             <p className="text-muted-foreground">Check back later for project updates</p>
+            <Button onClick={() => setIsCreatingUpdate(true)} className="mt-4">
+              <Plus className="h-4 w-4 mr-2" />
+              New Update
+            </Button>
           </Card>
         ) : (
           updates.map((update) => (
@@ -363,32 +379,61 @@ export function UpdatesView({
                 </div>
               </div>
             )}
+
+            {/* Comment input */}
+            {currentUser && (
+              <div className="border-t p-4 mt-auto">
+                <div className="flex space-x-2">
+                  <Textarea
+                    placeholder="Add a comment..."
+                    value={commentText}
+                    onChange={(e) => setCommentText(e.target.value)}
+                    className="flex-1 min-h-[60px]"
+                  />
+                  <Button
+                    size="sm"
+                    className="self-end"
+                    disabled={!commentText.trim()}
+                    onClick={handleAddComment}
+                  >
+                    Send
+                  </Button>
+                </div>
+              </div>
+            )}
             
             {/* Comments section would go here */}
-            {/* ... */}
-          </div>
-          
-          {/* Comment input */}
-          {currentUser && (
-            <div className="border-t p-4 mt-auto">
-              <div className="flex space-x-2">
-                <Textarea
-                  placeholder="Add a comment..."
-                  value={commentText}
-                  onChange={(e) => setCommentText(e.target.value)}
-                  className="flex-1 min-h-[60px]"
-                />
-                <Button 
-                  size="sm" 
-                  className="self-end"
-                  disabled={!commentText.trim()}
-                  onClick={handleAddComment}
-                >
-                  Send
-                </Button>
+            <div className="space-y-4">
+              <h4 className="text-sm font-medium">Comments ({comments?.length || 0})</h4>
+              {comments && comments.length > 0 ? (
+                comments.map((comment) => (
+                  <div key={comment.id} className="flex items-start space-x-2">
+                    <Avatar>
+                      <AvatarImage src={comment.users?.profile_pics || ''} />
+                      <AvatarFallback>{comment.users?.username?.charAt(0) || 'U'}</AvatarFallback>
+                    </Avatar>
+                    <div className="flex-1">
+                      <p className="font-medium">{comment.users?.username || 'Unknown User'}</p>
+                      <p className="text-sm">{comment.content}</p>
+                      <p className="text-xs text-muted-foreground">
+                        {formatDistanceToNow(new Date(comment.updated_at!), { addSuffix: true })}
+                      </p>
+                    </div>
+                  </div>
+                ))
+              ) : (
+                <p className="text-sm text-muted-foreground">No comments yet</p>
+              )}
               </div>
-            </div>
-          )}
+          </div>
+          {
+            loadingComments && (
+              <div className="absolute inset-0 flex items-center justify-center bg-white/50">
+                <Loader2 className="h-8 w-8 animate-spin text-primary" />
+                <div className="loader">Loading...</div>
+              </div>
+            )
+          }
         </SheetContent>
       </Sheet>
     </div>
