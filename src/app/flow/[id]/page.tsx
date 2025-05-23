@@ -41,7 +41,7 @@ import { ProposalsView } from "@/components/flow_item/proposals_view";
 import useFlow from "@/lib/hooks/use_flow";
 import AppUser from "@/lib/types/user";
 import toast from "react-hot-toast";
-import { FundingFlowResponse } from "@/lib/types/flow.response";
+import { FundingFlowResponse } from "@/lib/types/funding_flow.response";
 import useProfile from "@/lib/hooks/use_profile";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter, DialogDescription } from "@/components/ui/dialog";
 import { ContributeDialog } from "@/components/flow_item/contribute/contribute_dialog";
@@ -301,8 +301,6 @@ export default function FlowDetailPage() {
         {/* Mobile title and progress */}
         <MobileFlowHeader 
           flow={flow} 
-          creator={userProfile} 
-          progress={progress} 
           remainingDays={remainingDays} />
 
         {/* Contribute dialog */}
@@ -325,16 +323,6 @@ export default function FlowDetailPage() {
 
           {/* Contributors view */}
           {activeView === "contributors" && <ContributorsView flow={flow} />}
-
-          {/* Recipients view DISTRIBUTE*/}
-          {/* {activeView === "recipients" && (
-            <RecipientsView flow={flow} isCreator={currentUser?.isCreator} />
-          )} */}
-
-          {/* Applications view DISTRIBUTE*/}
-          {/* {activeView === "applications" && (
-            <ApplicationsView flow={flow} isCreator={currentUser?.isCreator} />
-          )} */}
 
           {/* Updates view */}
           {activeView === "updates" && (

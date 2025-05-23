@@ -10,20 +10,16 @@ import AppUser from "@/lib/types/user";
 import { SupportCurrency } from "@/lib/types/supported_currencies";
 import { AppConstants } from "@/lib/app_constants";
 import Image from "next/image";
-import { FundingFlowResponse } from "@/lib/types/flow.response";
+import { FundingFlowResponse } from "@/lib/types/funding_flow.response";
 import useFlow from "@/lib/hooks/use_flow";
 
 interface MobileFlowHeaderProps {
   flow: FundingFlowResponse;
-  creator: AppUser | null;
-  progress: number;
   remainingDays: number | null;
 }
 
 export function MobileFlowHeader({
   flow,
-  creator,
-  progress,
   remainingDays,
 }: MobileFlowHeaderProps) {
   const [currency, setCurrency] = useState<SupportCurrency | null>(null);
@@ -56,16 +52,10 @@ export function MobileFlowHeader({
 
   return (
     <div className="block md:hidden w-full mb-4 px-1">
-      <h1 className="text-2xl font-bold truncate mb-1">{flow.title}</h1>
+      {/* <h1 className="text-2xl font-bold truncate mb-1">{flow.title}</h1> */}
       <div className="flex items-center justify-between">
-        <Badge className="mb-2">{flow.status}</Badge>
-        <div className="flex items-center text-muted-foreground text-xs">
-          <Avatar className="h-4 w-4 mr-1">
-            <AvatarImage src={creator?.profile_pics} alt={creator?.name} />
-            <AvatarFallback>{creator?.username.substring(0, 2).toUpperCase()}</AvatarFallback>
-          </Avatar>
-          <span>{creator?.username}</span>
-        </div>
+        {/* <Badge className="mb-2">{flow.status}</Badge> */}
+        
       </div>
 
       {/* Mobile progress for Raise Flow */}

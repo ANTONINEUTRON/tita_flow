@@ -3,6 +3,7 @@ import { SUPABASE_CLIENT } from "../supabaseconfig";
 import { FundingFlow } from "../types/funding_flow";
 import { AppConstants } from "../app_constants";
 import { objectToSnake, objectToCamel } from "ts-case-convert";
+import { FundingFlowResponse } from "../types/funding_flow.response";
 
 
 // All operations here are rendered on the server side
@@ -22,7 +23,7 @@ export class FlowService {
         return FlowService.instance;
     }
 
-    public async fetchFundingFlow(flowId: string): Promise<FundingFlow | null> {
+    public async fetchFundingFlow(flowId: string): Promise<FundingFlowResponse | null> {
         try {
             const { data, error } = await (await this.client)
                 .from(AppConstants.FLOW_TABLE)
@@ -40,7 +41,7 @@ export class FlowService {
             }
 
             // Convert snake_case to camelCase and return as FundingFlow
-            return data as any as FundingFlow;
+            return data as any as FundingFlowResponse;
         } catch (error) {
             console.error('Error in fetchFundingFlow:', error);
             throw error;
@@ -66,17 +67,6 @@ export class FlowService {
 
     public async deleteFundingFlow() {}
 
-    /**
-     * Fetches funding flows created by a specific user with pagination support
-     * 
-     * @param userId The ID of the user whose flows to fetch
-     * @param page The page number to fetch (starts from 1)
-     * @param pageSize The number of items per page
-     * @param filters Optional filters for status, type, etc.
-     * @param sortBy Optional field to sort by
-     * @param sortOrder Optional sort direction ('asc' or 'desc')
-     * @returns A paginated result containing flows and pagination metadata
-     */
     public async fetchFundingFlowsByUserId(
         userId: string,
         page: number = 1,

@@ -1,5 +1,7 @@
 
+import { NotificationService } from "@/lib/server_services/notification_service";
 import { UserService } from "@/lib/server_services/user_service";
+import { NotificationTypes } from "@/lib/types/notification_types";
 import AppUser from "@/lib/types/user";
 import { NextRequest, NextResponse } from "next/server";
 
@@ -31,6 +33,17 @@ export async function POST(req: NextRequest) {
     try {
         // save user record to db
         await userService.saveUserRecordToDb(userProfile);
+
+        NotificationService.getInstance().saveNotification({
+            user_id: userProfile.id,
+            action_url: "/app/dashboard?tab=settings",
+            type: NotificationTypes.ACCOUNT_CREATED,
+            is_read: false,
+            metadata: {
+                username: userProfile.username,
+            },
+            created_at: new Date().toISOString(),
+        });
 
         return NextResponse.json({ message: "successful" });
     } catch (error) {

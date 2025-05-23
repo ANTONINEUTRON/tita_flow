@@ -36,7 +36,7 @@ import {
 import { formatDistanceToNow } from 'date-fns';
 import { Badge } from '@/components/ui/badge';
 import { Skeleton } from '@/components/ui/skeleton';
-import { FundingFlowResponse } from '@/lib/types/flow.response';
+import { FundingFlowResponse } from '@/lib/types/funding_flow.response';
 import formatWalletAddress from '@/lib/utils/format_wallet_address';
 import toast from 'react-hot-toast';
 import { AppConstants } from '@/lib/app_constants';

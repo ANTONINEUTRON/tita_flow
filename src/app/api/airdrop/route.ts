@@ -1,4 +1,4 @@
-import { airdropUser } from "@/lib/server_services/airdrop_service";
+import { AirdropService } from "@/lib/server_services/airdrop_service";
 import { NextRequest, NextResponse } from "next/server";
 
 export async function POST(req: NextRequest) {
@@ -21,7 +21,7 @@ export async function POST(req: NextRequest) {
         }
 
         // Call the airdrop function
-        const result = await airdropUser(userAddress, tokenMint);
+        const result = await AirdropService(userAddress, tokenMint);
 
         return NextResponse.json(
             {

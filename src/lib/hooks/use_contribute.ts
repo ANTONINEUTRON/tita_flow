@@ -10,7 +10,7 @@ import { Contribution } from "../types/contribution";
 import AppUser from "../types/user";
 import toast from "react-hot-toast";
 import { useState } from "react";
-import { FundingFlowResponse } from "../types/flow.response";
+import { FundingFlowResponse } from "../types/funding_flow.response";
 
 export default function useContribute() {
     const connection = AppConstants.APP_CONNECTION;
@@ -121,9 +121,6 @@ export default function useContribute() {
             body: JSON.stringify(contribution),
         });
 
-        if (!response.ok) {
-            throw new Error('Failed to save contribution');
-        }
     }
 
 

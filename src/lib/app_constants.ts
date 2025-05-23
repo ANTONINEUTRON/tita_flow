@@ -8,7 +8,7 @@ export class AppConstants {
   /**
    * The name of the application
    */
-  public static readonly APP_NAME = "Tita";
+  public static readonly APP_NAME = "Tita Flow";
   
   /**
    * The description of the application
@@ -33,7 +33,7 @@ export class AppConstants {
    */
   public static readonly SUPPORT_EMAIL = "support@tita.com";
 
-  public static readonly APP_URL = "https://beta.setita.com"
+  public static readonly APP_URL = "https://titaflow.setita.com"
 
   public static readonly APP_RPC_ENDPOINT = "https://devnet.helius-rpc.com/?api-key=" + process.env.NEXT_PUBLIC_HELIUS_API_KEY;
   // https://mainnet.helius-rpc.com/?api-key=ammmmmm
@@ -46,6 +46,8 @@ export class AppConstants {
   public static readonly CONT_TABLE = "contributions";
   public static readonly UPDATE_TABLE = "updates";
   public static readonly COMMENT_TABLE = "comments";
+  public static readonly ACTIVITIES_TABLE = "activities";
+  public static readonly NOTIFICATIONS_TABLE = "notifications";
 
   public static readonly TITA_FLOW_SEED = Buffer.from("tita-flow");
   public static readonly TITA_FLOW_TA_SEED = Buffer.from("tita-flow-ta");

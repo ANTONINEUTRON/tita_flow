@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { useCases } from "@/lib/data/landing-data";
+import { useCases } from "@/lib/data/landing_data";
 
 export function UseCasesSection() {
   return (

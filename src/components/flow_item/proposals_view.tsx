@@ -22,7 +22,7 @@ import { Flow, Proposal } from "@/lib/types/typesbbbb";
 import { formatDate } from "@/lib/utils";
 import { FundingFlow } from "@/lib/types/funding_flow";
 import { fetchFlowData } from "@/lib/data/flow_item_data";
-import { FundingFlowResponse } from "@/lib/types/flow.response";
+import { FundingFlowResponse } from "@/lib/types/funding_flow.response";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 
 interface ProposalsViewProps {

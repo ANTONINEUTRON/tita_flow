@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { footerLinks, socialLinks } from "@/lib/data/landing-data";
+import { footerLinks, socialLinks } from "@/lib/data/landing_data";
 import { AppConstants } from "@/lib/app_constants";
 
 export function Footer() {

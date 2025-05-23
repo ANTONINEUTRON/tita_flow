@@ -4,11 +4,18 @@ import { useEffect, useState } from "react";
 import Link from "next/link";
 import {
     ActivityIcon, SettingsIcon,
-    LayoutDashboardIcon, FolderIcon, 
+    LayoutDashboardIcon, FolderIcon,
     MenuIcon, ChevronLeftIcon, BellIcon, PlusCircleIcon,
-    XIcon, CheckCircleIcon, AlertCircleIcon, ClockIcon
+    XIcon, CheckCircleIcon, AlertCircleIcon, ClockIcon,
+    ArrowDownToLineIcon,
+    CoinsIcon,
+    FileTextIcon,
+    RocketIcon,
+    TrophyIcon,
+    UserPlusIcon,
+    XCircleIcon
 } from "lucide-react";
-import { cn } from "@/lib/utils";
+import { cn, formatDate } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import { AppConstants } from "@/lib/app_constants";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
@@ -23,7 +30,9 @@ import { SettingsContent } from "@/components/dashboard/settings/settings-conten
 import useProfile from "@/lib/hooks/use_profile";
 import formatWalletAddress from "@/lib/utils/format_wallet_address";
 import useFlow from "@/lib/hooks/use_flow";
-import { useRouter, useSearchParams } from "next/navigation";
+import { useSearchParams } from "next/navigation";
+import { useNotifications } from "@/lib/hooks/use_notifications";
+import { NotificationTypes } from "@/lib/types/notification_types";
 
 export default function DashboardPage() {
     const [sidebarExpanded, setSidebarExpanded] = useState(true);
@@ -32,7 +41,7 @@ export default function DashboardPage() {
     const { userProfile } = useProfile()
     const { getUserFlows, flows } = useFlow();
     const searchParams = useSearchParams();
-    const router = useRouter();
+    const { fetchNotifications, markAllAsRead, clearNotifications, notifications } = useNotifications();
 
     useEffect(() => {
         const tabParam = searchParams.get('tab');
@@ -49,85 +58,55 @@ export default function DashboardPage() {
             ).catch((error) => {
                 console.error("Error fetching user flows:", error);
             });
+
+            fetchNotifications(userProfile?.id ?? "");
         }
     }, [userProfile])
     // Navigation items (used for both sidebar and bottom nav)
     const navItems = [
         { id: "overview", label: "Overview", icon: LayoutDashboardIcon },
         { id: "flows", label: "Flows", icon: FolderIcon },
-        { id: "activity", label: "Activity", icon: ActivityIcon },
         { id: "settings", label: "Settings", icon: SettingsIcon },
     ];
 
-    // Dummy notification data
-    const notifications = [
-        {
-            id: 1,
-            type: "milestone",
-            title: "Milestone Completed",
-            description: "DeFi Startup Funding - Milestone 3 has been verified",
-            time: "2 hours ago",
-            read: false
-        },
-        {
-            id: 2,
-            type: "contribution",
-            title: "New Contribution",
-            description: "You received $5,000 for Community Grant Program",
-            time: "Yesterday",
-            read: false
-        },
-        {
-            id: 3,
-            type: "alert",
-            title: "Milestone Deadline Approaching",
-            description: "Community Grant Program - Milestone 3 due in 5 days",
-            time: "Yesterday",
-            read: true
-        },
-        {
-            id: 4,
-            type: "milestone",
-            title: "Milestone Review Required",
-            description: "Technical Bounty Fund - New milestone submission pending your review",
-            time: "3 days ago",
-            read: true
-        },
-        {
-            id: 5,
-            type: "system",
-            title: "System Update",
-            description: "Tita platform has been updated to version 2.1.0",
-            time: "1 week ago",
-            read: true
-        }
-    ];
-
     // Get notification icon based on type
-    const getNotificationIcon = (type: string) => {
+    const getNotificationIcon = (type: NotificationTypes) => {
         switch (type) {
-            case "milestone":
+            case NotificationTypes.ACCOUNT_CREATED:
+                return <UserPlusIcon className="h-5 w-5 text-blue-500" />;
+
+            case NotificationTypes.NEW_CONTRIBUTION:
+                return <CoinsIcon className="h-5 w-5 text-amber-500" />;
+
+            case NotificationTypes.NEW_WITHDRAW:
+                return <ArrowDownToLineIcon className="h-5 w-5 text-violet-500" />;
+
+            case NotificationTypes.NEW_UPDATE:
+                return <FileTextIcon className="h-5 w-5 text-indigo-500" />;
+
+            case NotificationTypes.FLOW_GOAL_REACHED:
+                return <TrophyIcon className="h-5 w-5 text-yellow-500" />;
+
+            case NotificationTypes.FLOW_CANCELED:
+                return <XCircleIcon className="h-5 w-5 text-red-500" />;
+
+            case NotificationTypes.FLOW_COMPLETED:
                 return <CheckCircleIcon className="h-5 w-5 text-green-500" />;
-            case "contribution":
-                return <ActivityIcon className="h-5 w-5 text-primary" />;
-            case "alert":
-                return <AlertCircleIcon className="h-5 w-5 text-yellow-500" />;
-            case "system":
-                return <SettingsIcon className="h-5 w-5 text-blue-500" />;
+
+            case NotificationTypes.FLOW_CREATED:
+                return <RocketIcon className="h-5 w-5 text-cyan-500" />;
+
             default:
                 return <ClockIcon className="h-5 w-5 text-gray-500" />;
         }
     };
-
     // Render content based on active view
     const renderContent = () => {
         switch (activeView) {
             case "overview":
                 return <OverviewContent />;
             case "flows":
-                return <FlowsContent flows={flows}/>;
-            case "activity":
-                return <ActivityContent />;
+                return <FlowsContent flows={flows} />;
             case "settings":
                 return <SettingsContent />;
             default:
@@ -172,7 +151,7 @@ export default function DashboardPage() {
                 )}>
                     <Avatar className="h-10 w-10">
                         <AvatarImage src={userProfile?.profile_pics} alt="User" />
-                        <AvatarFallback>{userProfile?.username.substring(0,2).toUpperCase()}</AvatarFallback>
+                        <AvatarFallback>{userProfile?.username.substring(0, 2).toUpperCase()}</AvatarFallback>
                     </Avatar>
                     {sidebarExpanded && (
                         <div className="ml-3 overflow-hidden">
@@ -217,8 +196,7 @@ export default function DashboardPage() {
                                                         ? "bg-primary/10 text-primary"
                                                         : "text-muted-foreground hover:bg-accent hover:text-accent-foreground",
                                                     !sidebarExpanded && "justify-center px-2"
-                                                )}
-                                            >
+                                                )}>
                                                 <item.icon className={cn("h-4 w-4", sidebarExpanded && "mr-2")} />
                                                 {sidebarExpanded && <span>{item.label}</span>}
                                             </button>
@@ -249,13 +227,9 @@ export default function DashboardPage() {
                             className="relative"
                         >
                             <BellIcon className="h-5 w-5" />
-                            {/* Notification indicator - only show if there are unread notifications */}
-                            {notifications.some(n => !n.read) && (
+                            {notifications.some(n => !n.notification.is_read) && (
                                 <span className="absolute top-0 right-0 h-2 w-2 rounded-full bg-primary"></span>
                             )}
-                        </Button>
-                        <Button variant="ghost" size="icon" className="md:hidden" onClick={() => setSidebarExpanded(!sidebarExpanded)}>
-                            <MenuIcon className="h-5 w-5" />
                         </Button>
                     </div>
                 </header>
@@ -268,7 +242,7 @@ export default function DashboardPage() {
 
             {/* Mobile Bottom Navigation */}
             <div className="md:hidden fixed bottom-0 left-0 right-0 border-t bg-background z-10">
-                <div className="grid grid-cols-4">
+                <div className="grid grid-cols-3">
                     {navItems.map((item) => (
                         <button
                             key={item.id}
@@ -318,29 +292,29 @@ export default function DashboardPage() {
                         {notifications.length > 0 ? (
                             notifications.map((notification) => (
                                 <div
-                                    key={notification.id}
+                                    key={notification.notification.id}
                                     className={cn(
                                         "p-4 rounded-lg border transition-colors",
-                                        notification.read ? "bg-background" : "bg-primary/5 border-primary/20"
+                                        notification.notification.is_read ? "bg-background" : "bg-primary/5 border-primary/20"
                                     )}
                                 >
                                     <div className="flex gap-3">
                                         <div className={cn(
                                             "mt-0.5 rounded-full p-1.5",
-                                            notification.read ? "bg-muted" : "bg-primary/10"
+                                            notification.notification.is_read ? "bg-muted" : "bg-primary/10"
                                         )}>
-                                            {getNotificationIcon(notification.type)}
+                                            {getNotificationIcon(notification.notification.type)}
                                         </div>
                                         <div className="flex-1 space-y-1">
                                             <div className="flex items-start justify-between gap-2">
                                                 <p className={cn(
                                                     "font-medium text-sm",
-                                                    !notification.read && "text-primary"
+                                                    !notification.notification.is_read && "text-primary"
                                                 )}>
                                                     {notification.title}
                                                 </p>
                                                 <span className="text-xs text-muted-foreground whitespace-nowrap">
-                                                    {notification.time}
+                                                    {formatDate(notification.notification.created_at)}
                                                 </span>
                                             </div>
                                             <p className="text-sm text-muted-foreground">
@@ -358,9 +332,20 @@ export default function DashboardPage() {
                     </div>
                 </ScrollArea>
 
-                <div className="border-t p-4">
-                    <Button variant="outline" className="w-full">
+                <div className="border-t p-4 flex gap-2 justify-between">
+                    <Button variant="outline" onClick={() => {
+                        markAllAsRead(userProfile?.id!)
+                        setShowNotifications(false);
+                    }} className="w-full">
+                        <CheckCircleIcon className="h-4 w-4 mr-2" />
                         Mark All as Read
+                    </Button>
+                    <Button disabled={!!notifications} variant="outline" onClick={() => {
+                        clearNotifications(userProfile?.id!)
+                        setShowNotifications(false);
+                    }} className="w-full bg-red-100">
+                        <XIcon className="h-4 w-4 mr-2" />
+                        Clear All
                     </Button>
                 </div>
             </div>

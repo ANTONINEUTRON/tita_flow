@@ -8,7 +8,7 @@ import { NavItem } from "../../../lib/types/typesbbbb";
 import { FlowHeader } from "./FlowHeader";
 import { FlowProgress } from "./FlowProgress";
 import { SidebarNavigation } from "./SidebarNavigation";
-import { FundingFlowResponse } from "@/lib/types/flow.response";
+import { FundingFlowResponse } from "@/lib/types/funding_flow.response";
 
 interface FlowSidebarProps {
   flow: FundingFlowResponse;

@@ -8,7 +8,7 @@ import { Input } from "@/components/ui/input";
 import Link from "next/link";
 import Image from "next/image";
 import { ArrowRight, Bell } from "lucide-react";
-import { useCases } from "@/lib/data/landing-data";
+import { useCases } from "@/lib/data/landing_data";
 
 export default function UseCasesPage() {
   return (

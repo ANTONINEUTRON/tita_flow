@@ -11,9 +11,11 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { VotingPowerModel } from "@/lib/types/funding_flow";
 import {  formatDate, formatCurrency, cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
-import { FundingFlowResponse } from "@/lib/types/flow.response";
+import { FundingFlowResponse } from "@/lib/types/funding_flow.response";
 import { CheckCircle2, ChevronLeft, ChevronRight, DollarSign } from "lucide-react";
 import { Badge } from "../ui/badge";
+import { Avatar, AvatarFallback, AvatarImage } from "../ui/avatar";
+import AppUser from "@/lib/types/user";
 
 interface FlowOverviewProps {
   flow: FundingFlowResponse;
@@ -25,8 +27,6 @@ interface MediaItem {
 }
 
 export function FlowOverview({ flow }: FlowOverviewProps) {
-  // Calculate progress percentage
-  const progressPercentage = flow.goal ? (flow.raised / parseFloat(flow.goal)) * 100 : 0;
   const [mediaItems, setMediaItems] = useState<MediaItem[]>([]);
   const [activeMediaIndex, setActiveMediaIndex] = useState(0);
   const sliderRef = useRef<HTMLDivElement>(null);
@@ -90,29 +90,20 @@ export function FlowOverview({ flow }: FlowOverviewProps) {
 
       {/* Overview Tab */}
       <TabsContent value="overview" className="space-y-6 pt-4">
-        {/* Funding Progress Card */}
-        {/* <Card>
-          <CardHeader>
-            <CardTitle>Funding Progress</CardTitle>
-            <CardDescription>
-              Goal: {formatCurrency(parseFloat(flow.goal), flow.currency)}
-            </CardDescription>
-          </CardHeader>
-          <CardContent className="space-y-4">
-            <Progress value={progressPercentage} />
-            <div className="flex justify-between text-sm">
-              <div>Raised: {formatCurrency(flow.raised, flow.currency)}</div>
-              <div>{progressPercentage.toFixed(2)}%</div>
-            </div>
-          </CardContent>
-        </Card> */}
         <Card>
           <CardHeader>
             <div className="flex">
-              <h1 className="text-3xl font-bold tracking-tight">{flow.title}</h1>
+              <h1 className="text-xl md:text-3xl font-bold tracking-tight">{flow.title}</h1>
               <div className="mx-2">
                 <Badge className="mt-1">{flow.status}</Badge>
               </div>
+            </div>
+            <div className="md:hidden flex items-center text-muted-foreground text-xs">
+              <Avatar className="h-4 w-4 mr-1">
+                <AvatarImage src={flow.users?.profile_pics} alt={flow.users?.name} />
+                <AvatarFallback>{flow.users?.username.substring(0, 2).toUpperCase()}</AvatarFallback>
+              </Avatar>
+              <span>{flow.users?.username}</span>
             </div>
           </CardHeader>
           <CardContent>

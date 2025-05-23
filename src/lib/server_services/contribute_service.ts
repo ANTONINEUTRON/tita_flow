@@ -28,7 +28,7 @@ export class ContributeService {
         try {
             const { data, error } = await (await this.client)
                 .from(AppConstants.CONT_TABLE)
-                .insert(contribution); //format object keys to snake_case
+                .insert(contribution); 
 
             if (error) {
                 throw error;

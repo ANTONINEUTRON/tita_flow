@@ -10,7 +10,7 @@ import {
   DialogHeader, DialogTitle, DialogTrigger
 } from "@/components/ui/dialog";
 import { Label } from "@/components/ui/label";
-import { FundingFlowResponse } from "@/lib/types/flow.response";
+import { FundingFlowResponse } from "@/lib/types/funding_flow.response";
 import AppUser from "@/lib/types/user";
 import useUpdates from "@/lib/hooks/use_updates";
 import { v4 } from "uuid";

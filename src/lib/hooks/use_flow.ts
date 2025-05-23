@@ -10,7 +10,7 @@ import { PublicKey, SystemProgram, Transaction } from "@solana/web3.js";
 import BN from "bn.js";
 import { TOKEN_PROGRAM_ID } from "@solana/spl-token";
 import { SolanaWallet } from "@civic/auth-web3";
-import { FundingFlowResponse } from "../types/flow.response";
+import { FundingFlowResponse } from "../types/funding_flow.response";
 
 interface FetchFlowOptions {
     page?: number;

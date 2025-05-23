@@ -2,7 +2,7 @@ import { Connection, PublicKey, Keypair, Transaction } from '@solana/web3.js';
 import { getOrCreateAssociatedTokenAccount, createTransferInstruction } from '@solana/spl-token';
 import { AppConstants } from '../app_constants';
 
-export async function airdropUser(
+export async function AirdropService(
     userWallet: string, 
     tokenMintAddr: string
 ) {

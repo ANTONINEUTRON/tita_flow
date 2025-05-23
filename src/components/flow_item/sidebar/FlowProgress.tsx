@@ -5,7 +5,7 @@ import { Progress } from "@/components/ui/progress";
 import { AppConstants } from "@/lib/app_constants";
 import { SupportCurrency } from "@/lib/types/supported_currencies";
 import Image from "next/image";
-import { FundingFlowResponse } from "@/lib/types/flow.response";
+import { FundingFlowResponse } from "@/lib/types/funding_flow.response";
 import { cn, formatCurrency } from "@/lib/utils"; // Make sure you have this utility
 import useFlow from "@/lib/hooks/use_flow";
 

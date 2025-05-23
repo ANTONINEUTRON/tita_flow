@@ -1,13 +1,11 @@
-
-
-// All operations here are rendered on the server side
-
 import { SupabaseClient } from "@supabase/supabase-js";
 import { SUPABASE_CLIENT } from "../supabaseconfig";
 import { Update } from "../types/update";
 import { AppConstants } from "../app_constants";
 import { Comment, CommentResponse } from "../types/comment";
 
+
+// All operations here are rendered on the server side
 // DON'T CALL FROM ANY FRONT FACING COMPONENT
 export class UpdateService {
     private static instance: UpdateService;
