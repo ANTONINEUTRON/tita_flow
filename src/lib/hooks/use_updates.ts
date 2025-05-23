@@ -1,17 +1,10 @@
-import { ChatClient, RoomOptions } from '@ably/chat';
-import { ChatClientProvider, ChatRoomProvider } from '@ably/chat/react';
-import * as Ably from 'ably';
-import { Update, UpdateFile } from '../types/update';
+import { Update } from '../types/update';
 import { useState } from 'react';
 import axios from 'axios';
 import { UpdateResponse } from '../types/update.response';
-import AppUser from '../types/user';
 import { Comment, CommentResponse } from '../types/comment';
 
 export default function useUpdates() {
-    // const roomOptions: RoomOptions = {};
-    // const ablyClient = new Ably.Realtime({authUrl: '/api/ably', clientId: 'ably-chat-demo'});
-    // const chatClient = new ChatClient(ablyClient);
     const [updates, setUpdates] = useState<UpdateResponse[]>([]);
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState<string | null>(null);
