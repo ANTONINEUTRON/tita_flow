@@ -15,7 +15,7 @@ export async function POST(req: NextRequest) {
         
         // Extract optional pagination parameters with defaults
         const page = Number(requestData.page) || 1;
-        const pageSize = Number(requestData.pageSize) || 20;
+        const pageSize = Number(requestData.pageSize) || 30;
         
         if (page < 1 || pageSize < 1 || pageSize > 100) {
             return NextResponse.json(
@@ -36,7 +36,7 @@ export async function POST(req: NextRequest) {
         }
         
         // Extract optional sorting parameters
-        const sortBy = requestData.sortBy || 'createdAt';
+        const sortBy =  'created_at';
         const sortOrder = requestData.sortOrder === 'asc' ? 'asc' : 'desc';
         
         // Fetch user flows with all parameters

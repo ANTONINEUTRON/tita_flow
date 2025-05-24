@@ -312,14 +312,14 @@ export default function DashboardPage() {
                 </ScrollArea>
 
                 <div className="border-t p-4 flex gap-2 justify-between">
-                    <Button variant="outline" onClick={() => {
+                    <Button disabled={notifications.length < 1}  variant="outline" onClick={() => {
                         markAllAsRead(userProfile?.id!)
                         setShowNotifications(false);
                     }} className="w-full">
                         <CheckCircleIcon className="h-4 w-4 mr-2" />
                         Mark All as Read
                     </Button>
-                    <Button disabled={!!notifications} variant="outline" onClick={() => {
+                    <Button disabled={notifications.length < 1} variant="outline" onClick={() => {
                         clearNotifications(userProfile?.id!)
                         setShowNotifications(false);
                     }} className="w-full bg-red-100">

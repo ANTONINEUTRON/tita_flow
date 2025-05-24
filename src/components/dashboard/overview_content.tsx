@@ -97,12 +97,6 @@ export function OverviewContent({
 
   const distributionData = getDistributionData();
 
-  // const distributionData = [
-  //   { name: "Active", value: 2 },
-  //   { name: "Pending", value: 1 },
-  //   { name: "Completed", value: 0 },
-  // ];
-
   const COLORS = ["#3f0566", "#9f763b", "#C3B2D0", "#dcceb9"];
 
 
@@ -179,18 +173,29 @@ export function OverviewContent({
             <CardDescription>Your total fundraising across all active flows</CardDescription>
           </CardHeader>
           <CardContent className="pl-2">
-            <ResponsiveContainer width="100%" height={250}>
-              <BarChart data={analyticsData}>
-                <CartesianGrid strokeDasharray="3 3" />
-                <XAxis dataKey="name" />
-                <YAxis />
-                <Tooltip
-                  formatter={(value) => [`$${value}`, 'Funds Raised']}
-                  labelFormatter={(label) => `Month: ${label}`}
-                />
-                <Bar dataKey="value" fill="#3f0566" />
-              </BarChart>
-            </ResponsiveContainer>
+            {analyticsData.length === 0  ? (
+              <div className="h-[200px] w-full flex flex-col items-center justify-center relative">
+                <div className="inset-0 flex items-center justify-center flex-col">
+                  <p className="text-muted-foreground">No funding data yet</p>
+                  <p className="text-sm text-muted-foreground mt-1">
+                    Create a funding flow and start receiving contribution and the chart will appear here
+                  </p>
+                </div>
+              </div>
+            ) : (
+              <ResponsiveContainer width="100%" height={250}>
+                <BarChart data={analyticsData}>
+                  <CartesianGrid strokeDasharray="3 3" />
+                  <XAxis dataKey="name" />
+                  <YAxis />
+                  <Tooltip
+                    formatter={(value) => [`$${value}`, 'Funds Raised']}
+                    labelFormatter={(label) => `Month: ${label}`}
+                  />
+                  <Bar dataKey="value" fill="#3f0566" />
+                </BarChart>
+              </ResponsiveContainer>
+            )}
           </CardContent>
         </Card>
 
@@ -200,28 +205,43 @@ export function OverviewContent({
             <CardDescription>Status of your funding flows</CardDescription>
           </CardHeader>
           <CardContent className="flex justify-center">
-            <ResponsiveContainer width="100%" height={200}>
-              <PieChart>
-                <Pie
-                  data={distributionData}
-                  cx="50%"
-                  cy="50%"
-                  labelLine={false}
-                  outerRadius={80}
-                  fill="#8884d8"
-                  dataKey="value"
-                >
-                  {distributionData.map((entry, index) => (
-                    <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
-                  ))}
-                </Pie>
-                <Tooltip
-                  formatter={(value, name, props) => [`${value} flows`, name]}
-                  contentStyle={{ backgroundColor: 'rgba(255, 255, 255, 0.9)', borderRadius: '6px' }}
-                />
-                <Legend layout="vertical" verticalAlign="middle" align="right" />
-              </PieChart>
-            </ResponsiveContainer>
+            {distributionData.length === 0 ? (
+              <div className="h-[200px] w-full flex flex-col items-center justify-center relative">
+                <div className="flex items-center justify-center flex-col">
+                  <p className="text-muted-foreground text-sm">No flow data available</p>
+                  <Button
+                    variant="link"
+                    onClick={() => router.push('/app/flows/create')}
+                    className="mt-2"
+                  >
+                    Create your first flow
+                  </Button>
+                </div>
+              </div>
+            ) : (
+              <ResponsiveContainer width="100%" height={200}>
+                <PieChart>
+                  <Pie
+                    data={distributionData}
+                    cx="50%"
+                    cy="50%"
+                    labelLine={false}
+                    outerRadius={80}
+                    fill="#8884d8"
+                    dataKey="value"
+                  >
+                    {distributionData.map((entry, index) => (
+                      <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
+                    ))}
+                  </Pie>
+                  <Tooltip
+                    formatter={(value, name, props) => [`${value} flows`, name]}
+                    contentStyle={{ backgroundColor: 'rgba(255, 255, 255, 0.9)', borderRadius: '6px' }}
+                  />
+                  <Legend layout="vertical" verticalAlign="middle" align="right" />
+                </PieChart>
+              </ResponsiveContainer>
+            )}
           </CardContent>
         </Card>
       </div>

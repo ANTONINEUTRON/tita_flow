@@ -63,20 +63,20 @@ export default function useProfile() {
     }
 
     const signUserOut = async () => {
-        setLoading(true);
+        // setLoading(true);
 
         try {
-            userContext.signOut();
-
-            router.push("/")
+            await userContext.signOut();
             setUserProfile(null);
             setError(null);
+
+            router.push("/")
         } catch (e) {
             console.log(e);
             toast.error("An error occurred during sign-in");
         }
 
-        setLoading(false);
+        // setLoading(false);
     }
 
     const onLogin = async () => {

@@ -5,12 +5,13 @@ import HeroGetStartedButton from "../buttons/get-started-button";
 import Image from "next/image";
 import { SocialLinks } from "./footer";
 import { formatCurrency } from "@/lib/utils"; // Create this utility if not existing
+import { AppConstants } from "@/lib/app_constants";
 
 export function HeroSection() {
   const [scrollY, setScrollY] = useState(0);
 
   const [stats, setStats] = useState({
-    amountRaised: 1100, 
+    amountRaised: 1100,
     flowsCreated: 24
   });
 
@@ -29,11 +30,14 @@ export function HeroSection() {
   return (
     <div className="w-full h-[100vh] bg-gradient-to-r from-primary/10 via-primary/5 to-secondary/10">
       <div className="container z-40 mx-auto flex justify-between items-center py-4 px-4">
-        <Image
-          src={"/logo.png"}
-          alt="Titaflow Logo"
-          width={56}
-          height={56} />
+        <Link href="/" className="flex items-center justify-start">
+          <Image
+            src={"/logo.png"}
+            alt="Titaflow Logo"
+            width={56}
+            height={56} />
+          {/* <span className="font-bold text-2xl">{AppConstants.APP_NAME}</span> */}
+        </Link>
         <SocialLinks />
       </div>
       <section className="py-12 h-[100vh] md:py-24 lg:py-28 relative overflow-hidden">
@@ -47,7 +51,7 @@ export function HeroSection() {
             }}
           >
             <h1 className="text-4xl md:text-6xl font-bold mb-4">
-                Welcome to Titaflow
+              Welcome to Titaflow
             </h1>
             <p className="text-xl text-muted-foreground mb-10">
               Configurable fundraising for any project or cause with transparency and control

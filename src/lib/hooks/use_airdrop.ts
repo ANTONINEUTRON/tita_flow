@@ -3,6 +3,7 @@ import AppUser from '../types/user';
 import { SupportCurrency } from '../types/supported_currencies';
 import toast from 'react-hot-toast';
 import axios from 'axios';
+import airdropWallet from '../utils/airdrop_wallet';
 
 export function useAirdrop() {
     const [isLoading, setIsLoading] = useState(false);
@@ -10,12 +11,17 @@ export function useAirdrop() {
     const requestDevnetToken = async (user: AppUser, currency: SupportCurrency) => {
         setIsLoading(true);
         try {
-            const response = await axios.post('/api/airdrop', {
-                tokenMint: currency.address,
-                userAddress: user.wallet
-            });
+            if (currency.name === "SOL") {
+                airdropWallet(user.wallet);
+            } else {
 
-            const result = response.data;
+                const response = await axios.post('/api/airdrop', {
+                    tokenMint: currency.address,
+                    userAddress: user.wallet
+                });
+
+                const result = response.data;
+            }
             // toast.success('Request for '+currency.name+' sent successfully!');
         } catch (error) {
             console.error('Failed to request USDC:', error);

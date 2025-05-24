@@ -248,18 +248,13 @@ export default function useFlow() {
                 body: JSON.stringify({
                     userId,
                     page: options.page || 1,
-                    pageSize: options.pageSize || 10,
+                    pageSize: options.pageSize || 30,
                     filters: options.filters || {},
                     sortBy: options.sortBy || 'createdAt',
                     sortOrder: options.sortOrder || 'desc',
                 }),
             });
 
-            if (!response.ok) {
-                const error = await response.json();
-                throw new Error(error.message || 'Failed to fetch user flows');
-            }
-            
             let data = await response.json();
             
             // Update flows with blockchain data

@@ -118,7 +118,7 @@ export class FlowService {
             }
 
             // Add sorting
-            // query = query.order(sortBy, { ascending: sortOrder === 'asc' });
+            query = query.order(sortBy, { ascending: sortOrder === 'asc' });
 
             // Add pagination
             query = query.range(offset, offset + pageSize - 1);
@@ -134,7 +134,7 @@ export class FlowService {
             // Calculate pagination metadata
             const total = count || 0;
             const totalPages = Math.ceil(total / pageSize);
-
+            
             return {
                 flows: (data || []) as FundingFlow[],
                 pagination: {
