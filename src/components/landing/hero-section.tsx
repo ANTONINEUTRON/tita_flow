@@ -9,10 +9,9 @@ import { formatCurrency } from "@/lib/utils"; // Create this utility if not exis
 export function HeroSection() {
   const [scrollY, setScrollY] = useState(0);
 
-  // Stats data - replace with real API calls if available
   const [stats, setStats] = useState({
-    amountRaised: 1000, // In USD or your base currency
-    flowsCreated: 22
+    amountRaised: 1100, 
+    flowsCreated: 24
   });
 
   useEffect(() => {
@@ -20,10 +19,8 @@ export function HeroSection() {
       setScrollY(window.scrollY);
     };
 
-    // Add event listener
     window.addEventListener("scroll", handleScroll, { passive: true });
 
-    // Clean up
     return () => {
       window.removeEventListener("scroll", handleScroll);
     };

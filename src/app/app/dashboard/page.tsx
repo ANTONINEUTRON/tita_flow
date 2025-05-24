@@ -7,7 +7,7 @@ import {
     LayoutDashboardIcon, FolderIcon,
     MenuIcon, ChevronLeftIcon, BellIcon, PlusCircleIcon,
     XIcon, CheckCircleIcon
-    } from "lucide-react";
+} from "lucide-react";
 import { cn, formatDate } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import { AppConstants } from "@/lib/app_constants";
@@ -26,16 +26,18 @@ import { useSearchParams } from "next/navigation";
 import { useNotifications } from "@/lib/hooks/use_notifications";
 import { getNotificationIcon } from "@/components/get_notification_icon";
 import useContribute from "@/lib/hooks/use_contribute";
+import { MonthlyAnalytics } from "@/lib/types/monthly_analytics";
 
 export default function DashboardPage() {
     const [sidebarExpanded, setSidebarExpanded] = useState(true);
     const [activeView, setActiveView] = useState("overview");
     const [showNotifications, setShowNotifications] = useState(false);
     const { userProfile } = useProfile()
-    const { getUserFlows, flows } = useFlow();
+    const { getUserFlows, flows, loading } = useFlow();
     const searchParams = useSearchParams();
     const { fetchNotifications, markAllAsRead, clearNotifications, notifications } = useNotifications();
-    const { getContributionsByUser, contributions } = useContribute();
+    const { getContributionsByUser, getMonthlyAnalyticsData, contributions } = useContribute();
+    const [analyticsData, setAnalyticsData] = useState<MonthlyAnalytics[]>([]);
 
     useEffect(() => {
         const tabParam = searchParams.get('tab');
@@ -47,23 +49,20 @@ export default function DashboardPage() {
     useEffect(() => {
         if (userProfile) {
             getUserFlows(userProfile?.id ?? "")
-            // .then((res) => {
-            // }
-            // ).catch((error) => {
-            //     console.error("Error fetching user flows:", error);
-            // });
 
             fetchNotifications(userProfile?.id ?? "");
 
             getContributionsByUser(userProfile?.wallet ?? "")
-            // .then((contributions) => {
-            //     setContributions(contributions);
-            // }).catch((error) => {
-            //     console.error("Error fetching user contributions:", error);
-            // });
+
+            getMonthlyAnalyticsData(userProfile?.id!).then((data: MonthlyAnalytics[]) => {
+                setAnalyticsData(data);
+            }).catch((error) => {
+                console.error("Error fetching monthly analytics data:", error);
+                setAnalyticsData([]);
+            });
         }
     }, [userProfile])
-    // Navigation items (used for both sidebar and bottom nav)
+
     const navItems = [
         { id: "overview", label: "Overview", icon: LayoutDashboardIcon },
         { id: "flows", label: "Flows", icon: FolderIcon },
@@ -73,37 +72,38 @@ export default function DashboardPage() {
     // Render content based on active view
     const renderContent = () => {
         switch (activeView) {
-            case "overview":
-                return <OverviewContent 
-                    flows={flows}
-                    showNotifications={() => setShowNotifications(true)}
-                    notifications={notifications}
-                    contributionsOC={contributions}
-                    userPrefCurrency={userProfile?.preferences?.displayCurrency || "USD"} />;
+            // case "overview":
+            // return <OverviewContent 
+            //     flows={flows}
+            //     showNotifications={() => setShowNotifications(true)}
+            //     notifications={notifications}
+            //     contributionsOC={contributions}
+            //     analyticsData={analyticsData}
+            //     user={userProfile} />;
             case "flows":
-                return <FlowsContent flows={flows} />;
+                return <FlowsContent
+                    flows={flows}
+                    loading={loading} />;
             case "settings":
                 return <SettingsContent />;
             default:
-                return <OverviewContent 
+                return <OverviewContent
                     flows={flows}
                     showNotifications={() => setShowNotifications(true)}
                     notifications={notifications}
                     contributionsOC={contributions}
-                    userPrefCurrency={userProfile?.preferences?.displayCurrency || "USD"} />;
+                    analyticsData={analyticsData}
+                    user={userProfile} />;
         }
     };
 
     return (
         <div className="flex h-screen overflow-hidden bg-background">
-            {/* Desktop Sidebar - hidden on mobile */}
             <aside
                 className={cn(
                     "bg-muted hidden md:flex flex-col border-r transition-all duration-300 ease-in-out",
                     sidebarExpanded ? "w-64" : "w-[70px]"
-                )}
-            >
-                {/* Sidebar header */}
+                )}>
                 <div className={cn(
                     "h-16 flex items-center px-4 border-b",
                     sidebarExpanded ? "justify-between" : "justify-center"
@@ -123,7 +123,6 @@ export default function DashboardPage() {
                     </Button>
                 </div>
 
-                {/* Rest of the sidebar implementation... */}
                 {/* User profile */}
                 <div className={cn(
                     "p-4 flex items-center border-b",

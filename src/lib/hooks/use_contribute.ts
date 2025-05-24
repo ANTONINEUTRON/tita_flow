@@ -11,16 +11,19 @@ import AppUser from "../types/user";
 import toast from "react-hot-toast";
 import { useState } from "react";
 import { FundingFlowResponse } from "../types/funding_flow.response";
+import axios from "axios";
+import { MonthlyAnalytics } from "../types/monthly_analytics";
 
 export default function useContribute() {
     const connection = AppConstants.APP_CONNECTION;
     const program = getTitaFlowProgram({ connection } as any);
-    const [contributions, setContributions] = useState<any[]>([]);
+    const [contributions, setContributions] = useState<any[]>([]); //onchain contributions
+    const [storeContributions, setStoreContributions] = useState<Contribution[]>([]); //offchain contributions record
 
     const getContributionsByFlow = async (flow: FundingFlowResponse) => {
         console.log("Flow: ", flow);
         const flowPDA = new PublicKey(flow.address!);
-        
+
         const filter = [
             {
                 memcmp: {
@@ -174,5 +177,26 @@ export default function useContribute() {
         }
     }
 
-    return {  contributions, contribute, getContributionsByFlow, getContributionsByUser }
+    // Function to process contributions into monthly analytics data
+    const getMonthlyAnalyticsData = async (userId: string): Promise<MonthlyAnalytics[]> =>  {
+        try {
+            const response = await axios.post('/api/user/flows/analytics', {
+                userId: userId
+            });
+
+            return response.data as MonthlyAnalytics[];
+        } catch (error) {
+            console.error("Error processing contributions for analytics:", error);
+        }
+        return [];
+    };
+
+
+    return { 
+        contributions, 
+        contribute, 
+        getContributionsByFlow, 
+        getMonthlyAnalyticsData, 
+        getContributionsByUser 
+    }
 }

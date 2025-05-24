@@ -28,7 +28,7 @@ export const features = [
   },
   {
     title: "Funding Without Borders",
-    description: "Enable truly global funding opportunities with blockchain technology. Creators can receive support from anywhere in the world without currency conversion fees, banking restrictions, or geographic limitations",
+    description: "Enable truly global funding opportunities without currency conversion fees, restrictions, or geographic limitations",
     icon: "🌎"
   }
 ];

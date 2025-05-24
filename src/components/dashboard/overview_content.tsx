@@ -1,21 +1,23 @@
 "use client";
 
-import { 
+import {
   BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer,
-  PieChart, Pie, Cell 
+  PieChart, Pie, Cell,
+  Legend
 } from "recharts";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { 
-  DollarSignIcon, 
-  TrendingUpIcon, 
-  CheckCircleIcon, 
-  ClockIcon, 
-  ArrowUpIcon, 
+import {
+  DollarSignIcon,
+  TrendingUpIcon,
+  CheckCircleIcon,
+  ClockIcon,
+  ArrowUpIcon,
   AlertCircleIcon,
   CoinsIcon,
   HeartIcon,
-  RocketIcon
+  RocketIcon,
+  Loader
 } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { Notification } from "@/lib/types/notification";
@@ -28,79 +30,78 @@ import { NotificationWithTitleDesc } from "@/lib/hooks/use_notifications";
 import { getNotificationIcon } from "../get_notification_icon";
 import { PublicKey } from "@solana/web3.js";
 import { AppConstants } from "@/lib/app_constants";
+import useContribute from "@/lib/hooks/use_contribute";
+import { useEffect, useState } from "react";
+import { MonthlyAnalytics } from "@/lib/types/monthly_analytics";
+import AppUser from "@/lib/types/user";
 
 interface OverviewContentProps {
   flows: FundingFlowResponse[];
   showNotifications: () => void;
   notifications: NotificationWithTitleDesc[];
   contributionsOC: any;
-  userPrefCurrency: string;
+  user: AppUser | null;
+  analyticsData: MonthlyAnalytics[];
 }
 
-export function OverviewContent({ 
-  flows, 
+export function OverviewContent({
+  flows,
   showNotifications,
-  notifications, 
+  notifications,
   contributionsOC,
-  userPrefCurrency
+  analyticsData,
+  user
 }: OverviewContentProps) {
   const router = useRouter();
+  const { getMonthlyAnalyticsData } = useContribute();
+
+  if(!user) {
+    return (
+      <div className="text-center py-6">
+        <Loader className="mx-auto h-8 w-8 animate-spin text-muted-foreground" />
+        <h2 className="text-lg font-semibold">Loading Dashboard...</h2>
+      </div>
+    );
+  }
+
   // Calculate summary metrics
   const activeFlows = flows.filter(flow => flow.status === "active");
   const completedFlows = flows.filter(flow => flow.status === "completed");
-  const totalContributions = contributionsOC.reduce((total: number, contribution: any) => 
+  const totalContributions = contributionsOC.reduce((total: number, contribution: any) =>
     total + ((contribution.contributed_amount / Math.pow(10, 6)) || 0), 0);
-  const totalRaised = flows.reduce((total, flow) => 
+  const totalRaised = flows.reduce((total, flow) =>
     total + ((flow.raised / Math.pow(10, 6)) || 0), 0);
-  
-  
-  // Get recent contributions from contributionsOC array
-  // const recentContributions = contributionsOC
-  //   // Map to add flow information from the flows array
-  //   .map((contribution: any) => {
-  //     // Find the corresponding flow
-  //     const flow = flows.find(flow => flow.address! === contribution.flow.toString());
-      
-  //     return {
-  //       ...contribution,
-  //       flow_title: flow?.title || "Unknown Flow",
-  //       flow_id: contribution.flow.toBase58(),
-  //       // Convert Solana timestamp (seconds since epoch) to JavaScript Date
-  //       // Multiply by 1000 to convert from seconds to milliseconds
-  //       created_at: new Date(contribution.last_contribution * 1000).toISOString(),
-  //       // Format the contribution amount (convert from lamports to SOL)
-  //       amount: (contribution.total_amount / 1_000_000_000),
-  //       // Format the currency based on the token mint
-  //       currency: "SOL" // You might want to look up the actual token symbol based on the mint
-  //     };
-  //   })
-  //   // Sort by most recent contribution
-  //   .sort((a: any, b: any) => b.last_contribution - a.last_contribution)
-  //   // Get the 5 most recent
-  //   .slice(0, 5);
 
+  // Deduce distribution data from flows array
+  const getDistributionData = () => {
+    // Get all unique statuses from flows
+    const statusCounts = flows.reduce((counts: any, flow) => {
+      // Get flow status (default to "Unknown" if missing)
+      const status = flow.status || "Unknown";
 
-  const analyticsData = 
-  [
-    { name: "Jan", value: 5000 },
-    { name: "Feb", value: 12000 },
-    { name: "Mar", value: 18000 },
-    { name: "Apr", value: 25000 },
-    { name: "May", value: 22000 },
-    { name: "Jun", value: 30000 },
-    { name: "Jul", value: 0 },
-    { name: "Aug", value: 30000 },
-    { name: "Sept", value: 30000 },
-    { name: "Oct", value: 0 },
-    { name: "Nov", value: 30000 },
-    { name: "Dec", value: 30000 },
-  ];
+      // Create title case status name (e.g., "active" -> "Active")
+      const statusName = status.charAt(0).toUpperCase() + status.slice(1).toLowerCase();
 
-  const distributionData = [
-    { name: "Active", value: 2 },
-    { name: "Pending", value: 1 },
-    { name: "Completed", value: 0 },
-  ];
+      // Increment the count for this status
+      counts[statusName] = (counts[statusName] || 0) + 1;
+
+      return counts;
+    }, {});
+
+    // Convert to required format
+    return Object.entries(statusCounts).map(([name, value]) => ({
+      name,
+      value
+    }));
+  };
+
+  const distributionData = getDistributionData();
+
+  // const distributionData = [
+  //   { name: "Active", value: 2 },
+  //   { name: "Pending", value: 1 },
+  //   { name: "Completed", value: 0 },
+  // ];
 
   const COLORS = ["#3f0566", "#9f763b", "#C3B2D0", "#dcceb9"];
 
@@ -123,7 +124,7 @@ export function OverviewContent({
             </p>
           </CardContent>
         </Card>
-        
+
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
             <CardTitle className="text-sm font-medium">
@@ -132,13 +133,13 @@ export function OverviewContent({
             <CoinsIcon className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">{totalRaised} {userPrefCurrency}</div>
+            <div className="text-2xl font-bold">{totalRaised} {user.preferences?.displayCurrency}</div>
             <p className="text-xs text-muted-foreground">
               Across all your flows
             </p>
           </CardContent>
         </Card>
-        
+
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
             <CardTitle className="text-sm font-medium">
@@ -153,7 +154,7 @@ export function OverviewContent({
             </p>
           </CardContent>
         </Card>
-        
+
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
             <CardTitle className="text-sm font-medium">
@@ -162,7 +163,7 @@ export function OverviewContent({
             <HeartIcon className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">{totalContributions} {userPrefCurrency}</div>
+            <div className="text-2xl font-bold">{totalContributions} {user.preferences?.displayCurrency}</div>
             <p className="text-xs text-muted-foreground">
               Funds you've contributed
             </p>
@@ -193,7 +194,7 @@ export function OverviewContent({
           </CardContent>
         </Card>
 
-        <Card>
+        <Card className="hidden lg:inline">
           <CardHeader>
             <CardTitle>Flow Distribution</CardTitle>
             <CardDescription>Status of your funding flows</CardDescription>
@@ -205,24 +206,27 @@ export function OverviewContent({
                   data={distributionData}
                   cx="50%"
                   cy="50%"
-                  innerRadius={60}
+                  labelLine={false}
                   outerRadius={80}
                   fill="#8884d8"
                   dataKey="value"
-                  label={({ name, percent }) => `${name} ${(percent * 100).toFixed(0)}%`}
                 >
                   {distributionData.map((entry, index) => (
                     <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
                   ))}
                 </Pie>
-                <Tooltip formatter={(value) => [`${value} flows`, 'Count']} />
+                <Tooltip
+                  formatter={(value, name, props) => [`${value} flows`, name]}
+                  contentStyle={{ backgroundColor: 'rgba(255, 255, 255, 0.9)', borderRadius: '6px' }}
+                />
+                <Legend layout="vertical" verticalAlign="middle" align="right" />
               </PieChart>
             </ResponsiveContainer>
           </CardContent>
         </Card>
       </div>
 
-      
+
       {/* Main Content Grid */}
       <div className="grid gap-4 md:grid-cols-2">
         {/* Active Flows */}
@@ -261,7 +265,7 @@ export function OverviewContent({
             </Button>
           </CardFooter>
         </Card>
-        
+
         {/* Recent Notifications */}
         <Card className="col-span-1 flex flex-col justify-between">
           <div >

@@ -1,7 +1,7 @@
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
-import { PlusCircleIcon } from "lucide-react";
+import { Loader, PlusCircleIcon } from "lucide-react";
 import { useEffect } from "react";
 import useFlow from "@/lib/hooks/use_flow";
 import useProfile from "@/lib/hooks/use_profile";
@@ -12,10 +12,20 @@ import { AppConstants } from "@/lib/app_constants";
 import { FundingFlowResponse } from "@/lib/types/funding_flow.response";
 
 interface FlowsContentProps {
-  flows: FundingFlowResponse[]
+  flows: FundingFlowResponse[];
+  loading: boolean;
 }
 
-export function FlowsContent({ flows }: FlowsContentProps) {
+export function FlowsContent({ flows, loading }: FlowsContentProps) {
+
+  if (loading) {
+    return (
+      <div className="text-center py-6">
+        <Loader className="mx-auto h-8 w-8 animate-spin text-muted-foreground" />
+        <h2 className="text-lg font-semibold">Loading Flows...</h2>
+      </div>
+    );
+  }
 
   return (
     <div className="space-y-6">

@@ -4,7 +4,6 @@ import { NextRequest, NextResponse } from "next/server";
 export async function POST(req: NextRequest) {
     try {
         const requestData = await req.json();
-        console.log("Request Data:", requestData);
         // Extract required user ID
         const userId = requestData.userId;
         if (!userId) {
