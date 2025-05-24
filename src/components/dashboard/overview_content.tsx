@@ -6,75 +6,171 @@ import {
 } from "recharts";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { DollarSignIcon, TrendingUpIcon, CheckCircleIcon, ClockIcon, ArrowUpIcon, AlertCircleIcon } from "lucide-react";
+import { 
+  DollarSignIcon, 
+  TrendingUpIcon, 
+  CheckCircleIcon, 
+  ClockIcon, 
+  ArrowUpIcon, 
+  AlertCircleIcon,
+  CoinsIcon,
+  HeartIcon,
+  RocketIcon
+} from "lucide-react";
+import { useRouter } from "next/navigation";
+import { Notification } from "@/lib/types/notification";
+import { getNotificationContent } from "@/lib/utils/notification_message";
+import { format } from "date-fns";
+import { Progress } from "@/components/ui/progress";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { FundingFlowResponse } from "@/lib/types/funding_flow.response";
+import { NotificationWithTitleDesc } from "@/lib/hooks/use_notifications";
+import { getNotificationIcon } from "../get_notification_icon";
+import { PublicKey } from "@solana/web3.js";
+import { AppConstants } from "@/lib/app_constants";
 
-export function OverviewContent() {
-  // Mock data
-  const analyticsData = [
+interface OverviewContentProps {
+  flows: FundingFlowResponse[];
+  showNotifications: () => void;
+  notifications: NotificationWithTitleDesc[];
+  contributionsOC: any;
+  userPrefCurrency: string;
+}
+
+export function OverviewContent({ 
+  flows, 
+  showNotifications,
+  notifications, 
+  contributionsOC,
+  userPrefCurrency
+}: OverviewContentProps) {
+  const router = useRouter();
+  // Calculate summary metrics
+  const activeFlows = flows.filter(flow => flow.status === "active");
+  const completedFlows = flows.filter(flow => flow.status === "completed");
+  const totalContributions = contributionsOC.reduce((total: number, contribution: any) => 
+    total + ((contribution.contributed_amount / Math.pow(10, 6)) || 0), 0);
+  const totalRaised = flows.reduce((total, flow) => 
+    total + ((flow.raised / Math.pow(10, 6)) || 0), 0);
+  
+  
+  // Get recent contributions from contributionsOC array
+  // const recentContributions = contributionsOC
+  //   // Map to add flow information from the flows array
+  //   .map((contribution: any) => {
+  //     // Find the corresponding flow
+  //     const flow = flows.find(flow => flow.address! === contribution.flow.toString());
+      
+  //     return {
+  //       ...contribution,
+  //       flow_title: flow?.title || "Unknown Flow",
+  //       flow_id: contribution.flow.toBase58(),
+  //       // Convert Solana timestamp (seconds since epoch) to JavaScript Date
+  //       // Multiply by 1000 to convert from seconds to milliseconds
+  //       created_at: new Date(contribution.last_contribution * 1000).toISOString(),
+  //       // Format the contribution amount (convert from lamports to SOL)
+  //       amount: (contribution.total_amount / 1_000_000_000),
+  //       // Format the currency based on the token mint
+  //       currency: "SOL" // You might want to look up the actual token symbol based on the mint
+  //     };
+  //   })
+  //   // Sort by most recent contribution
+  //   .sort((a: any, b: any) => b.last_contribution - a.last_contribution)
+  //   // Get the 5 most recent
+  //   .slice(0, 5);
+
+
+  const analyticsData = 
+  [
     { name: "Jan", value: 5000 },
     { name: "Feb", value: 12000 },
     { name: "Mar", value: 18000 },
     { name: "Apr", value: 25000 },
     { name: "May", value: 22000 },
     { name: "Jun", value: 30000 },
+    { name: "Jul", value: 0 },
+    { name: "Aug", value: 30000 },
+    { name: "Sept", value: 30000 },
+    { name: "Oct", value: 0 },
+    { name: "Nov", value: 30000 },
+    { name: "Dec", value: 30000 },
   ];
-  
+
   const distributionData = [
     { name: "Active", value: 2 },
     { name: "Pending", value: 1 },
-    { name: "Completed", value: 1 },
+    { name: "Completed", value: 0 },
   ];
-  
+
   const COLORS = ["#3f0566", "#9f763b", "#C3B2D0", "#dcceb9"];
+
 
   return (
     <div className="space-y-6">
+      {/* Summary Cards */}
       <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Total Value Locked</CardTitle>
-            <DollarSignIcon className="h-4 w-4 text-muted-foreground" />
+            <CardTitle className="text-sm font-medium">
+              Active Flows
+            </CardTitle>
+            <RocketIcon className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">$115,000</div>
-            <p className="text-xs text-muted-foreground">+20.1% from last month</p>
+            <div className="text-2xl font-bold">{activeFlows.length}</div>
+            <p className="text-xs text-muted-foreground">
+              {activeFlows.length === 1 ? 'campaign' : 'campaigns'} in progress
+            </p>
           </CardContent>
         </Card>
         
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Active Flows</CardTitle>
-            <TrendingUpIcon className="h-4 w-4 text-muted-foreground" />
+            <CardTitle className="text-sm font-medium">
+              Total Raised
+            </CardTitle>
+            <CoinsIcon className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">2</div>
-            <p className="text-xs text-muted-foreground">1 pending approval</p>
+            <div className="text-2xl font-bold">{totalRaised} {userPrefCurrency}</div>
+            <p className="text-xs text-muted-foreground">
+              Across all your flows
+            </p>
           </CardContent>
         </Card>
         
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Completed Milestones</CardTitle>
+            <CardTitle className="text-sm font-medium">
+              Completed Flows
+            </CardTitle>
             <CheckCircleIcon className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">11</div>
-            <p className="text-xs text-muted-foreground">3 pending verification</p>
+            <div className="text-2xl font-bold">{completedFlows.length}</div>
+            <p className="text-xs text-muted-foreground">
+              Successfully funded projects
+            </p>
           </CardContent>
         </Card>
         
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Upcoming Deadlines</CardTitle>
-            <ClockIcon className="h-4 w-4 text-muted-foreground" />
+            <CardTitle className="text-sm font-medium">
+              Your Contributions
+            </CardTitle>
+            <HeartIcon className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">2</div>
-            <p className="text-xs text-muted-foreground">Next: DeFi Milestone 4 (2 days)</p>
+            <div className="text-2xl font-bold">{totalContributions} {userPrefCurrency}</div>
+            <p className="text-xs text-muted-foreground">
+              Funds you've contributed
+            </p>
           </CardContent>
         </Card>
       </div>
 
+      {/* Charts */}
       <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
         <Card className="col-span-2">
           <CardHeader>
@@ -87,7 +183,7 @@ export function OverviewContent() {
                 <CartesianGrid strokeDasharray="3 3" />
                 <XAxis dataKey="name" />
                 <YAxis />
-                <Tooltip 
+                <Tooltip
                   formatter={(value) => [`$${value}`, 'Funds Raised']}
                   labelFormatter={(label) => `Month: ${label}`}
                 />
@@ -96,7 +192,7 @@ export function OverviewContent() {
             </ResponsiveContainer>
           </CardContent>
         </Card>
-        
+
         <Card>
           <CardHeader>
             <CardTitle>Flow Distribution</CardTitle>
@@ -113,7 +209,7 @@ export function OverviewContent() {
                   outerRadius={80}
                   fill="#8884d8"
                   dataKey="value"
-                  label={({name, percent}) => `${name} ${(percent * 100).toFixed(0)}%`}
+                  label={({ name, percent }) => `${name} ${(percent * 100).toFixed(0)}%`}
                 >
                   {distributionData.map((entry, index) => (
                     <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
@@ -125,38 +221,84 @@ export function OverviewContent() {
           </CardContent>
         </Card>
       </div>
+
       
-      <Card>
-        <CardHeader className="pb-3">
-          <CardTitle>Flow Actions Required</CardTitle>
-          <CardDescription>Items that need your attention</CardDescription>
-        </CardHeader>
-        <CardContent>
-          <div className="space-y-4">
-            <div className="flex items-start gap-4 border p-4 rounded-lg bg-yellow-50 border-yellow-200">
-              <div className="rounded-full bg-yellow-100 p-2">
-                <AlertCircleIcon className="h-5 w-5 text-yellow-600" />
-              </div>
-              <div className="flex-1 space-y-1">
-                <p className="text-sm font-medium">Milestone verification needed</p>
-                <p className="text-sm text-muted-foreground">DeFi Startup Funding - Milestone 4 submitted and awaiting your review</p>
-              </div>
-              <Button size="sm" className="bg-yellow-600 hover:bg-yellow-700">Review</Button>
-            </div>
-            
-            <div className="flex items-start gap-4 border p-4 rounded-lg bg-blue-50 border-blue-200">
-              <div className="rounded-full bg-blue-100 p-2">
-                <ClockIcon className="h-5 w-5 text-blue-600" />
-              </div>
-              <div className="flex-1 space-y-1">
-                <p className="text-sm font-medium">Upcoming deadline</p>
-                <p className="text-sm text-muted-foreground">Community Grant Program - Milestone 3 due in 5 days</p>
-              </div>
-              <Button size="sm" variant="outline" className="border-blue-600 text-blue-600 hover:bg-blue-50">View</Button>
-            </div>
+      {/* Main Content Grid */}
+      <div className="grid gap-4 md:grid-cols-2">
+        {/* Active Flows */}
+        <Card className="col-span-1">
+          <CardHeader>
+            <CardTitle>Active Flows</CardTitle>
+            <CardDescription>Your currently funding flows</CardDescription>
+          </CardHeader>
+          <CardContent className="space-y-4">
+            {activeFlows.length === 0 ? (
+              <p className="text-muted-foreground text-center py-6">No active flows</p>
+            ) : (
+              activeFlows.slice(0, 3).map((flow) => {
+                const supportCurr = AppConstants.SUPPORTEDCURRENCIES.find(
+                  (currency) => currency.name === flow.currency
+                );
+                return (
+                  <div key={flow.id} className="space-y-2">
+                    <div className="flex justify-between">
+                      <span className="font-medium">{flow.title}</span>
+                      <span>{Math.round((flow.raised / Number(flow.goal)) * 100)}%</span>
+                    </div>
+                    <Progress value={(flow.raised / Number(flow.goal)) * 100} />
+                    <div className="flex justify-between text-sm text-muted-foreground">
+                      <span>{(flow.raised / Math.pow(10, supportCurr?.decimals!))} {flow.currency} raised</span>
+                      <span>Goal: {(Number(flow.goal) / Math.pow(10, supportCurr?.decimals!))} {flow.currency}</span>
+                    </div>
+                  </div>
+                );
+              })
+            )}
+          </CardContent>
+          <CardFooter>
+            <Button variant="outline" className="w-full" onClick={() => router.push('/app/dashboard?tab=flows')}>
+              View All Flows
+            </Button>
+          </CardFooter>
+        </Card>
+        
+        {/* Recent Notifications */}
+        <Card className="col-span-1 flex flex-col justify-between">
+          <div >
+            <CardHeader>
+              <CardTitle>Recent Notifications</CardTitle>
+              <CardDescription>Your latest updates</CardDescription>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              {notifications.length === 0 ? (
+                <p className="text-muted-foreground text-center py-6">No notifications yet</p>
+              ) : (
+                notifications.slice(0, 5).map(({ notification }, index) => {
+                  const { title } = getNotificationContent(notification);
+                  return (
+                    <div key={index} className="flex items-start gap-3 pb-3 border-b">
+                      <div className="mt-1">
+                        {getNotificationIcon(notification.type)}
+                      </div>
+                      <div>
+                        <h4 className="text-sm font-medium">{title}</h4>
+                        <p className="text-xs text-muted-foreground">
+                          {format(new Date(notification.created_at), 'MMM d, h:mm a')}
+                        </p>
+                      </div>
+                    </div>
+                  );
+                })
+              )}
+            </CardContent>
           </div>
-        </CardContent>
-      </Card>
+          <CardFooter>
+            <Button variant="outline" className="w-full" onClick={showNotifications}>
+              View All Notifications
+            </Button>
+          </CardFooter>
+        </Card>
+      </div>
     </div>
   );
 }

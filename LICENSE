@@ -1,21 +1,34 @@
-MIT License
+TITAFLOW CUSTOM LICENSE
 
-Copyright (c) 2022-2025
+Copyright (c) 2022-2025 Titaflow
 
-Permission is hereby granted, free of charge, to any person obtaining a copy
-of this software and associated documentation files (the "Software"), to deal
-in the Software without restriction, including without limitation the rights
-to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
-copies of the Software, and to permit persons to whom the Software is
-furnished to do so, subject to the following conditions:
+TERMS AND CONDITIONS
 
-The above copyright notice and this permission notice shall be included in all
-copies or substantial portions of the Software.
+1. Definitions
+- "Software" refers to the Titaflow application, including all source code, documentation, and associated files.
+- "Copyright Holder" refers to the owner(s) of the copyright to the Software.
+- "You" refers to the individual or entity exercising permissions granted by this License.
 
-THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
-IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
-FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
-AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
-LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
-OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
-SOFTWARE.
+2. Limited Permission
+Permission to view, use, and modify the Software for personal, non-commercial purposes is granted, provided that the following conditions are met:
+
+3. Restrictions
+- **Verbatim copying, redistribution, or public display** of the Software (in whole or substantial parts) is strictly prohibited without prior written permission from the Copyright Holder.
+- You may not use the Software or derivatives for commercial purposes without explicit written permission.
+- Creating derivative works is permitted only for personal use and such derivatives remain subject to this license.
+
+4. Permission Requests
+To request permission for verbatim copying, redistribution, or commercial use, contact the Copyright Holder at:
+[antonineutron@gmail.com]
+
+5. Attribution
+Any permitted use of the Software must include prominent attribution to the Copyright Holder, including the copyright notice, this license, and a link to the original repository.
+
+6. Warranty Disclaimer
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE COPYRIGHT HOLDER BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+
+7. Termination
+This License and the rights granted hereunder will terminate automatically upon any breach by You of the terms of this License.
+
+8. Miscellaneous
+This License represents the complete agreement concerning the subject matter hereof. If any provision of this License is held to be unenforceable, such provision shall be reformed only to the extent necessary to make it enforceable

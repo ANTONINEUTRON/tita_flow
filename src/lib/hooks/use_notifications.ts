@@ -4,7 +4,7 @@ import { Notification } from '../types/notification';
 import toast from 'react-hot-toast';
 import { getNotificationContent } from '../utils/notification_message';
 
-interface NotificationWithTitleDesc{
+export interface NotificationWithTitleDesc{
     title: string;
     description: string;
     notification: Notification;

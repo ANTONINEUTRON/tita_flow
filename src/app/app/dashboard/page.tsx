@@ -3,18 +3,11 @@
 import { useEffect, useState } from "react";
 import Link from "next/link";
 import {
-    ActivityIcon, SettingsIcon,
+    SettingsIcon,
     LayoutDashboardIcon, FolderIcon,
     MenuIcon, ChevronLeftIcon, BellIcon, PlusCircleIcon,
-    XIcon, CheckCircleIcon, AlertCircleIcon, ClockIcon,
-    ArrowDownToLineIcon,
-    CoinsIcon,
-    FileTextIcon,
-    RocketIcon,
-    TrophyIcon,
-    UserPlusIcon,
-    XCircleIcon
-} from "lucide-react";
+    XIcon, CheckCircleIcon
+    } from "lucide-react";
 import { cn, formatDate } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import { AppConstants } from "@/lib/app_constants";
@@ -25,14 +18,14 @@ import { ScrollArea } from "@/components/ui/scroll-area";
 // Import dashboard components
 import { OverviewContent } from "@/components/dashboard/overview_content";
 import { FlowsContent } from "@/components/dashboard/flows_content";
-import { ActivityContent } from "@/components/dashboard/activity_content";
 import { SettingsContent } from "@/components/dashboard/settings/settings-content";
 import useProfile from "@/lib/hooks/use_profile";
 import formatWalletAddress from "@/lib/utils/format_wallet_address";
 import useFlow from "@/lib/hooks/use_flow";
 import { useSearchParams } from "next/navigation";
 import { useNotifications } from "@/lib/hooks/use_notifications";
-import { NotificationTypes } from "@/lib/types/notification_types";
+import { getNotificationIcon } from "@/components/get_notification_icon";
+import useContribute from "@/lib/hooks/use_contribute";
 
 export default function DashboardPage() {
     const [sidebarExpanded, setSidebarExpanded] = useState(true);
@@ -42,6 +35,7 @@ export default function DashboardPage() {
     const { getUserFlows, flows } = useFlow();
     const searchParams = useSearchParams();
     const { fetchNotifications, markAllAsRead, clearNotifications, notifications } = useNotifications();
+    const { getContributionsByUser, contributions } = useContribute();
 
     useEffect(() => {
         const tabParam = searchParams.get('tab');
@@ -52,14 +46,21 @@ export default function DashboardPage() {
 
     useEffect(() => {
         if (userProfile) {
-            getUserFlows(userProfile?.id ?? "").then((res) => {
-                console.log("User flows", flows);
-            }
-            ).catch((error) => {
-                console.error("Error fetching user flows:", error);
-            });
+            getUserFlows(userProfile?.id ?? "")
+            // .then((res) => {
+            // }
+            // ).catch((error) => {
+            //     console.error("Error fetching user flows:", error);
+            // });
 
             fetchNotifications(userProfile?.id ?? "");
+
+            getContributionsByUser(userProfile?.wallet ?? "")
+            // .then((contributions) => {
+            //     setContributions(contributions);
+            // }).catch((error) => {
+            //     console.error("Error fetching user contributions:", error);
+            // });
         }
     }, [userProfile])
     // Navigation items (used for both sidebar and bottom nav)
@@ -69,48 +70,27 @@ export default function DashboardPage() {
         { id: "settings", label: "Settings", icon: SettingsIcon },
     ];
 
-    // Get notification icon based on type
-    const getNotificationIcon = (type: NotificationTypes) => {
-        switch (type) {
-            case NotificationTypes.ACCOUNT_CREATED:
-                return <UserPlusIcon className="h-5 w-5 text-blue-500" />;
-
-            case NotificationTypes.NEW_CONTRIBUTION:
-                return <CoinsIcon className="h-5 w-5 text-amber-500" />;
-
-            case NotificationTypes.NEW_WITHDRAW:
-                return <ArrowDownToLineIcon className="h-5 w-5 text-violet-500" />;
-
-            case NotificationTypes.NEW_UPDATE:
-                return <FileTextIcon className="h-5 w-5 text-indigo-500" />;
-
-            case NotificationTypes.FLOW_GOAL_REACHED:
-                return <TrophyIcon className="h-5 w-5 text-yellow-500" />;
-
-            case NotificationTypes.FLOW_CANCELED:
-                return <XCircleIcon className="h-5 w-5 text-red-500" />;
-
-            case NotificationTypes.FLOW_COMPLETED:
-                return <CheckCircleIcon className="h-5 w-5 text-green-500" />;
-
-            case NotificationTypes.FLOW_CREATED:
-                return <RocketIcon className="h-5 w-5 text-cyan-500" />;
-
-            default:
-                return <ClockIcon className="h-5 w-5 text-gray-500" />;
-        }
-    };
     // Render content based on active view
     const renderContent = () => {
         switch (activeView) {
             case "overview":
-                return <OverviewContent />;
+                return <OverviewContent 
+                    flows={flows}
+                    showNotifications={() => setShowNotifications(true)}
+                    notifications={notifications}
+                    contributionsOC={contributions}
+                    userPrefCurrency={userProfile?.preferences?.displayCurrency || "USD"} />;
             case "flows":
                 return <FlowsContent flows={flows} />;
             case "settings":
                 return <SettingsContent />;
             default:
-                return <OverviewContent />;
+                return <OverviewContent 
+                    flows={flows}
+                    showNotifications={() => setShowNotifications(true)}
+                    notifications={notifications}
+                    contributionsOC={contributions}
+                    userPrefCurrency={userProfile?.preferences?.displayCurrency || "USD"} />;
         }
     };
 

@@ -8,8 +8,9 @@ TitaFlow is a configurable fundraising protocol built on Solana that enables tra
 
 - **Milestone-Based Disbursement**: Funds are released only when goals are met and verified
 - **On-Chain Transparency**: Every transaction is public and verifiable on the blockchain
-- **Decentralized Governance**: Enable backers to participate in fund management through on-chain voting
+- **Decentralized Governance**: Enable backers to participate in fund management through on-chain voting with various voting model to suit your use case
 - **Configurable Funding Flows**: Customize funding structures for various use cases
+- **AI-Powered Assistance**: Intelligent guidance for creating, optimizing and promoting funding flows
 - **Secure Fund Protection**: Smart contracts safeguard contributions until milestone completion
 
 ## 🛠️ Tech Stack
@@ -62,6 +63,8 @@ Visit [http://localhost:3000](http://localhost:3000) to see the application.
 
 1. Get the url to a flow to view details
 2. Enter contribution amount and submit
+3. When the creator shares and update you get notified
+4. When there's a proposal you get notified
 
 ### Governance
 
@@ -90,4 +93,5 @@ This project is licensed under the CUSTOM License - see the [LICENSE](LICENSE) f
 
 - Website: [titaflow.setita.com](https://titaflow.setita.com)
 - Twitter: [@titaflow_](https://twitter.com/titaflow_)
+- Email: [antonineutron@gmail.com](mail@antonineutron@gmail.com)
 

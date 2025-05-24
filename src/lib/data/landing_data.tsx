@@ -17,6 +17,11 @@ export const features = [
     icon: "🗳️"
   },
   {
+    title: "AI-Powered Project Success",
+    description: "Get intelligent guidance to create, optimize, and promote your funding flow with personalized AI assistance.",
+    icon: "🤖"
+  },
+  {
     title: "Project Updates & Communication",
     description: "Keep backers informed with integrated project update system and community feedback.",
     icon: "💬"
@@ -25,11 +30,6 @@ export const features = [
     title: "Funding Without Borders",
     description: "Enable truly global funding opportunities with blockchain technology. Creators can receive support from anywhere in the world without currency conversion fees, banking restrictions, or geographic limitations",
     icon: "🌎"
-  },
-  {
-    title: "On-Chain Transparency",
-    description: "Every transaction is public and verifiable on the blockchain.",
-    icon: "📊"
   }
 ];
 

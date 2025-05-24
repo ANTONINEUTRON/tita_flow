@@ -30,7 +30,7 @@ const program = getTitaFlowProgram({ connection } as any);
 export default function useFlow() {
     const [error, setError] = useState<string | null>(null);
     const [loading, setLoading] = useState(false);
-    const [flows, setFlows] = useState<FundingFlow[]>([]);
+    const [flows, setFlows] = useState<FundingFlowResponse[]>([]);
     const [pagination, setPagination] = useState({})
     const [activeFlow, setActiveFlow] = useState<any>(null);
 
@@ -299,7 +299,6 @@ export default function useFlow() {
                 totalPages: data.pagination.totalPages,
             });
             
-            return data.flows;
         } catch (error: any) {
             console.error("Error in getUserFlows:", error);
             setError(error.toString() || 'An error occurred while fetching flows');

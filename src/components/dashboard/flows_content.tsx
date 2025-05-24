@@ -9,9 +9,10 @@ import { cn } from "@/lib/utils";
 import { FundingFlow } from "@/lib/types/funding_flow";
 import { SupportCurrency } from "@/lib/types/supported_currencies";
 import { AppConstants } from "@/lib/app_constants";
+import { FundingFlowResponse } from "@/lib/types/funding_flow.response";
 
 interface FlowsContentProps {
-  flows: FundingFlow[]
+  flows: FundingFlowResponse[]
 }
 
 export function FlowsContent({ flows }: FlowsContentProps) {

@@ -34,6 +34,22 @@ export default function useContribute() {
         return contributions;
     }
 
+    const getContributionsByUser = async (userWallet: string) => {
+        const userPubKey = new PublicKey(userWallet);
+
+        const filter = [
+            {
+                memcmp: {
+                    offset: 8,
+                    bytes: userPubKey.toBase58()
+                }
+            }
+        ];
+
+        const contributions = await program.account.contribution.all(filter);
+        setContributions(contributions)
+    }
+
     const contributeTrx = async (
         amount: number,
         userAddress: string,
@@ -158,5 +174,5 @@ export default function useContribute() {
         }
     }
 
-    return {  contributions, contribute, getContributionsByFlow }
+    return {  contributions, contribute, getContributionsByFlow, getContributionsByUser }
 }
