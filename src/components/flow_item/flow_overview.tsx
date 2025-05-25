@@ -99,7 +99,7 @@ export function FlowOverview({ flow }: FlowOverviewProps) {
               </div>
             </div>
             <div className="md:hidden flex items-center text-muted-foreground text-xs">
-              <Avatar className="h-4 w-4 mr-1">
+              <Avatar className="h-6 w-6 mr-1">
                 <AvatarImage src={flow.users?.profile_pics} alt={flow.users?.name} />
                 <AvatarFallback>{flow.users?.username.substring(0, 2).toUpperCase()}</AvatarFallback>
               </Avatar>

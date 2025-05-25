@@ -31,7 +31,7 @@ export class AppConstants {
   /**
    * Support contact information
    */
-  public static readonly SUPPORT_EMAIL = "support@tita.com";
+  public static readonly SUPPORT_EMAIL = "antobuilds@gmail.com";
 
   public static readonly APP_URL = "https://titaflow.setita.com"
 

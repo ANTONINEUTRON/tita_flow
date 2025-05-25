@@ -43,3 +43,4 @@ export type Notification =
         type: NotificationTypes.FLOW_CREATED;
         metadata: FlowCreatedMetadata;
     });
+    

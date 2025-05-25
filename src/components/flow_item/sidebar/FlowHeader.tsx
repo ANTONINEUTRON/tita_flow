@@ -11,9 +11,6 @@ export function FlowHeader({ flow }: FlowHeaderProps) {
   return (
     <CardHeader className="pb-4">
       <div className="space-y-1">
-        {/* <CardTitle className="text-2xl font-bold truncate" title={flow.title}>
-          {flow.title}
-        </CardTitle> */}
         <div className="flex items-center text-muted-foreground text-sm mt-2">
           <Avatar className="h-8 w-8 mr-2">
             <AvatarImage src={flow.users?.profile_pics } alt={flow.users?.username} />

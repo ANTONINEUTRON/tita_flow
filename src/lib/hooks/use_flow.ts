@@ -32,13 +32,14 @@ export default function useFlow() {
     const [loading, setLoading] = useState(false);
     const [flows, setFlows] = useState<FundingFlowResponse[]>([]);
     const [pagination, setPagination] = useState({})
-    const [activeFlow, setActiveFlow] = useState<any>(null);
+    const [activeFlowOnchainData, setActiveFlowOnChainData] = useState<any>(null);
 
     const fetchFlowOC = async (address: string) => {
         try {
             const flow = await program.account.flow.fetch(new PublicKey(address));
              
-            setActiveFlow(flow);
+            setActiveFlowOnChainData(flow);
+            return flow;
         }catch (error) {
             console.error("Error fetching flow:", error);
             setError("Failed to fetch flow data");
@@ -262,15 +263,16 @@ export default function useFlow() {
                 data.flows.map(async (flow: any) => {
                     // Only fetch on-chain data if the flow has an address
                     if (flow.address) {
-                        const onChainData = await fetchFlowOnChainData(flow.address);
+                        const onChainData = await fetchFlowOC(flow.address);
                         
                         if (onChainData) {
                             // Return flow with updated on-chain data
+                            let completedMilestones = !onChainData.milestones ? 0 : onChainData.milestones.filter((m: any) => m.completed).length;
                             return {
                                 ...flow,
                                 raised: onChainData.raised,
                                 goal: onChainData.goal,
-                                completedMilestones: onChainData.completedMilestones,
+                                completedMilestones: completedMilestones,
                             };
                         }
                     }
@@ -331,20 +333,20 @@ export default function useFlow() {
     };
 
     // Fetch a flow's on-chain data and return it (instead of setting state)
-    const fetchFlowOnChainData = async (address: string) => {
-        try {
-            const flow = await program.account.flow.fetch(new PublicKey(address));
-            let completedMilestones = !flow.milestones ? 0 : flow.milestones.filter((m: any) => m.completed).length;
-            return {
-                raised: flow.raised.toString(),
-                goal: flow.goal.toString(),
-                completedMilestones: completedMilestones,
-            };
-        } catch (error) {
-            console.error(`Error fetching on-chain data for flow ${address}:`, error);
-            return null;
-        }
-    };
+    // const fetchFlowOnChainData = async (address: string) => {
+    //     try {
+    //         const flow = await program.account.flow.fetch(new PublicKey(address));
+    //         let completedMilestones = !flow.milestones ? 0 : flow.milestones.filter((m: any) => m.completed).length;
+    //         return {
+    //             raised: flow.raised.toString(),
+    //             goal: flow.goal.toString(),
+    //             completedMilestones: completedMilestones,
+    //         };
+    //     } catch (error) {
+    //         console.error(`Error fetching on-chain data for flow ${address}:`, error);
+    //         return null;
+    //     }
+    // };
 
     return {
         getUserFlows, 
@@ -353,7 +355,7 @@ export default function useFlow() {
         createFlowTransaction, 
         saveFlowToStore, 
         fetchFlowOC,
-        activeFlow,
+        activeFlowOnchainData,
         loading, 
         error, 
         flows, 

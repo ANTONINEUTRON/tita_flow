@@ -18,10 +18,9 @@ export default function useContribute() {
     const connection = AppConstants.APP_CONNECTION;
     const program = getTitaFlowProgram({ connection } as any);
     const [contributions, setContributions] = useState<any[]>([]); //onchain contributions
-    const [storeContributions, setStoreContributions] = useState<Contribution[]>([]); //offchain contributions record
+    const [contributing, setContributing] = useState<boolean>(false)
 
     const getContributionsByFlow = async (flow: FundingFlowResponse) => {
-        console.log("Flow: ", flow);
         const flowPDA = new PublicKey(flow.address!);
 
         const filter = [
@@ -150,6 +149,7 @@ export default function useContribute() {
         solanaWallet: SolanaWallet,
     ) => {
         try {
+            setContributing(true);
             // Attempt to send transaction
             const { trxAddress, signature } = await contributeTrx(
                 amount,
@@ -157,6 +157,9 @@ export default function useContribute() {
                 flow,
                 solanaWallet
             );
+
+            if(!signature) return;
+
 
             // If successful, save the real data
             const contribution: Contribution = {
@@ -171,9 +174,12 @@ export default function useContribute() {
 
             await saveToDB(contribution);
 
+            toast.success("You have contributed successfully to this flow");
         } catch (error) {
             console.error("Transaction failed:", error);
             toast.error("Couldn't complete contribution. Please try again.");
+        } finally {
+            setContributing(false)
         }
     }
 
@@ -194,6 +200,7 @@ export default function useContribute() {
 
     return { 
         contributions, 
+        contributing,
         contribute, 
         getContributionsByFlow, 
         getMonthlyAnalyticsData, 

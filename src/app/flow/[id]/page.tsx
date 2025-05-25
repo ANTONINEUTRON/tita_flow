@@ -72,8 +72,8 @@ export default function FlowDetailPage() {
   const [agentDialogOpen, setAgentDialogOpen] = useState(false);
   const { userProfile, signUserIn, walletInstance, supportedCurrenciesBalances } = useProfile();
   const flowId = params.id as string;
-  const { getFlowById } = useFlow();
-  const { contribute } = useContribute();
+  const { getFlowById, fetchFlowOC, activeFlowOnchainData } = useFlow();
+  const { contribute, contributing  } = useContribute();
   const { updates, fetchUpdates, loading: updateLoading } = useUpdates();
 
   useEffect(() => {
@@ -84,7 +84,8 @@ export default function FlowDetailPage() {
       try {
         let flowDetail = await getFlowById(flowId);
         setFlow(flowDetail);
-
+        if(flowDetail) document.title = `${flowDetail!.title} | Titaflow`;
+        fetchFlowOC(flowDetail?.address!);
         // fetch updates
         fetchUpdates(flowId);
       } catch (error) {
@@ -120,10 +121,12 @@ export default function FlowDetailPage() {
 
   const handleCreateProposal = async (title: string, description: string, options: string[], endDate: string): Promise<void> => {
     // Logic for creating a proposal
+    toast.success("Currently working on this feature! Stay tuned.");
   };
 
   const handleVoteOnProposal = async (proposalId: string, optionId: string): Promise<void> => {
     // Logic for voting on a proposal
+    toast.success("Currently working on this feature! Stay tuned.");
   };
 
   const handleContributeClick = () => {
@@ -145,7 +148,7 @@ export default function FlowDetailPage() {
           amount, userProfile!, flow as any as FundingFlow, walletInstance!,
         )
 
-        toast.success("You have contributed successfully to this flow");
+         fetchFlowOC(flow?.address!);
       } catch (error) {
         console.error("Contribution failed:", error);
         toast.error("Contribution failed. Please try again.");
@@ -153,6 +156,7 @@ export default function FlowDetailPage() {
 
     }
   };
+
 
   const handleSignIn = async () => {
     setIsSigningIn(true); // Set loading state
@@ -294,13 +298,15 @@ export default function FlowDetailPage() {
           remainingDays={remainingDays}
           isSignedIn={!!userProfile}
           canContribute={userProfile?.wallet !== flow.creator}
+          isLoading={contributing}
+          activeFlowOnchainData={activeFlowOnchainData}
           onNavigate={handleNavigation}
-          handleContributeClick={handleContributeClick}
-        />
+          handleContributeClick={handleContributeClick} />
 
         {/* Mobile title and progress */}
         <MobileFlowHeader 
-          flow={flow} 
+          flow={flow}
+          activeFlowOnchainData={activeFlowOnchainData}
           remainingDays={remainingDays} />
 
         {/* Contribute dialog */}
@@ -365,6 +371,7 @@ export default function FlowDetailPage() {
         onNavigate={handleNavigation}
         onAction={handleContributeClick}
         isSignedIn={!!userProfile}
+        isLoading={contributing}
         canContribute={userProfile?.wallet !== flow.creator}
       />
 

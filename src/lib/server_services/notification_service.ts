@@ -3,6 +3,7 @@ import { SUPABASE_CLIENT } from "../supabaseconfig";
 import { Notification } from "../types/notification";
 import { UserPreferences } from "../types/user";
 import { UserService } from "./user_service";
+import { EmailService } from "../services/email.service";
 
 
 // All operations here are rendered on the server side
@@ -30,15 +31,21 @@ export class NotificationService {
                 .insert(notificationObj);
 
 
+            const user = await UserService.getInstance().getUserRecord(
+                notificationObj.user_id
+            );
                 //fetch userId from the request
-                const userPreference: UserPreferences = (await UserService.getInstance().getUserRecord(
-                    notificationObj.user_id
-                )).preferences!;
+                const userPreference: UserPreferences = user.preferences!;
                 
                 // if userPresence is set, send notification through selected channels to the user
                 //Send notification to the user through the notification channel
                 if(userPreference.notifications?.email){
                     // call email service
+                    EmailService.getInstance().sendNotificationEmail(
+                        user.email,
+                        user.username,
+                        notificationObj
+                    );
                 }
 
             if (error) {

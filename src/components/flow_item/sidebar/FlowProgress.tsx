@@ -11,25 +11,18 @@ import useFlow from "@/lib/hooks/use_flow";
 
 interface FlowProgressProps {
   flow: FundingFlowResponse;
-  progress: number;
   remainingDays: number | null;
+  activeFlowOnchainData: any;
 }
 
-export function FlowProgress({ flow, progress, remainingDays }: FlowProgressProps) {
-  const [currency, setCurrency] = useState<SupportCurrency | null>(null);
-  const { activeFlow, fetchFlowOC } = useFlow();
+export function FlowProgress({ flow, activeFlowOnchainData, remainingDays }: FlowProgressProps) {
+  const currency = AppConstants.SUPPORTEDCURRENCIES.find((c) => c.name === flow.currency);
 
-  useEffect(() => {
-    const curr = AppConstants.SUPPORTEDCURRENCIES.find((c) => c.name === flow.currency);
-    if (curr) setCurrency(curr);
-
-    fetchFlowOC(flow.address!);
-  }, [flow.currency]); 
 
   // Calculate values
   const decimals = currency?.decimals || 9;
-  const raised = activeFlow ? Number(activeFlow.raised) / Math.pow(10, decimals) : 0;
-  const goal = activeFlow ? Number(activeFlow.goal) / Math.pow(10, decimals) : 0;
+  const raised = activeFlowOnchainData ? Number(activeFlowOnchainData.raised) / Math.pow(10, decimals) : 0;
+  const goal = activeFlowOnchainData ? Number(activeFlowOnchainData.goal) / Math.pow(10, decimals) : 0;
   const progressPercentage = goal > 0 ? Math.min((raised / goal) * 100, 100) : 0;
   
   // Format values for display
