@@ -12,7 +12,7 @@ interface FAQItem {
 
 export default function FAQPage() {
   const [activeCategory, setActiveCategory] = useState<string>('all');
-  
+
   const faqItems: FAQItem[] = [
     {
       question: "What is TITA Flow?",
@@ -27,17 +27,72 @@ export default function FAQPage() {
       category: "general"
     },
     {
+      question: "How do I create a flow?",
+      answer: (
+        <div>
+          <p>To create a flow:</p>
+          <ol className="list-decimal pl-5 mt-2 space-y-1">
+            <li>Connect your wallet</li>
+            <li>Click on "Create Flow" in the navigation</li>
+            <li>Fill out the project details, funding goal, media and timeline</li>
+            <li>You have the option to define your milestones with specific deliverables and funding amounts</li>
+            <li>Toggle on governance if you need it</li>
+            <li>Submit and create your funding flow</li>
+          </ol>
+          <p className="mt-2">Your flow will be live immediately after creation.</p>
+        </div>
+      ),
+      category: "fundraisers"
+    },
+    {
+      question: "How do I contribute to a flow?",
+      answer: (
+        <div>
+          <p>Contributing to a flow is simple:</p>
+          <ol className="list-decimal pl-5 mt-2 space-y-1">
+            <li>Open a specific flow</li>
+            <li>Review the project details and milestones</li>
+            <li>Click "Contribute" and enter the amount you wish to fund</li>
+            <li>Approve the transaction in your wallet</li>
+          </ol>
+          <p className="mt-2">
+            Once you contribute, you'll become a stakeholder in the project with voting rights based on the
+            flow's governance model.
+          </p>
+        </div>
+      ),
+      category: "contributors"
+    },
+    {
+      question: "How do funding rules work?",
+      answer: (
+        <div>
+          <p>
+            TITA Flow lets creators set customizable rules for how their funding works, giving both creators and contributors clarity and confidence:
+          </p>
+          <ol className="list-decimal pl-5 mt-2 space-y-1">
+            <li>Project creators can define optional rules like milestones and governance parameters</li>
+            <li>Milestone rules let creators break projects into stages with specific deliverables and funding amounts</li>
+            <li>Governance rules determine whether contributors can vote on milestone completion or if creators self-verify</li>
+            <li>All rules are transparent to contributors before they fund, building trust and accountability</li>
+          </ol>
+        </div>
+      ),
+      category: "funding"
+    },
+    {
       question: "How does milestone-based funding work?",
       answer: (
         <div>
           <p>
-            Milestone-based funding divides a project into specific deliverable phases. Here's how it works:
+            TITA Flow offers optional milestone-based funding as a powerful tool for projects that need structured accountability. Here's how it works:
           </p>
           <ol className="list-decimal pl-5 mt-2 space-y-1">
-            <li>Project creators define clear milestones with deliverables and funding amounts</li>
-            <li>Contributors fund the project knowing exactly what to expect at each stage</li>
-            <li>Funds are released only when milestones are completed and approved by voting</li>
-            <li>This creates accountability and reduces risk for contributors</li>
+            <li>Project creators can choose to define milestones with deliverables and funding amounts</li>
+            <li>Contributors see exactly what to expect at each stage when milestones are used</li>
+            <li>For projects needing additional accountability, funds can be released only when milestones are completed</li>
+            <li>Voting on milestone completion is available but optional, giving fundraisers flexibility</li>
+            <li>These optional tools help create transparency for projects where it's beneficial</li>
           </ol>
         </div>
       ),
@@ -57,45 +112,6 @@ export default function FAQPage() {
         </div>
       ),
       category: "governance"
-    },
-    {
-      question: "How do I create a flow?",
-      answer: (
-        <div>
-          <p>To create a flow:</p>
-          <ol className="list-decimal pl-5 mt-2 space-y-1">
-            <li>Connect your wallet</li>
-            <li>Click on "Create Flow" in the navigation</li>
-            <li>Fill out the project details, funding goal, and timeline</li>
-            <li>Define your milestones with specific deliverables and funding amounts</li>
-            <li>Choose your preferred voting power model</li>
-            <li>Set governance parameters (quorum, approval threshold)</li>
-            <li>Submit and pay a small creation fee</li>
-          </ol>
-          <p className="mt-2">Your flow will be live immediately after creation.</p>
-        </div>
-      ),
-      category: "fundraisers"
-    },
-    {
-      question: "How do I contribute to a flow?",
-      answer: (
-        <div>
-          <p>Contributing to a flow is simple:</p>
-          <ol className="list-decimal pl-5 mt-2 space-y-1">
-            <li>Connect your wallet</li>
-            <li>Browse available flows or go directly to a specific flow</li>
-            <li>Review the project details and milestones</li>
-            <li>Click "Contribute" and enter the amount you wish to fund</li>
-            <li>Approve the transaction in your wallet</li>
-          </ol>
-          <p className="mt-2">
-            Once you contribute, you'll become a stakeholder in the project with voting rights based on the
-            flow's governance model.
-          </p>
-        </div>
-      ),
-      category: "contributors"
     },
     {
       question: "How do milestone approvals work?",
@@ -124,7 +140,7 @@ export default function FAQPage() {
       question: "What tokens are supported?",
       answer: (
         <p>
-          Currently, Tita Flow supports SOL and SPL tokens on the Solana blockchain. Flow creators can 
+          Currently, Tita Flow supports selected tokens on the Solana blockchain. Flow creators can
           specify which token they want to accept for their project. Support for more tokens will be
           added in future updates.
         </p>
@@ -135,8 +151,8 @@ export default function FAQPage() {
       question: "Are there any fees?",
       answer: (
         <p>
-          Tita Flow charges a small platform fee of 1.5% on funds released to creators. 
-          There may be a nominal flow creation fee to prevent spam in the future. 
+          Tita Flow charges a small platform fee of 1.5% on funds released to creators.
+          There may be a nominal flow creation fee to prevent spam in the future.
           All Solana network fees for transactions also apply.
         </p>
       ),
@@ -159,27 +175,6 @@ export default function FAQPage() {
       category: "general"
     },
     {
-      question: "How secure is Tita Flow?",
-      answer: (
-        <div>
-          <p>
-            Tita Flow is built with security as a priority:
-          </p>
-          <ul className="list-disc pl-5 mt-2 space-y-1">
-            <li>Smart contracts are audited by security professionals</li>
-            <li>All funds are stored in secure on-chain treasuries</li>
-            <li>Governance mechanisms prevent unauthorized access to funds</li>
-            <li>Open-source code allows community review</li>
-          </ul>
-          <p className="mt-2">
-            However, as with any blockchain application, users should exercise caution and do their
-            own research before contributing to projects.
-          </p>
-        </div>
-      ),
-      category: "security"
-    },
-    {
       question: "I'm having wallet connection issues. How can I fix this?",
       answer: (
         <div>
@@ -200,7 +195,7 @@ export default function FAQPage() {
       category: "technical"
     }
   ];
-  
+
   const categories = [
     { id: 'all', name: 'All Questions' },
     { id: 'general', name: 'General' },
@@ -208,34 +203,32 @@ export default function FAQPage() {
     { id: 'fundraisers', name: 'For Fundraisers' },
     { id: 'contributors', name: 'For Contributors' },
     { id: 'governance', name: 'Governance' },
-    { id: 'technical', name: 'Technical' },
-    { id: 'security', name: 'Security' }
+    { id: 'technical', name: 'Technical' }
   ];
-  
-  const filteredFAQs = activeCategory === 'all' 
-    ? faqItems 
+
+  const filteredFAQs = activeCategory === 'all'
+    ? faqItems
     : faqItems.filter(item => item.category === activeCategory);
-  
+
   return (
     <div className="container mx-auto px-4 py-12 max-w-5xl">
       <h1 className="text-4xl font-bold text-center mb-8">Frequently Asked Questions</h1>
-      
+
       <div className="mb-8 flex flex-wrap gap-2 justify-center">
         {categories.map(category => (
           <button
             key={category.id}
             onClick={() => setActiveCategory(category.id)}
-            className={`px-4 py-2 rounded-full text-sm font-medium ${
-              activeCategory === category.id 
-                ? 'bg-blue-600 text-white' 
+            className={`px-4 py-2 rounded-full text-sm font-medium ${activeCategory === category.id
+                ? 'bg-blue-600 text-white'
                 : 'bg-gray-100 text-gray-800 hover:bg-gray-200'
-            }`}
+              }`}
           >
             {category.name}
           </button>
         ))}
       </div>
-      
+
       <div className="space-y-6">
         {filteredFAQs.map((faq, index) => (
           <div key={index} className="bg-white rounded-lg shadow-md p-6">
@@ -248,14 +241,14 @@ export default function FAQPage() {
             </div>
           </div>
         ))}
-        
+
         {filteredFAQs.length === 0 && (
           <div className="text-center py-12">
             <p className="text-xl text-gray-600">No FAQs found in this category.</p>
           </div>
         )}
       </div>
-      
+
       <div className="mt-12 text-center">
         <p className="text-gray-600">
           Still have questions? Contact us at{' '}
@@ -263,7 +256,7 @@ export default function FAQPage() {
             {AppConstants.SUPPORT_EMAIL}
           </a>
         </p>
-        
+
         <div className="mt-6">
           <Link href="/" className="text-blue-600 hover:underline">
             Return to Home
