@@ -346,7 +346,7 @@ export default function TabAccount() {
                 <div className="space-y-2">
                   <Label>Preview</Label>
                   <div className="flex justify-center p-4 border rounded-md">
-                    <Avatar className="h-24 w-24">
+                    <Avatar className="h-48 w-48">
                       <AvatarImage 
                         src={previewUrl || form.watch("profilePics")} 
                         alt="Profile Preview" 

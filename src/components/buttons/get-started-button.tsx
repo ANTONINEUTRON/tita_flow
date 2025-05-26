@@ -2,7 +2,6 @@
 import { useRouter } from "next/navigation";
 import { Button } from "../ui/button";
 import { useUser } from "@civic/auth-web3/react";
-import toast from "react-hot-toast";
 import { useEffect, useState } from "react";
 import { cn } from "@/lib/utils";
 import useProfile from "@/lib/hooks/use_profile";
@@ -23,21 +22,22 @@ export default function GetStartedButton({
     const router = useRouter();
     const { user, signIn } = useUser();
     const { userProfile, signUserIn, loading } = useProfile()
-    // const [isSigningIn, setIsSigningIn] = useState(false);
+    const [isSigningIn, setIsSigningIn] = useState(false);
 
-    // When user state changes and we were in signing in process, navigate
+    // When user state from CIVIC changes and email found, just navigate
     useEffect(() => {
-        if (userProfile && !loading) {
+        if (user?.email && isSigningIn) {
             // setIsSigningIn(false);
             router.push("/app/dashboard");
         }
-    }, [userProfile, loading]);
+    }, [user]);
 
     const onclick = () => {
         // window.scrollTo({ top: 0, behavior: "smooth" }); // Scroll to top
-        if (userProfile) {
+        if (userProfile || user?.email) {
             router.push("/app/dashboard")
         } else {
+            setIsSigningIn(true);
             signUserIn()
         }
     }

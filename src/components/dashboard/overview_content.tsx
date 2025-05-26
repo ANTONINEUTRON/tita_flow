@@ -250,35 +250,37 @@ export function OverviewContent({
       {/* Main Content Grid */}
       <div className="grid gap-4 md:grid-cols-2">
         {/* Active Flows */}
-        <Card className="col-span-1">
+        <Card className="col-span-1 flex flex-col justify-between">
+          <div>
           <CardHeader>
             <CardTitle>Active Flows</CardTitle>
             <CardDescription>Your currently funding flows</CardDescription>
           </CardHeader>
-          <CardContent className="space-y-4">
-            {activeFlows.length === 0 ? (
-              <p className="text-muted-foreground text-center py-6">No active flows</p>
-            ) : (
-              activeFlows.slice(0, 3).map((flow) => {
-                const supportCurr = AppConstants.SUPPORTEDCURRENCIES.find(
-                  (currency) => currency.name === flow.currency
-                );
-                return (
-                  <div key={flow.id} className="space-y-2">
-                    <div className="flex justify-between">
-                      <span className="font-medium">{flow.title}</span>
-                      <span>{Math.round((flow.raised / Number(flow.goal)) * 100)}%</span>
+            <CardContent className="space-y-4">
+              {activeFlows.length === 0 ? (
+                <p className="text-muted-foreground text-center py-6">No active flows</p>
+              ) : (
+                activeFlows.slice(0, 3).map((flow) => {
+                  const supportCurr = AppConstants.SUPPORTEDCURRENCIES.find(
+                    (currency) => currency.name === flow.currency
+                  );
+                  return (
+                    <div key={flow.id} className="space-y-2">
+                      <div className="flex justify-between">
+                        <span className="font-medium">{flow.title}</span>
+                        <span>{Math.round((flow.raised / Number(flow.goal)) * 100)}%</span>
+                      </div>
+                      <Progress value={(flow.raised / Number(flow.goal)) * 100} />
+                      <div className="flex justify-between text-sm text-muted-foreground">
+                        <span>{(flow.raised / Math.pow(10, supportCurr?.decimals!))} {flow.currency} raised</span>
+                        <span>Goal: {(Number(flow.goal) / Math.pow(10, supportCurr?.decimals!))} {flow.currency}</span>
+                      </div>
                     </div>
-                    <Progress value={(flow.raised / Number(flow.goal)) * 100} />
-                    <div className="flex justify-between text-sm text-muted-foreground">
-                      <span>{(flow.raised / Math.pow(10, supportCurr?.decimals!))} {flow.currency} raised</span>
-                      <span>Goal: {(Number(flow.goal) / Math.pow(10, supportCurr?.decimals!))} {flow.currency}</span>
-                    </div>
-                  </div>
-                );
-              })
-            )}
-          </CardContent>
+                  );
+                })
+              )}
+            </CardContent>
+          </div>
           <CardFooter>
             <Button variant="outline" className="w-full" onClick={() => router.push('/app/dashboard?tab=flows')}>
               View All Flows
@@ -297,7 +299,7 @@ export function OverviewContent({
               {notifications.length === 0 ? (
                 <p className="text-muted-foreground text-center py-6">No notifications yet</p>
               ) : (
-                notifications.slice(0, 5).map(({ notification }, index) => {
+                notifications.slice(0, 3).map(({ notification }, index) => {
                   const { title } = getNotificationContent(notification);
                   return (
                     <div key={index} className="flex items-start gap-3 pb-3 border-b">

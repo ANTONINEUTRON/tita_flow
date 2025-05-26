@@ -34,8 +34,9 @@ export default function useProfile() {
     const { requestDevnetToken } = useAirdrop();
 
     useEffect(() => {
-        // console.log("User Profile: ", userContext.user);
+        console.log("User Profile: ", userContext.user);
         if (userContext.user && !userProfile) {
+            console.log("User Profile inn : ", userProfile);
             // router.push("/app/dashboard");
             if (!loadingRef.current) {
                 loadingRef.current = true;
@@ -230,6 +231,7 @@ export default function useProfile() {
     }
 
     const updateUserProfile = async (id: string, updatedUserProfileFields: { [key: string]: any }) => {
+        setLoading(true)
         try {
             // save through put request to api/user
             const response = await axios.put(
@@ -243,6 +245,7 @@ export default function useProfile() {
             setError("An error occurred while updating user profile");
             console.error("Occurred while updating user profile " + error);
         }
+        setLoading(false)
     }
 
     return { 

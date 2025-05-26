@@ -2,6 +2,7 @@
 
 import { useState } from 'react';
 import Link from 'next/link';
+import { AppConstants } from '@/lib/app_constants';
 
 interface FAQItem {
   question: string;
@@ -17,9 +18,10 @@ export default function FAQPage() {
       question: "What is TITA Flow?",
       answer: (
         <p>
-          TITA Flow is a decentralized funding platform built on Solana that allows creators to raise funds 
-          for their projects through milestone-based funding. Funds are released as milestones are completed 
-          and approved by contributors through on-chain governance.
+          Tita Flow is a decentralized and configurable funding platform built on Solana.
+          It empowers fundraisers to raise support for their projects using flexible funding strategies,
+          including milestone-based, full upfront, or partial disbursement models. Contributors remain in control
+          via on-chain governance, and flows can be tailored to suit each project's needs.
         </p>
       ),
       category: "general"
@@ -45,7 +47,7 @@ export default function FAQPage() {
       question: "What types of voting power models are available?",
       answer: (
         <div>
-          <p>TITA Flow offers three voting power models:</p>
+          <p>Tita Flow offers three voting power models:</p>
           <ul className="list-disc pl-5 mt-2 space-y-1">
             <li><strong>Token-Weighted</strong>: 1 token = 1 vote (traditional model)</li>
             <li><strong>Quadratic Voting</strong>: Voting power equals the square root of contribution (reduces whale influence)</li>
@@ -73,7 +75,7 @@ export default function FAQPage() {
           <p className="mt-2">Your flow will be live immediately after creation.</p>
         </div>
       ),
-      category: "creators"
+      category: "fundraisers"
     },
     {
       question: "How do I contribute to a flow?",
@@ -122,7 +124,7 @@ export default function FAQPage() {
       question: "What tokens are supported?",
       answer: (
         <p>
-          Currently, TITA Flow supports SOL and SPL tokens on the Solana blockchain. Flow creators can 
+          Currently, Tita Flow supports SOL and SPL tokens on the Solana blockchain. Flow creators can 
           specify which token they want to accept for their project. Support for more tokens will be
           added in future updates.
         </p>
@@ -133,34 +135,35 @@ export default function FAQPage() {
       question: "Are there any fees?",
       answer: (
         <p>
-          TITA Flow charges a small platform fee of 2% on funds released to creators. There is also
-          a nominal flow creation fee to prevent spam. All Solana network fees for transactions also apply.
+          Tita Flow charges a small platform fee of 1.5% on funds released to creators. 
+          There may be a nominal flow creation fee to prevent spam in the future. 
+          All Solana network fees for transactions also apply.
         </p>
       ),
       category: "general"
     },
     {
-      question: "How is TITA Flow different from other crowdfunding platforms?",
+      question: "How is Tita Flow different from other crowdfunding platforms?",
       answer: (
         <div>
-          <p>TITA Flow differs from traditional platforms in several ways:</p>
+          <p>Tita Flow differs from traditional platforms in several ways:</p>
           <ul className="list-disc pl-5 mt-2 space-y-1">
-            <li>Fully on-chain, transparent funding and governance</li>
-            <li>Milestone-based release of funds with contributor approval</li>
-            <li>Multiple voting models for flexible governance</li>
+            <li>Fully on-chain, transparent funding with verifiable transactions</li>
+            <li>Milestone-based release of funds that builds trust</li>
+            <li>AI-powered assistance for creating and optimizing your funding flow</li>
             <li>Lower fees than traditional platforms</li>
-            <li>No centralized authority - contributors control fund release</li>
+            <li>Real-time notifications and updates for both creators and contributors</li>
           </ul>
         </div>
       ),
       category: "general"
     },
     {
-      question: "How secure is TITA Flow?",
+      question: "How secure is Tita Flow?",
       answer: (
         <div>
           <p>
-            TITA Flow is built with security as a priority:
+            Tita Flow is built with security as a priority:
           </p>
           <ul className="list-disc pl-5 mt-2 space-y-1">
             <li>Smart contracts are audited by security professionals</li>
@@ -202,9 +205,9 @@ export default function FAQPage() {
     { id: 'all', name: 'All Questions' },
     { id: 'general', name: 'General' },
     { id: 'funding', name: 'Funding' },
-    { id: 'governance', name: 'Governance' },
-    { id: 'creators', name: 'For Creators' },
+    { id: 'fundraisers', name: 'For Fundraisers' },
     { id: 'contributors', name: 'For Contributors' },
+    { id: 'governance', name: 'Governance' },
     { id: 'technical', name: 'Technical' },
     { id: 'security', name: 'Security' }
   ];
@@ -256,8 +259,8 @@ export default function FAQPage() {
       <div className="mt-12 text-center">
         <p className="text-gray-600">
           Still have questions? Contact us at{' '}
-          <a href="mailto:support@titaflow.xyz" className="text-blue-600 underline">
-            support@titaflow.xyz
+          <a href={"mailto:" + AppConstants.SUPPORT_EMAIL} className="text-blue-600 underline">
+            {AppConstants.SUPPORT_EMAIL}
           </a>
         </p>
         

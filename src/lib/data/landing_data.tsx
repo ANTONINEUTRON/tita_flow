@@ -69,23 +69,23 @@ export const useCases = [
 export const howItWorks = [
   {
     step: "01",
-    title: "Launch a Funding Flow",
-    description: "Set up milestone-based funding rules and governance options for your project"
+    title: "Create Your Flow",
+    description: "Set up your project with rules"
   },
   {
     step: "02",
-    title: "Receive Support",
-    description: "Allow contributors to fund your project"
+    title: "Get Funded",
+    description: "Backers contribute to your project with confidence"
   },
   {
     step: "03",
-    title: "Track & Manage",
-    description: "Funds are released only when predefined milestones are met, with decisions governed on-chain by the contributors"
+    title: "Reach Milestones",
+    description: "Funds release automatically when goals are verified"
   },
   {
     step: "04",
-    title: "Keep Everyone Updated",
-    description: "Share progress updates and engage with your contributors"
+    title: "Build Trust",
+    description: "Share updates and grow your community of supporters"
   }
 ];
 
