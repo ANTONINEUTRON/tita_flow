@@ -34,7 +34,6 @@ export default function useProfile() {
     useEffect(() => {
         console.log("useProfile hook initialized");
         if (userContext.user && !userProfile) {
-            setLoading(true);
             if (!loadingRef.current) {
                 loadingRef.current = true;
                 onLogin()
@@ -58,10 +57,9 @@ export default function useProfile() {
             toast.error("An error occurred during sign-in");
         }
         //If after one minute loading is not 
-        // setTimeout(() => {
+        setTimeout(() => {
             setLoading(false);
-
-        // }, 000);
+        }, 61000);
     }
 
     const signUserOut = async () => {
@@ -259,11 +257,13 @@ export default function useProfile() {
             );
 
             // Update the user profile state
-            setUserProfile((prevProfile) => ({
-                ...prevProfile!,
-                ...updatedUserProfileFields,
-            }));
-            toast.success("User profile updated successfully");
+            fetchProfile(userProfile!.id).then((profile) => {
+                console.log(profile)
+                if (profile) {
+                    setUserProfile(profile);
+                }
+            });
+            // toast.success("User profile updated successfully");
         } catch (error) {
             setError("An error occurred while updating user profile");
             console.error("Occurred while updating user profile " + error);

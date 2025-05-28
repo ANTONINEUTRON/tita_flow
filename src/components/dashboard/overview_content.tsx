@@ -8,32 +8,23 @@ import {
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import {
-  DollarSignIcon,
-  TrendingUpIcon,
   CheckCircleIcon,
-  ClockIcon,
-  ArrowUpIcon,
-  AlertCircleIcon,
   CoinsIcon,
   HeartIcon,
   RocketIcon,
   Loader
 } from "lucide-react";
 import { useRouter } from "next/navigation";
-import { Notification } from "@/lib/types/notification";
 import { getNotificationContent } from "@/lib/utils/notification_message";
 import { format } from "date-fns";
 import { Progress } from "@/components/ui/progress";
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { FundingFlowResponse } from "@/lib/types/funding_flow.response";
 import { NotificationWithTitleDesc } from "@/lib/hooks/use_notifications";
 import { getNotificationIcon } from "../get_notification_icon";
-import { PublicKey } from "@solana/web3.js";
 import { AppConstants } from "@/lib/app_constants";
-import useContribute from "@/lib/hooks/use_contribute";
-import { useEffect, useState } from "react";
 import { MonthlyAnalytics } from "@/lib/types/monthly_analytics";
 import AppUser from "@/lib/types/user";
+import useContribute from "@/lib/hooks/use_contribute";
 
 interface OverviewContentProps {
   flows: FundingFlowResponse[];
@@ -55,7 +46,9 @@ export function OverviewContent({
   const router = useRouter();
   const { getMonthlyAnalyticsData } = useContribute();
 
-  if(!user) {
+  console.log(flows)
+
+  if (!user) {
     return (
       <div className="text-center py-6">
         <Loader className="mx-auto h-8 w-8 animate-spin text-muted-foreground" />
@@ -173,7 +166,7 @@ export function OverviewContent({
             <CardDescription>Your total fundraising across all active flows</CardDescription>
           </CardHeader>
           <CardContent className="pl-2">
-            {analyticsData.length === 0  ? (
+            {analyticsData.length === 0 ? (
               <div className="h-[200px] w-full flex flex-col items-center justify-center relative">
                 <div className="inset-0 flex items-center justify-center flex-col">
                   <p className="text-muted-foreground">No funding data yet</p>
@@ -252,20 +245,21 @@ export function OverviewContent({
         {/* Active Flows */}
         <Card className="col-span-1 flex flex-col justify-between">
           <div>
-          <CardHeader>
-            <CardTitle>Active Flows</CardTitle>
-            <CardDescription>Your currently funding flows</CardDescription>
-          </CardHeader>
+            <CardHeader>
+              <CardTitle>Active Flows</CardTitle>
+              <CardDescription>Your currently funding flows</CardDescription>
+            </CardHeader>
             <CardContent className="space-y-4">
               {activeFlows.length === 0 ? (
                 <p className="text-muted-foreground text-center py-6">No active flows</p>
               ) : (
-                activeFlows.slice(0, 3).map((flow) => {
+                activeFlows.slice(0, 2).map((flow) => {
                   const supportCurr = AppConstants.SUPPORTEDCURRENCIES.find(
                     (currency) => currency.name === flow.currency
                   );
+                  console.log("CURRENCY FOUND", flow.currency)
                   return (
-                    <div key={flow.id} className="space-y-2">
+                    <div key={flow.id} className="space-y-2 pb-3  border-b">
                       <div className="flex justify-between">
                         <span className="font-medium">{flow.title}</span>
                         <span>{Math.round((flow.raised / Number(flow.goal)) * 100)}%</span>
