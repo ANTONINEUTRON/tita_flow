@@ -61,14 +61,14 @@ export class AppConstants {
       canBeUsed: false
     },
     {
-      name: "tUSDC",
+      name: "USDCt",
       address: "61DVYzrDYcAqx8oVQ8jixoEYfGhLz1dvmcYic3qJEzYU",//"EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v", 
       decimals: 6,
       logo: "/icon/usdc.png",
       canBeUsed: true
     },
     {
-        name: "tUSDT",
+        name: "USDTt",
         address: "Gh9ZwEmdLJ8DscKNTkTqPbNwLNNBjuSzaG9Vp2KGtKJr",//"Es9vMFrzaCERmJfrF4H2FYD4KCoNkY11McCe8BenwNYB", 
         decimals: 6,
         logo: "/icon/usdt.png",
