@@ -21,7 +21,7 @@ export default function useProfile() {
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState<string | null>(null);
     const router = useRouter();
-    const { address,  } = useWallet({ type: "solana" })
+    const { address, } = useWallet({ type: "solana" })
     const userContext = useUser();
     const walletInstance = userHasWallet(userContext)
         ? userContext.solana.wallet
@@ -32,7 +32,9 @@ export default function useProfile() {
     const { requestDevnetToken } = useAirdrop();
 
     useEffect(() => {
+        console.log("useProfile hook initialized");
         if (userContext.user && !userProfile) {
+            setLoading(true);
             if (!loadingRef.current) {
                 loadingRef.current = true;
                 onLogin()
@@ -41,11 +43,11 @@ export default function useProfile() {
     }, [userContext.user])
 
     useEffect(() => {
-        if(userProfile?.wallet && supportedCurrenciesBalances.length === 0) {
+        if (userProfile?.wallet && supportedCurrenciesBalances.length === 0) {
             // fetch user balance
             fetchUserBalance();
         }
-    },[userProfile?.wallet])
+    }, [userProfile?.wallet])
 
     const signUserIn = async () => {
         setLoading(true);
@@ -55,7 +57,11 @@ export default function useProfile() {
             console.log(e);
             toast.error("An error occurred during sign-in");
         }
-        // setLoading(false);
+        //If after one minute loading is not 
+        // setTimeout(() => {
+            setLoading(false);
+
+        // }, 000);
     }
 
     const signUserOut = async () => {
@@ -213,7 +219,7 @@ export default function useProfile() {
 
                 toast.success("Wallet created successfully");
                 toast.success("Airdropping tokens to wallet");
-                
+
                 await requestDevnetToken(userProfile, AppConstants.SUPPORTEDCURRENCIES[1]);
                 await requestDevnetToken(userProfile, AppConstants.SUPPORTEDCURRENCIES[2]);
                 // airdrop the wallet
@@ -252,12 +258,12 @@ export default function useProfile() {
                 }
             );
 
-                // Update the user profile state
-                setUserProfile((prevProfile) => ({
-                    ...prevProfile!,
-                    ...updatedUserProfileFields,
-                }));
-                toast.success("User profile updated successfully");
+            // Update the user profile state
+            setUserProfile((prevProfile) => ({
+                ...prevProfile!,
+                ...updatedUserProfileFields,
+            }));
+            toast.success("User profile updated successfully");
         } catch (error) {
             setError("An error occurred while updating user profile");
             console.error("Occurred while updating user profile " + error);
@@ -265,17 +271,17 @@ export default function useProfile() {
         setLoading(false)
     }
 
-    return { 
-        userProfile, 
-        loading, 
-        error, 
-        walletInstance, 
-        supportedCurrenciesBalances, 
-        loadingSupportedCurrencies, 
+    return {
+        userProfile,
+        loading,
+        error,
+        walletInstance,
+        supportedCurrenciesBalances,
+        loadingSupportedCurrencies,
         fetchUserBalance,
-        fetchProfile, 
-        updateUserProfile, 
-        signUserIn, 
-        signUserOut 
+        fetchProfile,
+        updateUserProfile,
+        signUserIn,
+        signUserOut
     }
 }
