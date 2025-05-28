@@ -3,14 +3,10 @@ import { AppConstants } from "@/lib/app_constants";
 import { NATIVE_MINT } from "@solana/spl-token";
 
 export async function getAssetBalance(tokenMint: string, userPublicKey: PublicKey): Promise<number> {
-    console.log("Getting asset balance for token mint:", tokenMint);
-    console.log("User public key:", userPublicKey.toString());
-
     if (tokenMint === "SOL" || tokenMint == NATIVE_MINT.toString()) {
         // Fetch SOL balance directly
         const solBalanceLamports = await AppConstants.APP_CONNECTION.getBalance(userPublicKey);
         const solBalance = solBalanceLamports / 1_000_000_000; // Convert from lamports to SOL
-        console.log("SOL Balance:", solBalance);
         return parseFloat(solBalance.toFixed(4));
     } else {
         // Fetch SPL token balance for other tokens (e.g., USDC, USDT, etc.)
@@ -20,7 +16,6 @@ export async function getAssetBalance(tokenMint: string, userPublicKey: PublicKe
         );
 
         if (tokenAccounts.value.length === 0) {
-            console.log(`No token accounts found for mint: ${tokenMint}`);
             return 0; // No balance
         }
 
@@ -31,7 +26,6 @@ export async function getAssetBalance(tokenMint: string, userPublicKey: PublicKe
             return total + tokenAmount;
         }, 0);
 
-        console.log(`Token Balance for ${tokenMint}:`, balance);
         return parseFloat(balance.toFixed(4));
     }
 }

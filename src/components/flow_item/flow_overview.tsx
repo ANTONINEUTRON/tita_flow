@@ -3,19 +3,26 @@ import {
   Card,
   CardContent,
   CardDescription,
-  CardFooter,
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { VotingPowerModel } from "@/lib/types/funding_flow";
-import {  formatDate, formatCurrency, cn } from "@/lib/utils";
+import { formatDate, formatCurrency, cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import { FundingFlowResponse } from "@/lib/types/funding_flow.response";
-import { CheckCircle2, ChevronLeft, ChevronRight, DollarSign } from "lucide-react";
+import { CheckCircle2, ChevronLeft, ChevronRight, DollarSign, InfoIcon, XIcon } from "lucide-react";
 import { Badge } from "../ui/badge";
 import { Avatar, AvatarFallback, AvatarImage } from "../ui/avatar";
-import AppUser from "@/lib/types/user";
+import {
+  getVotingPowerModelDisplayName,
+  getVotingPowerModelDescription
+} from "@/lib/types/funding_flow";
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from "@/components/ui/popover";
 
 interface FlowOverviewProps {
   flow: FundingFlowResponse;
@@ -73,18 +80,17 @@ export function FlowOverview({ flow }: FlowOverviewProps) {
 
   // Get milestone status color
   const getStatusColor = (index: number) => {
-    if (!flow.completedMilestones) return "bg-gray-400";
-    if (index < flow.completedMilestones) return "bg-green-500";
+    if (!flow.completed_milestones) return "bg-gray-400";
+    if (index < flow.completed_milestones) return "bg-green-500";
     return "bg-gray-400";
   };
 
   return (
     <Tabs defaultValue="overview" className="w-full">
       {flow.rules.milestone && (
-        <TabsList className="grid w-full grid-cols-3">
+        <TabsList className="grid w-full grid-cols-2">
           <TabsTrigger value="overview">Overview</TabsTrigger>
           <TabsTrigger value="milestones">Milestones</TabsTrigger>
-          {flow.rules.governance && <TabsTrigger value="governance">Governance</TabsTrigger>}
         </TabsList>
       )}
 
@@ -245,7 +251,7 @@ export function FlowOverview({ flow }: FlowOverviewProps) {
                       {item.type === 'image' ? (
                         <img
                           src={item.url}
-                          alt={ "Flow image"}
+                          alt={"Flow image"}
                           className="w-full h-full object-cover"
                         />
                       ) : item.type === 'video' ? (
@@ -341,12 +347,12 @@ export function FlowOverview({ flow }: FlowOverviewProps) {
           </Card>
         )}
 
-        {
-          flow.rules.milestone || flow.rules.governance && (
-            <Card>
-              <CardHeader className="flex flex-row items-center justify-between">
-                <CardTitle>Funding Rules</CardTitle>
-              </CardHeader>
+        <Card>
+          <CardHeader className="flex flex-row items-center justify-between">
+            <CardTitle>Funding Rules</CardTitle>
+          </CardHeader>
+          {
+            flow.rules.milestone && (
               <CardContent>
                 {flow.rules.milestone && (
                   <div className="flex gap-3">
@@ -362,25 +368,65 @@ export function FlowOverview({ flow }: FlowOverviewProps) {
                   </div>
                 )}
 
-                <div className="space-y-4">
-                  {flow.rules.governance && (
-                    <div className="flex gap-3">
-                      <div className="mt-0.5">
-                        <DollarSign className="h-5 w-5 text-primary" />
-                      </div>
-                      <div>
-                        <h4 className="font-medium">Governance</h4>
-                        <p className="text-sm text-muted-foreground">
-                          Funds are governed by the community through voting.
-                        </p>
-                      </div>
-                    </div>
-                  )}
-                </div>
               </CardContent>
-            </Card>
-          )
-        }
+            )
+          }
+          {flow.rules.governance && (
+            <CardContent>
+              <div className="flex gap-3">
+                <div className="mt-0.5">
+                  <DollarSign className="h-5 w-5 text-primary" />
+                </div>
+                <div>
+                  <h4 className="font-medium">Governance</h4>
+                  <p className="text-sm text-muted-foreground">
+                    Funds are governed by the community through voting.
+                  </p>
+
+                  <div className="mt-2 flex items-center">
+                    <span className="text-xs bg-secondary/50 px-2 py-0.5 rounded-md font-medium">
+                      {getVotingPowerModelDisplayName(flow.voting_power_model)}
+                    </span>
+
+                    <Popover>
+                      <PopoverTrigger asChild>
+                        <button
+                          type="button"
+                          className="inline-flex items-center justify-center rounded-full h-5 w-5 ml-1.5 hover:bg-muted"
+                        >
+                          <InfoIcon className="h-3.5 w-3.5 text-muted-foreground" />
+                          <span className="sr-only">About this voting model</span>
+                        </button>
+                      </PopoverTrigger>
+                      <PopoverContent side="right"
+                        align="start"
+                        sideOffset={10}
+                        className="w-72 p-4 z-50"
+                        avoidCollisions={true}>
+                        <div className="space-y-2">
+                          <div className="flex items-center justify-between">
+                            <h4 className="font-medium text-sm">About this voting model</h4>
+                            <PopoverTrigger asChild>
+                              <button className="h-5 w-5 inline-flex items-center justify-center rounded-full hover:bg-muted">
+                                <XIcon className="h-3 w-3" />
+                                <span className="sr-only">Close</span>
+                              </button>
+                            </PopoverTrigger>
+                          </div>
+                          <p className="text-sm text-muted-foreground">
+                            {getVotingPowerModelDescription(flow.voting_power_model)}
+                          </p>
+                        </div>
+                      </PopoverContent>
+                    </Popover>
+                  </div>
+                </div>
+              </div>
+            </CardContent>
+          )}
+        </Card>
+
+
 
       </TabsContent>
 
@@ -415,7 +461,7 @@ export function FlowOverview({ flow }: FlowOverviewProps) {
                             </p>
                           </div>
                           <div>
-                            {index < (flow.completedMilestones || 0) && (
+                            {index < (flow.completed_milestones || 0) && (
                               <span className="text-green-500 text-sm">Completed</span>
                             )}
                           </div>
@@ -425,25 +471,6 @@ export function FlowOverview({ flow }: FlowOverviewProps) {
                   </div>
                 ))}
               </div>
-            </CardContent>
-          </Card>
-        </TabsContent>
-      )}
-
-      {/* Governance Tab */}
-      {flow.rules.governance && (
-        <TabsContent value="governance" className="space-y-6 pt-4">
-          <Card>
-            <CardHeader>
-              <CardTitle>Governance</CardTitle>
-              <CardDescription>
-                Voting power model: {getVotingPowerModelName(flow.votingPowerModel)}
-              </CardDescription>
-            </CardHeader>
-            <CardContent>
-              <p className="text-sm">
-                This flow uses {getVotingPowerModelName(flow.votingPowerModel)} for its governance model.
-              </p>
             </CardContent>
           </Card>
         </TabsContent>

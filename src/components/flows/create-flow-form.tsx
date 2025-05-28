@@ -1,23 +1,31 @@
 "use client"
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Form, FormControl, FormDescription, FormField, FormItem, FormLabel } from "@/components/ui/form";
+import { Form, FormControl, FormDescription, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
 import { Switch } from "@/components/ui/switch";
 import { BasicInformation } from "@/components/flows/basic-information";
-import { MilestoneList } from "@/components/flows/milestone-list";
+import { MilestoneList } from "@/components/flows/milestone_list";
 import { z } from "zod";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { LucideArrowRight, LucideArrowLeft, Check } from "lucide-react";
+import { LucideArrowRight, LucideArrowLeft, Check, WalletIcon } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { v4 as uuidv4 } from 'uuid';
 import { GovernanceConfiguration } from "./governance-config";
-import { FundingFlow, VotingPowerModel } from "@/lib/types/funding_flow";
+import { getVotingPowerModelDescription, getVotingPowerModelDisplayName, VotingPowerModel } from "@/lib/types/funding_flow";
 import toast from "react-hot-toast";
 import useProfile from "@/lib/hooks/use_profile";
 import useFlow from "@/lib/hooks/use_flow";
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from "@/components/ui/popover";
+import { InfoIcon, XIcon } from "lucide-react";
+
+
 
 // Define form steps
 enum FormStep {
@@ -32,15 +40,27 @@ const createFlowValidationSchema = z.object({
   description: z.string().min(1, "Description is required"),
   goal: z.string().min(1, "Goal amount is required").default("0"),
   currency: z.string().min(1, "Currency is required"),
-  startdate: z.string()
-    .min(1, "Start date is required")
-    .nonempty("Start date is required")
-    .refine(date => !isNaN(new Date(date).getTime()), "Invalid date format"),
 
-  endDate: z.string()
-    .min(1, "End date is required")
-    .nonempty("End date is required")
-    .refine(date => !isNaN(new Date(date).getTime()), "Invalid date format"),
+  startdate: z.union([
+    z.string(),
+    z.date()
+  ])
+    .refine(val => {
+      if (!val) return true; // Optional field
+      if (val instanceof Date) return !isNaN(val.getTime());
+      return !isNaN(new Date(val).getTime());
+    }, "Invalid date format"),
+
+  endDate: z.union([
+    z.string(),
+    z.date()
+  ])
+    .optional()
+    .refine(val => {
+      if (!val) return true; // Optional field
+      if (val instanceof Date) return !isNaN(val.getTime());
+      return !isNaN(new Date(val).getTime());
+    }, "Invalid date format"),
 
   // Rules Configuration
   rules: z.object({
@@ -51,9 +71,13 @@ const createFlowValidationSchema = z.object({
   // Milestone Configuration
   milestones: z.array(
     z.object({
-      id: z.number().min(6, "Id is required"),
+      id: z.number().min(1, "Id is required"),
       description: z.string().min(1, "Description is required"),
-      amount: z.number().min(1, "Amount is required"),
+      amount: z.string()
+        .refine(val => !isNaN(parseFloat(val)) && parseFloat(val) > 0, {
+          message: "Amount must be greater than 0"
+        })
+        .transform(val => parseFloat(val)),
       deadline: z.string().min(1, "Deadline is required"),
     })
   ).optional(),
@@ -72,7 +96,17 @@ const createFlowValidationSchema = z.object({
     })
     // z.any()
   ).optional(),
-}).refine(data => new Date(data.endDate) > new Date(data.startdate), {
+}).refine(data => {
+  if (data.startdate && data.endDate) {
+    const startDate = data.startdate instanceof Date ?
+      data.startdate : new Date(data.startdate);
+    const endDate = data.endDate instanceof Date ?
+      data.endDate : new Date(data.endDate);
+
+    return endDate > startDate;
+  }
+  return true;
+}, {
   message: "End date must be after start date",
   path: ["endDate"]
 });
@@ -97,7 +131,7 @@ export default function CreateFlowForm() {
       title: "",
       currency: "",
       description: "",
-      goal: "0",
+      goal: "",
       rules: {
         milestone: false,
         governance: false,
@@ -139,12 +173,12 @@ export default function CreateFlowForm() {
   // Add this function near the beginning of your component
   const validateCurrentStep = async () => {
     try {
-      const currentValues = form.getValues();
-      
+      const rulesValidation = ["rules"];
+
       // Define which fields to validate at each step
       const fieldsToValidateByStep = {
         [FormStep.BASIC_INFO]: ["title", "description", "goal", "currency", "startdate", "endDate"],
-        [FormStep.RULES_CONFIG]: ["rules"],
+        [FormStep.RULES_CONFIG]: rulesValidation,
         [FormStep.PREVIEW]: [] // No validation needed at preview step
       };
       
@@ -153,6 +187,12 @@ export default function CreateFlowForm() {
       
       // Validate only the fields for the current step
       const result = await form.trigger(fieldsToValidate as any);
+
+
+      if (currentStep === FormStep.RULES_CONFIG && form.getValues("rules.milestone")) {
+        return validateMilestones();
+      }
+
       return result;
     } catch (error) {
       console.error("Validation error:", error);
@@ -160,16 +200,29 @@ export default function CreateFlowForm() {
     }
   };
 
+  // Add this effect to your component to link milestone and governance
+  useEffect(() => {
+    // Watch for changes to the milestone toggle
+    const subscription = form.watch((value, { name }) => {
+      // When milestone rule is toggled
+      if (name === "rules.milestone") {
+        const milestoneEnabled = value.rules?.milestone;
+        
+        // If milestone is enabled, also enable governance
+        if (milestoneEnabled) {
+          form.setValue("rules.governance", true);
+        }
+      }
+    });
+    
+    return () => subscription.unsubscribe();
+  }, [form]);
+
   // Form submission handler
   const onSubmit = async (values: FlowCreationValues) => {
+    console.log("Clicked submit with values:", values);
     setIsSubmitting(true);
     try {
-      // Validate milestone-based rules
-      if (values.rules.milestone && (!values.milestones || values.milestones.length === 0)) {
-        toast("At least one milestone is required when milestone-based funding is enabled")
-        return;
-      }
-
       // Show loading toast
       toast("Uploading media and creating the funding flow");
 
@@ -223,7 +276,7 @@ export default function CreateFlowForm() {
     
     if (!isValid) {
       // Show a toast or some feedback
-      toast.error("Please fix the errors before proceeding");
+      // toast.error("Please fix the errors before proceeding");
       return;
     }
 
@@ -231,6 +284,98 @@ export default function CreateFlowForm() {
       setCurrentStep((prev) => (prev + 1) as FormStep);
     }
   };
+
+  // Validate milestones in a simpler way based on the updated contract
+const validateMilestones = () => {
+  const milestones = form.getValues("milestones") || [];
+  const now = Math.floor(Date.now() / 1000);
+  
+  // Create arrays to collect all errors
+  const errors = [];
+  
+  // Check milestone count
+  if (milestones.length === 0) {
+    form.setError("milestones", {
+      type: "custom",
+      message: "At least one milestone is required"
+    });
+    errors.push("No milestones defined");
+  } else if (milestones.length > 10) {
+    form.setError("milestones", {
+      type: "custom",
+      message: "Maximum of 10 milestones allowed"
+    });
+    errors.push("Too many milestones (maximum is 10)");
+  }
+  
+  // Validate each milestone
+  milestones.forEach((milestone, i) => {
+    // Track validation issues for this milestone
+    const milestoneIssues = [];
+    
+    // Description validation
+    if (!milestone.description?.trim()) {
+      form.setError(`milestones.${i}.description`, {
+        type: "required",
+        message: "Description is required"
+      });
+      milestoneIssues.push("missing description");
+    }
+    
+    // Amount validation
+    const amount = milestone.amount;
+    if (isNaN(amount) || amount <= 0) {
+      form.setError(`milestones.${i}.amount`, {
+        type: "custom",
+        message: "Amount must be greater than 0"
+      });
+      milestoneIssues.push("invalid amount");
+    }
+    
+    // Deadline validation
+    try {
+      const milestoneDeadline = Math.floor(new Date(milestone.deadline).getTime() / 1000);
+      
+      if (milestoneDeadline <= now) {
+        form.setError(`milestones.${i}.deadline`, {
+          type: "custom",
+          message: "Deadline must be in the future"
+        });
+        milestoneIssues.push("deadline in the past");
+      }
+    } catch (e) {
+      form.setError(`milestones.${i}.deadline`, {
+        type: "custom",
+        message: "Invalid date format"
+      });
+      milestoneIssues.push("invalid date format");
+    }
+    
+    // Add consolidated error for this milestone if issues exist
+    if (milestoneIssues.length > 0) {
+      errors.push(`Milestone ${i+1}: ${milestoneIssues.join(", ")}`);
+    }
+  });
+  
+  // No need to check if total equals goal in the updated contract
+  
+  // Show all errors in one toast if any exist
+  if (errors.length > 0) {
+    toast.error(
+      <div>
+        <p>Please fix the following issues:</p>
+        <ul className="list-disc pl-4 mt-1 text-sm">
+          {errors.map((error, i) => (
+            <li key={i}>{error}</li>
+          ))}
+        </ul>
+      </div>
+    );
+    return false;
+  }
+  
+  return true;
+};
 
   return (
     <Card className="w-full max-w-4xl mx-auto">
@@ -337,17 +482,21 @@ export default function CreateFlowForm() {
                     render={({ field }) => (
                       <FormItem className="flex flex-row items-center justify-between rounded-lg border p-4">
                         <div className="space-y-0.5">
-                          <FormLabel className="text-base">Enable Governance</FormLabel>
+                          <FormLabel className="text-base">
+                            Governance
+                          </FormLabel>
                           <FormDescription>
-                            Allow contributors to vote on proposals and decisions
+                            Enable voting on milestone completion by contributors
                           </FormDescription>
                         </div>
                         <FormControl>
                           <Switch
                             checked={field.value}
                             onCheckedChange={field.onChange}
+                            disabled={form.watch("rules.milestone")} // Disable toggle when milestone is enabled
                           />
                         </FormControl>
+                        <FormMessage />
                       </FormItem>
                     )}
                   />
@@ -356,6 +505,12 @@ export default function CreateFlowForm() {
                   {governanceRule && (
                     <div className="pl-4 border-l-2 border-primary/20 mt-2">
                       <GovernanceConfiguration control={form.control} />
+                    </div>
+                  )}
+
+                  {form.watch("rules.milestone") && form.watch("rules.governance") && (
+                    <div className="text-sm text-muted-foreground ml-4 mt-2">
+                      <p>Governance is automatically enabled for milestone-based flows</p>
                     </div>
                   )}
                 </div>
@@ -370,8 +525,16 @@ export default function CreateFlowForm() {
                   <div>
                     {
                       supportedCurrenciesBalances && supportedCurrenciesBalances[0] < 0 && (
-                        <div>
+                        <div className="flex flex-col md:flex-row justify-center items-center gap-2">
                           <p className="text-sm text-destructive">You don't have enough balance to create a flow</p>
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            onClick={() => window.open('/app/dashboard?tab=settings')}
+                          >
+                            <WalletIcon className="mr-2 h-4 w-4" />
+                            Fund Wallet
+                          </Button>
                         </div>
                       )
                     }
@@ -395,7 +558,7 @@ export default function CreateFlowForm() {
                     <span className="text-muted-foreground">Start Date:</span>
                     <span>{new Date(form.getValues("startdate")).toLocaleDateString()}</span>
                     <span className="text-muted-foreground">End Date:</span>
-                    <span>{new Date(form.getValues("endDate")).toLocaleDateString()}</span>
+                    <span>{new Date(form.getValues("endDate")!).toLocaleDateString()}</span>
                   </div>
                 </div>
 
@@ -418,10 +581,10 @@ export default function CreateFlowForm() {
                         <h5 className="font-medium mb-2">Milestones ({milestones.length})</h5>
                         <ul className="space-y-3 text-sm">
                           {milestones.map((milestone, index) => (
-                            <li key={index} className="border-b pb-2 last:border-0">
-                              <div className="text-muted-foreground text-xs">{milestone.description}</div>
-                              <div className="text-right mt-1">{milestone.amount}</div>
-                            </li>
+                            <div key={index} className="border-b mb-2 text-sm grid grid-cols-1 md:grid-cols-2 gap-y-2 justify-between pb-2 last:border-0">
+                              <span className="text-muted-foreground ">{milestone.description}</span>
+                              <span className="">{milestone.amount} {form.getValues("currency")}</span>
+                            </div>
                           ))}
                         </ul>
                       </div>
@@ -433,7 +596,36 @@ export default function CreateFlowForm() {
                         <h5 className="font-medium mb-2">Governance Settings</h5>
                         <div className="grid grid-cols-2 gap-y-2 text-sm">
                           <span className="text-muted-foreground">Voting Model:</span>
-                          <span>{form.getValues("votingPowerModel")}</span>
+                          <div className="flex items-center gap-1.5">
+                            <span>{getVotingPowerModelDisplayName(form.getValues("votingPowerModel"))}</span>
+                            <Popover>
+                              <PopoverTrigger asChild>
+                                <button
+                                  type="button"
+                                  className="inline-flex items-center justify-center rounded-full h-5 w-5 hover:bg-muted"
+                                >
+                                  <InfoIcon className="h-4 w-4 text-muted-foreground" />
+                                  <span className="sr-only">More information</span>
+                                </button>
+                              </PopoverTrigger>
+                              <PopoverContent side="right" className="w-80 p-4">
+                                <div className="space-y-2">
+                                  <div className="flex items-center justify-between">
+                                    <h4 className="font-medium text-sm">About this voting model</h4>
+                                    <PopoverTrigger asChild>
+                                      <button className="h-5 w-5 inline-flex items-center justify-center rounded-full hover:bg-muted">
+                                        <XIcon className="h-3 w-3" />
+                                        <span className="sr-only">Close</span>
+                                      </button>
+                                    </PopoverTrigger>
+                                  </div>
+                                  <p className="text-sm text-muted-foreground">
+                                    {getVotingPowerModelDescription(form.getValues("votingPowerModel"))}
+                                  </p>
+                                </div>
+                              </PopoverContent>
+                            </Popover>
+                          </div>
                         </div>
                       </div>
                     )}

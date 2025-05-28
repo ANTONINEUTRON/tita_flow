@@ -71,12 +71,12 @@ export function FlowsContent({ flows, loading }: FlowsContentProps) {
                       <div className="space-y-1">
                         <div className="flex justify-between text-sm">
                           <span className="text-muted-foreground">Milestones</span>
-                          <span className="font-medium">{flow.completedMilestones} of {flow.milestones?.length} completed</span>
+                          <span className="font-medium">{flow.completed_milestones} of {flow.milestones?.length} completed</span>
                         </div>
                         <div className="h-2 bg-muted rounded-full overflow-hidden">
                           <div
                             className="h-full bg-secondary"
-                            style={{ width: `${(flow.completedMilestones! / flow.milestones?.length!) * 100}%` }}
+                            style={{ width: `${(flow.completed_milestones! / flow.milestones?.length!) * 100}%` }}
                           ></div>
                         </div>
                       </div>
@@ -85,8 +85,8 @@ export function FlowsContent({ flows, loading }: FlowsContentProps) {
                 </CardContent>
               </div>
               <CardFooter>
-                <Button variant="outline" size="sm" className="w-full" asChild>
-                  <Link target="_blank" className="w-full h-full" href={`/flow/${flow.id}`}>Manage Flow</Link>
+                <Button variant="outline" size="lg" className="w-full " asChild>
+                  <Link target="_blank" className="" href={`/flow/${flow.id}`}>Manage Flow</Link>
                 </Button>
               </CardFooter>
             </Card>

@@ -52,18 +52,25 @@ export default function useFlow() {
             : { imageUrls: [], videoUrl: "" };
 
         const now = new Date().toISOString()
+
+        // Format dates properly for database compatibility
+        const formatDate = (dateValue: string | Date | undefined | null): string | null => {
+            if (!dateValue) return null;
+            return new Date(dateValue).toISOString();
+        };
+
         return {
             id: flowId,
             title: formValues.title,
             description: formValues.description,
             goal: formValues.goal,
-            enddate: formValues.endDate,
-            startdate: formValues.startdate,
+            enddate: formatDate(formValues.endDate) ?? "",
+            startdate: formatDate(formValues.startdate) ?? "",
             currency: formValues.currency,
 
             rules: formValues.rules,
-            creator: creator, // Placeholder for creator's address
-            creator_id: creator_id!, // Placeholder for creator's ID
+            creator: creator, 
+            creator_id: creator_id!, 
             milestones: formValues.milestones || [],
             votingPowerModel: formValues.votingPowerModel,
             images: mediaUploadRes.imageUrls,

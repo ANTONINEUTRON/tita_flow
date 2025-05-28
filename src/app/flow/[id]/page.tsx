@@ -6,7 +6,6 @@ import Link from "next/link";
 import React from "react";
 import {
   ArrowLeft,
-  Coins,
   Download,
   LayoutDashboard,
   MessageSquare,
@@ -39,7 +38,6 @@ import { ContributorsView } from "@/components/flow_item/contribute/contributors
 import { UpdatesView } from "@/components/flow_item/updates_view";
 import { ProposalsView } from "@/components/flow_item/proposals_view";
 import useFlow from "@/lib/hooks/use_flow";
-import AppUser from "@/lib/types/user";
 import toast from "react-hot-toast";
 import { FundingFlowResponse } from "@/lib/types/funding_flow.response";
 import useProfile from "@/lib/hooks/use_profile";

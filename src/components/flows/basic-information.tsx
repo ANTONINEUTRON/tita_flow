@@ -6,12 +6,21 @@ import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Button } from "@/components/ui/button";
-import { Card } from "@/components/ui/card";
-import { CURRENCIES } from "@/lib/flow-constants";
-import { FileVideo, FileImage, X, Upload, AlertCircle, Info, ChevronUp, ChevronDown } from "lucide-react";
+import { FileVideo, FileImage, X, AlertCircle, Info, ChevronUp, ChevronDown, CalendarIcon } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { AppConstants } from "@/lib/app_constants";
+import { format } from "date-fns";
+import { Popover, PopoverContent, PopoverTrigger } from "../ui/popover";
+import { Calendar } from "../ui/calendar"; 
+import { InfoIcon } from "lucide-react";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger
+} from "@/components/ui/tooltip";
+
 
 // Define types for media items
 type MediaItem = {
@@ -35,6 +44,8 @@ const MAX_IMAGES = 5;
 export function BasicInformation({ form, minDateString, }: BasicInformationProps) {
   const [uploadError, setUploadError] = useState<string | null>(null);
   const [isMediaExpanded, setIsMediaExpanded] = useState(false);
+  const [isEndDateTooltipOpen, setIsEndDateTooltipOpen] = useState(false);
+  const [isStartDateTooltipOpen, setIsStartDateTooltipOpen] = useState(false);
   
   // Handle media file selection
   const handleMediaSelect = (event: React.ChangeEvent<HTMLInputElement>, mediaType: 'image' | 'video') => {
@@ -185,7 +196,12 @@ export function BasicInformation({ form, minDateString, }: BasicInformationProps
             <FormItem>
               <FormLabel>Funding Goal</FormLabel>
               <FormControl>
-                <Input type="number" placeholder="10000" {...field} />
+                <Input 
+                  type="number" 
+                  placeholder="0.00"
+                  step="0.01"
+                  min="0.01"
+                  {...field} />
               </FormControl>
               {/* <FormDescription>
                   The total amount you want to raise
@@ -236,7 +252,7 @@ export function BasicInformation({ form, minDateString, }: BasicInformationProps
       
       {/* Second row of paired fields */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-        <FormField
+        {/* <FormField
           control={form.control}
           name="startdate"
           render={({ field }) => (
@@ -269,7 +285,165 @@ export function BasicInformation({ form, minDateString, }: BasicInformationProps
               <FormMessage />
             </FormItem>
           )}
+        /> */}
+        {/* Start Date */}
+        <FormField
+          control={form.control}
+          name="startdate"
+          render={({ field }) => (
+            <FormItem className="flex flex-col">
+              <FormLabel>Start Date </FormLabel>
+              <Popover>
+                <PopoverTrigger asChild>
+                  <FormControl>
+                    <Button
+                      variant={"outline"}
+                      className={cn(
+                        "w-full pl-3 text-left font-normal",
+                        !field.value && "text-muted-foreground"
+                      )}
+                    >
+                      {field.value ? (
+                        format(new Date(field.value), "PPP")
+                      ) : (
+                        <span>Pick a date</span>
+                      )}
+                      <CalendarIcon className="ml-auto h-4 w-4 opacity-50" />
+                    </Button>
+                  </FormControl>
+                </PopoverTrigger>
+                <PopoverContent className="w-auto p-0" align="start">
+                  <Calendar
+                    mode="single"
+                    selected={field.value ? new Date(field.value) : undefined}
+                    onSelect={field.onChange}
+                    disabled={(date) => date < new Date(minDateString)}
+                    initialFocus
+                  />
+                </PopoverContent>
+              </Popover>
+              <div>
+                <TooltipProvider>
+                  <Tooltip 
+                    open={isStartDateTooltipOpen}
+                    onOpenChange={setIsStartDateTooltipOpen}
+                    delayDuration={300}>
+                    <TooltipTrigger asChild>
+                      <InfoIcon 
+                        className="h-4 w-4 text-muted-foreground cursor-pointer"
+                        onClick={() => setIsStartDateTooltipOpen(!isStartDateTooltipOpen)} />
+                    </TooltipTrigger>
+                    <TooltipContent 
+                      side="right"
+                      className="max-w-xs"
+                      sideOffset={5}
+                      onClick={() => setIsStartDateTooltipOpen(false)}>
+                      <p>
+                        The date when your funding flow will start
+                      </p>
+                    </TooltipContent>
+                  </Tooltip>
+                </TooltipProvider>
+              </div>
+              
+              <FormMessage />
+            </FormItem>
+          )}
         />
+
+        {/* End Date */}
+        <FormField
+          control={form.control}
+          name="endDate"
+          render={({ field }) => (
+            <FormItem className="flex flex-col">
+              <div className="flex items-center justify-between">
+                <FormLabel>End Date</FormLabel>
+                <span className="text-xs text-muted-foreground">(Optional)</span>
+              </div>
+              <Popover>
+                <PopoverTrigger asChild>
+                  <FormControl>
+                    <Button
+                      variant={"outline"}
+                      className={cn(
+                        "w-full pl-3 text-left font-normal",
+                        !field.value && "text-muted-foreground"
+                      )}
+                      onClick={(e) => {
+                        // If we have a value and user clicks, clear it
+                        if (field.value && e.target === e.currentTarget) {
+                          e.preventDefault();
+                          field.onChange("");
+                        }
+                      }}
+                    >
+                      {field.value ? (
+                        <>
+                          {format(new Date(field.value), "PPP")}
+                          <X
+                            className="ml-auto h-4 w-4 opacity-50 hover:opacity-100"
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              field.onChange("");
+                            }}
+                          />
+                        </>
+                      ) : (
+                        <>
+                          <span>No end date (long-running flow)</span>
+                          <CalendarIcon className="ml-auto h-4 w-4 opacity-50" />
+                        </>
+                      )}
+                    </Button>
+                  </FormControl>
+                </PopoverTrigger>
+                <PopoverContent className="w-auto p-0" align="start">
+                  <Calendar
+                    mode="single"
+                    selected={field.value ? new Date(field.value) : undefined}
+                    onSelect={field.onChange}
+                    disabled={(date) =>
+                      date < new Date(minDateString) ||
+                      (form.getValues("startdate") && date <= new Date(form.getValues("startdate")))
+                    }
+                    initialFocus
+                  />
+                </PopoverContent>
+              </Popover>
+              <div>
+                <TooltipProvider>
+                  <Tooltip 
+                    open={isEndDateTooltipOpen}
+                    onOpenChange={setIsEndDateTooltipOpen} 
+                    delayDuration={300}>
+                    <TooltipTrigger asChild>
+                      <InfoIcon 
+                        className="h-4 w-4 text-muted-foreground cursor-pointer"
+                        onClick={() => setIsEndDateTooltipOpen(!isEndDateTooltipOpen)} />
+                    </TooltipTrigger>
+                    <TooltipContent 
+                      side="right" 
+                      className="max-w-xs"
+                      onClick={() => setIsEndDateTooltipOpen(false)} 
+                      sideOffset={5}>
+                      <p>
+                        Optional target date for project completion. Flow remains open after this date.
+                      </p>
+                      <p className="mt-1"> 
+                        Funders will be notified when this date is reached for review purposes.
+                      </p>
+                    </TooltipContent>
+                  </Tooltip>
+                </TooltipProvider>
+                <FormMessage />
+              </div>
+              
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+
       </div>
       
       {/* Media Upload Section */}

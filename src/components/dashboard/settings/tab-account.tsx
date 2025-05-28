@@ -19,7 +19,7 @@ import WalletCard from "./wallet_card";
 // Simplified form schema for only editable fields
 const accountFormSchema = z.object({
   name: z.string().min(1, "Name is required"),
-  profilePics: z.string().url({ message: "Please enter a valid URL" }).optional().or(z.literal("")),
+  profile_pics: z.string().url({ message: "Please enter a valid URL" }).optional().or(z.literal("")),
   username: z.string().min(1, "Username is required"),
 });
 
@@ -37,7 +37,7 @@ export default function TabAccount() {
     resolver: zodResolver(accountFormSchema),
     defaultValues: {
       name: userProfile?.name || "",
-      profilePics: userProfile?.profile_pics || "",
+      profile_pics: userProfile?.profile_pics || "",
       username: userProfile?.username || "",
     },
   });
@@ -47,20 +47,20 @@ export default function TabAccount() {
     if (userProfile) {
       form.reset({
         name: userProfile.name || "",
-        profilePics: userProfile.profile_pics || "",
+        profile_pics: userProfile.profile_pics || "",
         username: userProfile.username || ""
       });
     }
   }, [userProfile, form]);
   
-  // Handle form submission - only update name and profilePics
+  // Handle form submission - only update name and profile_pics
   const onSubmit = async (data: AccountFormValues) => {
     try {
       if (!userProfile) return;
       
       await updateUserProfile(userProfile.id,{
         name: data.name,
-        profilePics: data.profilePics || "",
+        profile_pics: data.profile_pics || "",
         username: data.username,
       });
       
@@ -127,7 +127,7 @@ export default function TabAccount() {
       const data = await response.json();
       
       // Update the form field with the new URL
-      form.setValue("profilePics", data.url, { 
+      form.setValue("profile_pics", data.url, { 
         shouldValidate: true,
         shouldDirty: true,
       });
@@ -271,7 +271,7 @@ export default function TabAccount() {
         </CardContent>
       </Card>
       
-      {/* Editable Information - Just name and profilePics */}
+      {/* Editable Information - Just name and profile_pics */}
       <Form {...form}>
         <form onSubmit={form.handleSubmit(onSubmit)}>
           <Card>
@@ -342,13 +342,13 @@ export default function TabAccount() {
               </div>
               
               {/* Preview of profile picture */}
-              {(form.watch("profilePics") || previewUrl) && (
+              {(form.watch("profile_pics") || previewUrl) && (
                 <div className="space-y-2">
                   <Label>Preview</Label>
                   <div className="flex justify-center p-4 border rounded-md">
                     <Avatar className="h-48 w-48">
                       <AvatarImage 
-                        src={previewUrl || form.watch("profilePics")} 
+                        src={previewUrl || form.watch("profile_pics")} 
                         alt="Profile Preview" 
                       />
                       <AvatarFallback>

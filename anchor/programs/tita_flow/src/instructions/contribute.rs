@@ -1,5 +1,5 @@
 use anchor_lang::prelude::*;
-use anchor_spl::token_interface::{Mint, TokenAccount, TokenInterface, transfer_checked};
+use anchor_spl::token_interface::{transfer_checked, Mint, TokenAccount, TokenInterface};
 
 use crate::{
     constants::TITA_CONTRIBUTION_SEED,
@@ -38,13 +38,13 @@ pub struct Contribute<'info> {
         constraint = contributor_token_account.owner == contributor.key() @ TitaErrors::InvalidTokenOwner,
     )]
     pub contributor_token_account: InterfaceAccount<'info, TokenAccount>,
-    
+
     #[account(
         mut,
         constraint = flow_token_account.mint == token_mint.key() @ TitaErrors::InvalidTokenAccount,
     )]
     pub flow_token_account: InterfaceAccount<'info, TokenAccount>,
-    
+
     pub token_mint: InterfaceAccount<'info, Mint>,
     pub token_program: Interface<'info, TokenInterface>,
     pub system_program: Program<'info, System>,
@@ -54,19 +54,19 @@ impl<'info> Contribute<'info> {
     pub fn contribute(&mut self, amount: u64, contribution_bump: u8) -> Result<()> {
         // Validate the contribution amount
         require!(amount > 0, TitaErrors::InvalidContributionAmount);
-        
+
         // Check if flow is still accepting contributions
         if let Some(end_date) = self.flow.end_date {
             let current_time = Clock::get()?.unix_timestamp;
             require!(current_time <= end_date, TitaErrors::FlowEnded);
         }
-        
+
         // Check if flow is accepting contributions (start time)
         // if let Some(start_date) = self.flow.start_date {
         //     let current_time = Clock::get()?.unix_timestamp;
         //     require!(current_time >= start_date, TitaErrors::FlowNotStarted);
         // }
-        
+
         // Transfer tokens to token account
         transfer_checked(
             CpiContext::new(
@@ -84,7 +84,7 @@ impl<'info> Contribute<'info> {
 
         // Initialize contribution if new
         let current_timestamp = Clock::get()?.unix_timestamp;
-        
+
         if self.contribution.contribution_count == 0 {
             // First-time setup
             self.contribution.flow = self.flow.key();
@@ -101,36 +101,73 @@ impl<'info> Contribute<'info> {
 
             self.contribution.bump = contribution_bump;
         }
-        
+
         // Update the contribution account
-        self.contribution.total_amount = self.contribution.total_amount
+        self.contribution.total_amount = self
+            .contribution
+            .total_amount
             .checked_add(amount)
             .ok_or(TitaErrors::MathOverflow)?;
 
         // if there's no milestone all should be available for withdrawal
         if self.flow.milestones.is_none() {
-            self.flow.available = self.flow.available
+            self.flow.available = self
+                .flow
+                .available
                 .checked_add(amount)
                 .ok_or(TitaErrors::MathOverflow)?;
+        } else if let Some(milestones) = &self.flow.milestones {
+            // If there are milestones, calculate their total
+            let milestone_total = milestones.iter().fold(0u64, |sum, milestone| {
+                sum.checked_add(milestone.amount).unwrap_or(sum)
+            });
+
+            // If milestone total is less than goal, a portion of each contribution should be immediately available
+            if milestone_total < self.flow.goal {
+                // Calculate the proportion that should be immediately available
+                let available_ratio = self.flow.goal.checked_sub(milestone_total).unwrap_or(0);
+
+                // Calculate the immediate available amount from this contribution
+                // Using saturating multiplication to avoid overflow
+                let immediate_available = amount
+                    .checked_mul(available_ratio)
+                    .and_then(|product| product.checked_div(self.flow.goal))
+                    .unwrap_or(0);
+
+                // Add the immediate available amount to the flow's available balance
+                if immediate_available > 0 {
+                    self.flow.available = self
+                        .flow
+                        .available
+                        .checked_add(immediate_available)
+                        .ok_or(TitaErrors::MathOverflow)?;
+                }
+            }
         }
-            
+
         self.contribution.last_contribution = current_timestamp;
-        self.contribution.contribution_count = self.contribution.contribution_count
+        self.contribution.contribution_count = self
+            .contribution
+            .contribution_count
             .checked_add(1)
             .ok_or(TitaErrors::MathOverflow)?;
-            
+
         // Update the flow account
-        self.flow.raised = self.flow.raised
+        self.flow.raised = self
+            .flow
+            .raised
             .checked_add(amount)
             .ok_or(TitaErrors::MathOverflow)?;
-            
+
         // If this is a new contributor (first contribution), increment the flow's contributor count
         if self.contribution.contribution_count == 1 {
-            self.flow.contributor_count = self.flow.contributor_count
+            self.flow.contributor_count = self
+                .flow
+                .contributor_count
                 .checked_add(1)
                 .ok_or(TitaErrors::MathOverflow)?;
         }
-        
+
         // Emit contribution event
         emit!(ContributionEvent {
             flow: self.flow.key(),
@@ -139,11 +176,10 @@ impl<'info> Contribute<'info> {
             total_contributed: self.contribution.total_amount,
             timestamp: current_timestamp,
         });
-        
+
         Ok(())
     }
 }
-
 
 // Event emitted when a contribution is made
 #[event]

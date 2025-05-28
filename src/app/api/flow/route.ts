@@ -68,7 +68,7 @@ export async function POST(req: NextRequest) {
 
         return NextResponse.json({ message: "Saved" })
     } catch (error) {
-        console.error("Error uploading media:", error);
+        console.error("Error creating flow:", error);
         return NextResponse.error();
     }
 }

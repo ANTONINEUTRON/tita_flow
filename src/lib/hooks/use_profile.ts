@@ -10,11 +10,9 @@ import { v4 as uuidv4, } from 'uuid';
 import airdropWallet from "../utils/airdrop_wallet";
 import { useUser, useWallet } from "@civic/auth-web3/react";
 import { userHasWallet } from "@civic/auth-web3";
-import { SupportCurrency } from "../types/supported_currencies";
 import { AppConstants } from "../app_constants";
 import { getAssetBalance } from "../utils/get_asset_balance";
 import { PublicKey } from "@solana/web3.js";
-import { set } from "@coral-xyz/anchor/dist/cjs/utils/features";
 import { useAirdrop } from "./use_airdrop";
 
 
@@ -34,10 +32,7 @@ export default function useProfile() {
     const { requestDevnetToken } = useAirdrop();
 
     useEffect(() => {
-        console.log("User Profile: ", userContext.user);
         if (userContext.user && !userProfile) {
-            console.log("User Profile inn : ", userProfile);
-            // router.push("/app/dashboard");
             if (!loadingRef.current) {
                 loadingRef.current = true;
                 onLogin()
@@ -92,9 +87,24 @@ export default function useProfile() {
                 //// if it exists, set the user profile
                 setUserProfile(userRecord)
 
-                if (!userRecord.profile_pics && userContext.user?.picture) {
-                    // update the profile picture
-                    updateUserProfile(userRecord.id, { profile_pics: userContext.user?.picture })
+                // For already authenticated users
+                if ((!userRecord.profile_pics || !userRecord.name) && userContext.user) {
+                    const updates: any = {};
+
+                    // Check and update profile picture if needed
+                    if (!userRecord.profile_pics && userContext.user.picture) {
+                        updates.profile_pics = userContext.user.picture;
+                    }
+
+                    // Check and update name if needed
+                    if (!userRecord.name && userContext.user.name) {
+                        updates.name = userContext.user.name;
+                    }
+
+                    // Only update if we have changes to make
+                    if (Object.keys(updates).length > 0) {
+                        updateUserProfile(userRecord.id, updates);
+                    }
                 }
             } else {
                 //// if it does not exist, create a new user record
@@ -106,7 +116,7 @@ export default function useProfile() {
                         email!,
                         3
                     ),
-                    name: "",
+                    name: userContext.user?.name ?? "",
                     profile_pics: userContext.user?.picture,
                 }
 
@@ -241,6 +251,13 @@ export default function useProfile() {
                     ...updatedUserProfileFields
                 }
             );
+
+                // Update the user profile state
+                setUserProfile((prevProfile) => ({
+                    ...prevProfile!,
+                    ...updatedUserProfileFields,
+                }));
+                toast.success("User profile updated successfully");
         } catch (error) {
             setError("An error occurred while updating user profile");
             console.error("Occurred while updating user profile " + error);

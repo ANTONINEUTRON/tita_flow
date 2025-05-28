@@ -62,10 +62,8 @@ impl<'info> CreateFlow<'info> {
         voting_power_model: VotingPowerModel,
         flow_bump: u8
     ) -> Result<()> {
-        // Validate time parameters if provided
         let current_time = Clock::get()?.unix_timestamp;
         
-        // If start time is specified, ensure it's not in the past
         if let Some(start) = start_time {
             require!(
                 start >= current_time,
@@ -73,7 +71,6 @@ impl<'info> CreateFlow<'info> {
             );
         }
         
-        // If both start and end times are specified, ensure end is after start
         if let (Some(start), Some(end)) = (start_time, end_time) {
             require!(
                 end > start,
@@ -103,7 +100,6 @@ impl<'info> CreateFlow<'info> {
                 TitaErrors::NoMilestonesSpecified
             );
             
-            let mut total_amount = 0u64;
             
             // Validate each milestone
             for milestone in milestones_vec {
@@ -125,25 +121,8 @@ impl<'info> CreateFlow<'info> {
                     TitaErrors::MilestoneCantBeCompletedAtCreation
                 );
                 
-                // If end time is specified, ensure milestone deadline is before end time
-                if let Some(end) = end_time {
-                    require!(
-                        milestone.deadline <= end,
-                        TitaErrors::MilestoneAfterEndTime
-                    );
-                }
-                
-                // Sum milestone amounts with overflow check
-                total_amount = total_amount
-                    .checked_add(milestone.amount)
-                    .ok_or(TitaErrors::MathOverflow)?;
             }
             
-            // Ensure milestone amounts add up to the goal
-            require!(
-                total_amount == goal,
-                TitaErrors::MilestoneTotalMismatch
-            );
         }
         
         // Initialize flow account

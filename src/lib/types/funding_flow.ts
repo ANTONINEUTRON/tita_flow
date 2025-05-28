@@ -1,4 +1,3 @@
-
 export interface FundingFlow{
     id: string,
     title: string,
@@ -20,9 +19,6 @@ export interface FundingFlow{
     votingPowerModel: VotingPowerModel,
     images: string[],
     video?: string,
-    // quorumPercentage: number,
-    // approvalPercentage: number,
-    // votingPeriodDays: number,
     createdAt?: string,
     updatedAt?: string,
     address?: string,
@@ -45,6 +41,36 @@ export function anchorAnumBasedOnVotingPowerModel(votingPowerModel: VotingPowerM
             return { individualVoting: {} };
     }
 }
+
+export function getVotingPowerModelDisplayName(votingPowerModel: VotingPowerModel): string {
+    switch (votingPowerModel) {
+        case VotingPowerModel.TOKEN_WEIGHTED:
+            return "Token Weighted Voting";
+        case VotingPowerModel.QUADRATIC_VOTING:
+            return "Quadratic Voting";
+        case VotingPowerModel.INDIVIDUAL_VOTING:
+            return "One Person, One Vote";
+        default:
+            return "Unknown Voting Model";
+    }
+}
+
+export function getVotingPowerModelDescription(votingPowerModel: VotingPowerModel): string {
+    switch (votingPowerModel) {
+        case VotingPowerModel.TOKEN_WEIGHTED:
+            return "Voting power is proportional to the amount of tokens held";
+        case VotingPowerModel.QUADRATIC_VOTING:
+            return "Voting power scales as the square root of tokens, reducing the influence of large token holders";
+        case VotingPowerModel.INDIVIDUAL_VOTING:
+            return "Each contributor has equal voting power regardless of contribution amount";
+        default:
+            return "";
+    }
+}
+
+// Usage example:
+// const displayName = getVotingPowerModelDisplayName(flow.votingPowerModel);
+// const description = getVotingPowerModelDescription(flow.votingPowerModel);
 
 // export interface MediaItem {
 //     id: string;
