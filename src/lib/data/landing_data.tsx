@@ -3,7 +3,7 @@ import { AppConstants } from "@/lib/app_constants";
 export const features = [
   {
     title: "Fully Configurable Funding Flows",
-    description: "Customize funding structures for any use case, from simple to complex patterns.",
+    description: "Flows are customize funding structures for any use case, from simple to complex use cases",
     icon: "🔧"
   },
   {

@@ -8,7 +8,7 @@ export class AppConstants {
   /**
    * The name of the application
    */
-  public static readonly APP_NAME = "Tita Flow";
+  public static readonly APP_NAME = "Titaflow";
   
   /**
    * The description of the application
