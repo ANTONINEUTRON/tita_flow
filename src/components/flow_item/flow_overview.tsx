@@ -348,9 +348,13 @@ export function FlowOverview({ flow }: FlowOverviewProps) {
         )}
 
         <Card>
-          <CardHeader className="flex flex-row items-center justify-between">
-            <CardTitle>Funding Rules</CardTitle>
-          </CardHeader>
+          {
+            (flow.rules.milestone || flow.rules.governance) && (
+              <CardHeader className="flex flex-row items-center justify-between">
+                <CardTitle>Funding Rules</CardTitle>
+              </CardHeader>
+            )
+          }
           {
             flow.rules.milestone && (
               <CardContent>

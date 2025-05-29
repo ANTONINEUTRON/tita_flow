@@ -25,13 +25,13 @@ export class AppConstants {
    */
   public static readonly SOCIAL_LINKS = {
     TWITTER: "https://x.com/titaflow_",
-    DISCORD: "https://discord.gg/titaflow_"
+    DISCORD: "https://discord/titaflow_"
   };
   
   /**
    * Support contact information
    */
-  public static readonly SUPPORT_EMAIL = "antobuilds@gmail.com";
+  public static readonly SUPPORT_EMAIL = "info@titaflow.com";
 
   public static readonly APP_URL = "https://titaflow.setita.com"
 

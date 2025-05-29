@@ -423,7 +423,7 @@ export default function FlowDetailPage() {
           <div className="py-4">
             <div className="space-y-4">
               <p>
-                Leah is designed to help you understand this project better by:
+                Leah AI is designed to help you understand this project better by:
               </p>
               
               <ul className="list-disc pl-5 space-y-2">

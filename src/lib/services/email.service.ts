@@ -22,7 +22,7 @@ export class EmailService {
     private constructor() {
         this.config = {
             apiKey: process.env.RS_EMAIL_KEY || '',
-            defaultFrom: 'Titaflow <no-reply@titaflow.setita.com>',
+            defaultFrom: 'Titaflow <no-reply@titaflow.com>',
             defaultReplyTo: AppConstants.SUPPORT_EMAIL,
         };
 
