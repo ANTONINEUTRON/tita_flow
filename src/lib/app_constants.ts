@@ -33,7 +33,7 @@ export class AppConstants {
    */
   public static readonly SUPPORT_EMAIL = "info@titaflow.com";
 
-  public static readonly APP_URL = "https://titaflow.setita.com"
+  public static readonly APP_URL = "https://titaflow.com"
 
   public static readonly APP_RPC_ENDPOINT = "https://devnet.helius-rpc.com/?api-key=" + process.env.NEXT_PUBLIC_HELIUS_API_KEY;
   // https://mainnet.helius-rpc.com/?api-key=ammmmmm
