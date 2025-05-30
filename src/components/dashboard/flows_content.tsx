@@ -86,7 +86,7 @@ export function FlowsContent({ flows, loading }: FlowsContentProps) {
               </div>
               <CardFooter>
                 <Button variant="outline" size="lg" className="w-full " asChild>
-                  <Link target="_blank" className="" href={`/flow/${flow.id}`}>Manage Flow</Link>
+                  <Link className="" href={`/flow/${flow.id}`}>Manage Flow</Link>
                 </Button>
               </CardFooter>
             </Card>
