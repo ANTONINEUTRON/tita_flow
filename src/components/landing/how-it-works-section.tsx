@@ -12,7 +12,7 @@ export function HowItWorksSection() {
             </p>
           </div>
         </div>
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8 mt-12">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 mt-12">
           {howItWorks.map((step, index) => (
             <div key={index} className="relative flex flex-col items-center p-6">
               <div className="text-4xl font-bold text-primary/20 dark:text-primary/30 mb-4">{step.step}</div>
