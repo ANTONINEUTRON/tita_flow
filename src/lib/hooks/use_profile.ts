@@ -32,7 +32,6 @@ export default function useProfile() {
     const { requestDevnetToken } = useAirdrop();
 
     useEffect(() => {
-        console.log("useProfile hook initialized");
         if (userContext.user && !userProfile) {
             if (!loadingRef.current) {
                 loadingRef.current = true;
@@ -152,10 +151,9 @@ export default function useProfile() {
 
                 const updatedBalances = [...supportedCurrenciesBalances!];
                 updatedBalances[indexToFetch] = balance;
-                console.log("Updated Balances: ", updatedBalances);
+                
                 setSCurrenciesBalances(updatedBalances);
             } else {
-                console.log("Fetching all balances");
                 // fetch all balances
                 const balances = await Promise.all(
                     AppConstants.SUPPORTEDCURRENCIES.map(async (currency, index) => {
@@ -166,7 +164,6 @@ export default function useProfile() {
                         return balance;
                     })
                 );
-                console.log("Balances: ", balances);
                 setSCurrenciesBalances(balances);
             }
         } catch (error) {

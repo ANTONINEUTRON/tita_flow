@@ -19,6 +19,7 @@ import {
   InfoIcon,
   Edit2Icon,
   ShieldCheckIcon,
+  UserIcon,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
@@ -48,20 +49,22 @@ import { AppConstants } from "@/lib/app_constants";
 import useContribute from "@/lib/hooks/use_contribute";
 import { FundingFlow } from "@/lib/types/funding_flow";
 import useUpdates from "@/lib/hooks/use_updates";
+import { Card } from "@/components/ui/card";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 
 interface NavItem {
   title: string;
   href: string;
   icon: LucideIcon;
   badge?: number;
-  highlight?: boolean; 
+  highlight?: boolean;
 }
 
 export default function FlowDetailPage() {
   const params = useParams();
   const [dialogOpen, setDialogOpen] = useState(false);
   const [signInDialogOpen, setSignInDialogOpen] = useState(false);
-  const [isSigningIn, setIsSigningIn] = useState(false); 
+  const [isSigningIn, setIsSigningIn] = useState(false);
   const router = useRouter();
   const [flow, setFlow] = useState<FundingFlowResponse | null>(null);
   const [loading, setLoading] = useState(true);
@@ -71,7 +74,7 @@ export default function FlowDetailPage() {
   const { userProfile, signUserIn, walletInstance, supportedCurrenciesBalances } = useProfile();
   const flowId = params.id as string;
   const { getFlowById, fetchFlowOC, activeFlowOnchainData } = useFlow();
-  const { contribute, contributing  } = useContribute();
+  const { contribute, contributing } = useContribute();
   const { updates, fetchUpdates, loading: updateLoading } = useUpdates();
 
   useEffect(() => {
@@ -82,7 +85,7 @@ export default function FlowDetailPage() {
       try {
         let flowDetail = await getFlowById(flowId);
         setFlow(flowDetail);
-        if(flowDetail) document.title = `${flowDetail!.title} | Titaflow`;
+        if (flowDetail) document.title = `${flowDetail!.title} | Titaflow`;
         fetchFlowOC(flowDetail?.address!);
         // fetch updates
         fetchUpdates(flowId);
@@ -146,7 +149,7 @@ export default function FlowDetailPage() {
           amount, userProfile!, flow as any as FundingFlow, walletInstance!,
         )
 
-         fetchFlowOC(flow?.address!);
+        fetchFlowOC(flow?.address!);
       } catch (error) {
         console.error("Contribution failed:", error);
         toast.error("Contribution failed. Please try again.");
@@ -216,12 +219,24 @@ export default function FlowDetailPage() {
         <div>
           {
             userProfile && (
-              <Button variant="outline" size="sm" asChild className="h-9">
-                <Link href="/app/dashboard?tab=flows">
-                  <ArrowLeft className="mr-2 h-4 w-4" />
-                  Back to Flows
-                </Link>
-              </Button>
+              <div className="flex items-center gap-2">
+                <Button variant="outline" size="sm" asChild className="h-9">
+                  <Link href="/app/dashboard?tab=flows">
+                    <ArrowLeft className="mr-2 h-4 w-4" />
+                    Back to Flows
+                  </Link>
+                </Button>
+                <Card className="flex items-center p-1 hover:bg-accent transition-colors rounded-full cursor-pointer">
+                  <Link href={`/app/dashboard?tab=settings`} className="flex items-center gap-2">
+                    <Avatar className="h-7 w-7">
+                      <AvatarImage src={userProfile.profile_pics || ""} alt={userProfile.username || "Creator"} />
+                      <AvatarFallback>
+                        <UserIcon className="h-4 w-4" />
+                      </AvatarFallback>
+                    </Avatar>
+                  </Link>
+                </Card>
+              </div>
             )
           }
           {
@@ -235,13 +250,13 @@ export default function FlowDetailPage() {
         </div>
         <div className="flex items-center gap-2">
           {/* Premium AI Assistant Button with Animation */}
-          <Button 
-            onClick={() => setAgentDialogOpen(true)} 
+          <Button
+            onClick={() => setAgentDialogOpen(true)}
             className="h-9 relative overflow-hidden bg-gradient-to-br from-indigo-600 via-purple-500 to-pink-500 text-white border-0 hover:shadow-lg transition-all duration-300 group"
             size="sm">
             {/* Animated glow effect */}
             <div className="absolute inset-0 bg-gradient-to-r from-blue-400 to-purple-500 opacity-0 group-hover:opacity-30 transition-opacity duration-300 blur-xl"></div>
-            
+
             {/* Button content */}
             <div className="relative flex items-center">
               <Sparkles className="mr-2 h-4 w-4 text-white animate-pulse" />
@@ -266,10 +281,10 @@ export default function FlowDetailPage() {
                 <Link href={`https://solscan.io/address/${flow.address}`} target="_blank" rel="noopener noreferrer">
                   <DropdownMenuItem>
                     <ShieldCheckIcon className="h-4 w-4 mr-2" />
-                    Verify 
+                    Verify
                   </DropdownMenuItem>
                 </Link>
-                
+
               )}
               <DropdownMenuItem onClick={() => router.push(`/flow/${flowId}/edit`)}>
                 <Edit2Icon className="mr-2 h-4 w-4" />
@@ -279,7 +294,7 @@ export default function FlowDetailPage() {
                 <Download className="mr-2 h-4 w-4" />
                 Export Details
               </DropdownMenuItem>
-              
+
             </DropdownMenuContent>
           </DropdownMenu>
         </div>
@@ -302,7 +317,7 @@ export default function FlowDetailPage() {
           handleContributeClick={handleContributeClick} />
 
         {/* Mobile title and progress */}
-        <MobileFlowHeader 
+        <MobileFlowHeader
           flow={flow}
           activeFlowOnchainData={activeFlowOnchainData}
           remainingDays={remainingDays} />
@@ -425,14 +440,14 @@ export default function FlowDetailPage() {
               <p>
                 Leah AI is designed to help you understand this project better by:
               </p>
-              
+
               <ul className="list-disc pl-5 space-y-2">
                 <li>Answering questions about project goals and milestones</li>
                 <li>Providing context on updates and progress</li>
                 <li>Explaining technical aspects in simple terms</li>
                 <li>Summarizing key information for quick understanding</li>
               </ul>
-              
+
               <div className="bg-muted p-4 rounded-md flex items-start">
                 <div className="bg-primary/10 p-2 rounded-full mr-3">
                   <InfoIcon className="h-5 w-5 text-primary" />

@@ -65,7 +65,7 @@ export function MobileFlowHeader({
         </div>
         <Progress value={progressPercentage} className="h-2" />
         <div className="flex justify-between items-center mt-1">
-          <div className="text-xs text-muted-foreground">{progressPercentage}% completed</div>
+          <div className="text-xs text-muted-foreground">{progressPercentage.toFixed(2)}% completed</div>
           {remainingDays !== null && (
             <div className="flex items-center mt-1 text-xs text-muted-foreground">
               <Clock className="mr-1 h-3 w-3" />
