@@ -13,7 +13,7 @@ export const features = [
   },
   {
     title: "Decentralized Governance & Voting",
-    description: "Enable backers to participate in fund management and decision-making.",
+    description: "Enable backers to participate in fund management with flexible voting models: Token-Weighted, Quadratic, or One-Person-One-Vote.",
     icon: "🗳️"
   },
   {
