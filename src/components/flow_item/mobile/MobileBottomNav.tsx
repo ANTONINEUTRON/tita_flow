@@ -12,7 +12,7 @@ interface MobileBottomNavProps {
   canContribute: boolean;
   isLoading: boolean;
   onNavigate: (view: string) => void;
-  onAction: () => void;
+  onContributeClicked: () => void;
 }
 
 export function MobileBottomNav({
@@ -22,7 +22,7 @@ export function MobileBottomNav({
   canContribute,
   isLoading,
   onNavigate,
-  onAction
+  onContributeClicked: onAction
 }: MobileBottomNavProps) {
   return (
     <div className="md:hidden fixed bottom-0 left-0 right-0 bg-background border-t z-40 pb-safe">
@@ -31,6 +31,7 @@ export function MobileBottomNav({
         <Button
           className="h-14 w-14 rounded-full shadow-lg flex items-center justify-center"
           onClick={onAction}
+          disabled={isLoading}
         >
           {isLoading ? (
             <div className="">

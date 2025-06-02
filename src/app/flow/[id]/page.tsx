@@ -62,7 +62,7 @@ interface NavItem {
 
 export default function FlowDetailPage() {
   const params = useParams();
-  const [dialogOpen, setDialogOpen] = useState(false);
+  const [contributeDialogOpen, setContributeDialogOpen] = useState(false);
   const [signInDialogOpen, setSignInDialogOpen] = useState(false);
   const [isSigningIn, setIsSigningIn] = useState(false);
   const router = useRouter();
@@ -107,7 +107,7 @@ export default function FlowDetailPage() {
     if (userProfile && isSigningIn) {
       setIsSigningIn(false); // Reset loading state
       setSignInDialogOpen(false); // Close sign in dialog
-      setDialogOpen(true); // Open contribute dialog
+      setContributeDialogOpen(true); // Open contribute dialog
     }
   }, [userProfile, isSigningIn]);
 
@@ -132,7 +132,12 @@ export default function FlowDetailPage() {
 
   const handleContributeClick = () => {
     if (userProfile) {
-      setDialogOpen(true);
+      if(flow!.users.id == userProfile.id) {
+        toast.success("Withdrawal is currently being worked on. Stay tuned!"); //TODO
+        return;
+      }else{
+        setContributeDialogOpen(true);
+      }
     } else {
       setSignInDialogOpen(true);
     }
@@ -143,7 +148,7 @@ export default function FlowDetailPage() {
     if (!isNaN(parsed) && parsed > 0) {
       // call contribute function to sign transaction and debit user wallet
       try {
-        setDialogOpen(false);
+        setContributeDialogOpen(false);
 
         await contribute(
           amount, userProfile!, flow as any as FundingFlow, walletInstance!,
@@ -324,8 +329,8 @@ export default function FlowDetailPage() {
 
         {/* Contribute dialog */}
         <ContributeDialog
-          open={dialogOpen}
-          onOpenChange={setDialogOpen}
+          open={contributeDialogOpen}
+          onOpenChange={setContributeDialogOpen}
           selectedToken={flow.currency}
           userBalance={supportedCurrenciesBalances[AppConstants.SUPPORTEDCURRENCIES.findIndex(curr => curr.name === flow.currency)]}
           onContribute={handleDialogContribute}
@@ -382,7 +387,7 @@ export default function FlowDetailPage() {
         mobileNavItems={mobileNavItems}
         activeView={activeView}
         onNavigate={handleNavigation}
-        onAction={handleContributeClick}
+        onContributeClicked={handleContributeClick}
         isSignedIn={!!userProfile}
         isLoading={contributing}
         canContribute={userProfile?.wallet !== flow.creator}
