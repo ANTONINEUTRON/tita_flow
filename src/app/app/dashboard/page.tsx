@@ -18,7 +18,7 @@ import { ScrollArea } from "@/components/ui/scroll-area";
 // Import dashboard components
 import { OverviewContent } from "@/components/dashboard/overview_content";
 import { FlowsContent } from "@/components/dashboard/flows_content";
-import { SettingsContent } from "@/components/dashboard/settings/settings-content";
+import { SettingsContent } from "@/components/dashboard/settings/settings_content";
 import useProfile from "@/lib/hooks/use_profile";
 import formatWalletAddress from "@/lib/utils/format_wallet_address";
 import useFlow from "@/lib/hooks/use_flow";
@@ -72,14 +72,6 @@ export default function DashboardPage() {
     // Render content based on active view
     const renderContent = () => {
         switch (activeView) {
-            // case "overview":
-            // return <OverviewContent 
-            //     flows={flows}
-            //     showNotifications={() => setShowNotifications(true)}
-            //     notifications={notifications}
-            //     contributionsOC={contributions}
-            //     analyticsData={analyticsData}
-            //     user={userProfile} />;
             case "flows":
                 return <FlowsContent
                     flows={flows}

@@ -46,8 +46,6 @@ export function OverviewContent({
   const router = useRouter();
   const { getMonthlyAnalyticsData } = useContribute();
 
-  console.log(flows)
-
   if (!user) {
     return (
       <div className="text-center py-6">

@@ -70,7 +70,7 @@ export class UserService {
 
             return user[0];
         } catch (error) {
-            console.error("Error fetching donations by campaign id:", error);
+            console.error("Error fetching user record:", error);
             throw error;
         }
     }
@@ -88,7 +88,7 @@ export class UserService {
 
             return user[0];
         } catch (error) {
-            console.error("Error fetching donations by campaign id:", error);
+            console.error("Error fetching user record by email:", error);
             throw error;
         }
     }

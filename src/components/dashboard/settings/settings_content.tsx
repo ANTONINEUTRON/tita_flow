@@ -1,6 +1,6 @@
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import TabAccount from "./tab-account";
-import TabNotifications from "./tab-notifications";
+import TabAccount from "./tab_account";
+import TabNotifications from "./tab_notifications";
 
 
 export function SettingsContent() {

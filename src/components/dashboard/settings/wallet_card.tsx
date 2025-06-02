@@ -21,6 +21,8 @@ import { Input } from "@/components/ui/input";
 import { useAirdrop } from "@/lib/hooks/use_airdrop";
 import useProfile from "@/lib/hooks/use_profile";
 import AppUser from "@/lib/types/user";
+import { withdrawFromWallet } from "@/lib/utils/withdraw_from_wallet";
+import { Keypair, PublicKey } from "@solana/web3.js";
 
 interface WalletCardProps {
     supportedCurrenciesBalances: number[];
@@ -37,6 +39,7 @@ export default function WalletCard({ supportedCurrenciesBalances, user, fetchBal
     const [withdrawToken, setWithdrawToken] = useState<string>(AppConstants.SUPPORTEDCURRENCIES[0]?.name || "");
     const [withdrawAmount, setWithdrawAmount] = useState<string>("");
     const [withdrawAddress, setWithdrawAddress] = useState<string>("");
+    const { walletInstance, fetchUserBalance } = useProfile()
 
     // Add validation
     const getMaxAmount = () => {
@@ -118,8 +121,8 @@ export default function WalletCard({ supportedCurrenciesBalances, user, fetchBal
                             <Wallet className="mr-2 h-4 w-4" />
                             Add Funds
                         </Button>
-                        <Button 
-                            className="w-full" 
+                        <Button
+                            className="w-full"
                             onClick={() => setWithdrawDialogOpen(true)}
                             variant="outline">
                             <ArrowUpRight className="mr-2 h-4 w-4" />
@@ -323,17 +326,26 @@ export default function WalletCard({ supportedCurrenciesBalances, user, fetchBal
                                     toast.loading(`Withdrawing ${withdrawAmount} ${withdrawToken}...`);
 
                                     // API call would go here
-                                    await new Promise(r => setTimeout(r, 1000)); // Simulated delay
-
+                                    // await new Promise(r => setTimeout(() => {
+                                        setWithdrawDialogOpen(false);
+                                    // }, 1500));
+                                    await withdrawFromWallet(
+                                        walletInstance!,
+                                        new PublicKey(user.wallet),
+                                        withdrawAddress,
+                                        Number(withdrawAmount),
+                                        withdrawToken
+                                    );
+                                    fetchBalance();
                                     toast.dismiss();
                                     toast.success(`Successfully withdrew ${withdrawAmount} ${withdrawToken}`);
-                                    setWithdrawDialogOpen(false);
 
                                     // Reset form
                                     setWithdrawAmount("");
                                     setWithdrawAddress("");
                                 } catch (error) {
                                     toast.dismiss();
+                                    console.error(`Failed to withdraw: ${error}`);
                                     toast.error(`Failed to withdraw: ${error}`);
                                 }
                             }}

@@ -53,7 +53,6 @@ export default function TabAccount() {
     }
   }, [userProfile, form]);
   
-  // Handle form submission - only update name and profile_pics
   const onSubmit = async (data: AccountFormValues) => {
     try {
       if (!userProfile) return;
@@ -261,13 +260,6 @@ export default function TabAccount() {
             </div>
           </div>
           
-          {/* Read-only Information */}
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mt-4">
-            <div className="space-y-1">
-              <Label className="text-xs text-muted-foreground">Email</Label>
-              <p className="text-sm">{userProfile.email || "No email provided"}</p>
-            </div>
-          </div>
         </CardContent>
       </Card>
       
@@ -286,7 +278,7 @@ export default function TabAccount() {
                 name="name"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Display Name</FormLabel>
+                    <FormLabel>Name</FormLabel>
                     <FormControl>
                       <Input placeholder="Your name" {...field} />
                     </FormControl>

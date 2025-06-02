@@ -129,8 +129,8 @@ export default function useProfile() {
             }
 
         } catch (error) {
-            console.log("An error occurred while fetching user profile " + error);
-            setError("An error occurred while fetching user profile");
+            toast.error("Couldn't fetch your profile. Please try again.");
+            console.error("An error occurred while fetching user profile " + error);
         }
 
         loadingRef.current = false;
@@ -194,11 +194,9 @@ export default function useProfile() {
 
             return response.data as AppUser;
         } catch (error) {
-            setError("An error occurred while fetching user profile");
             console.error(error);
+            throw Error("An error occurred while fetching user profile");
         }
-
-        return null
     }
 
     const saveUserProfile = async (userProfile: AppUser) => {
