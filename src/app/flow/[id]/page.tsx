@@ -42,7 +42,6 @@ import useFlow from "@/lib/hooks/use_flow";
 import toast from "react-hot-toast";
 import { FundingFlowResponse } from "@/lib/types/funding_flow.response";
 import useProfile from "@/lib/hooks/use_profile";
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter, DialogDescription } from "@/components/ui/dialog";
 import { ContributeDialog } from "@/components/flow_item/contribute/contribute_dialog";
 import { SupportCurrency } from "@/lib/types/supported_currencies";
 import { AppConstants } from "@/lib/app_constants";
@@ -51,6 +50,12 @@ import { FundingFlow } from "@/lib/types/funding_flow";
 import useUpdates from "@/lib/hooks/use_updates";
 import { Card } from "@/components/ui/card";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { SignInDialog } from "@/components/dialogs/sign_in_dialog";
+import { AIAssistantDialog } from "@/components/dialogs/ai_assistant_dialog";
+import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { Label } from "@/components/ui/label";
+import { Input } from "@/components/ui/input";
+import { formatCurrency } from "@/lib/utils";
 
 interface NavItem {
   title: string;
@@ -73,9 +78,12 @@ export default function FlowDetailPage() {
   const [agentDialogOpen, setAgentDialogOpen] = useState(false);
   const { userProfile, signUserIn, walletInstance, supportedCurrenciesBalances } = useProfile();
   const flowId = params.id as string;
-  const { getFlowById, fetchFlowOC, activeFlowOnchainData } = useFlow();
+  const { getFlowById, fetchFlowOC, withDrawFromFlow, activeFlowOnchainData } = useFlow();
   const { contribute, contributing } = useContribute();
   const { updates, fetchUpdates, loading: updateLoading } = useUpdates();
+  const [withdrawDialogOpen, setWithdrawDialogOpen] = useState(false);
+  const [withdrawAmount, setWithdrawAmount] = useState("");
+  const [isWithdrawing, setIsWithdrawing] = useState(false);
 
   useEffect(() => {
     const loadFlowData = async () => {
@@ -107,7 +115,7 @@ export default function FlowDetailPage() {
     if (userProfile && isSigningIn) {
       setIsSigningIn(false); // Reset loading state
       setSignInDialogOpen(false); // Close sign in dialog
-      setContributeDialogOpen(true); // Open contribute dialog
+      if(userProfile.id !== flow?.users.id)setContributeDialogOpen(true); // Open contribute dialog
     }
   }, [userProfile, isSigningIn]);
 
@@ -132,10 +140,10 @@ export default function FlowDetailPage() {
 
   const handleContributeClick = () => {
     if (userProfile) {
-      if(flow!.users.id == userProfile.id) {
-        toast.success("Withdrawal is currently being worked on. Stay tuned!"); //TODO
+      if (flow!.users.id == userProfile.id) {
+        setWithdrawDialogOpen(true);
         return;
-      }else{
+      } else {
         setContributeDialogOpen(true);
       }
     } else {
@@ -199,11 +207,6 @@ export default function FlowDetailPage() {
       </div>
     );
   }
-
-  const progress = flow.goal ? Math.min(100, Math.round((flow.raised! / Number(flow.goal)) * 100)) : 0;
-  const remainingDays = flow.enddate
-    ? Math.max(0, Math.ceil((new Date(flow.enddate).getTime() - new Date().getTime()) / (1000 * 60 * 60 * 24)))
-    : null;
 
   // Navigation items
   const navItems: NavItem[] = [
@@ -312,11 +315,9 @@ export default function FlowDetailPage() {
           flow={flow}
           activeView={activeView}
           navItems={navItems}
-          progress={progress}
-          remainingDays={remainingDays}
           isSignedIn={!!userProfile}
           canContribute={userProfile?.wallet !== flow.creator}
-          isLoading={contributing}
+          isLoading={contributing || isWithdrawing}
           activeFlowOnchainData={activeFlowOnchainData}
           onNavigate={handleNavigation}
           handleContributeClick={handleContributeClick} />
@@ -324,8 +325,7 @@ export default function FlowDetailPage() {
         {/* Mobile title and progress */}
         <MobileFlowHeader
           flow={flow}
-          activeFlowOnchainData={activeFlowOnchainData}
-          remainingDays={remainingDays} />
+          activeFlowOnchainData={activeFlowOnchainData} />
 
         {/* Contribute dialog */}
         <ContributeDialog
@@ -389,84 +389,100 @@ export default function FlowDetailPage() {
         onNavigate={handleNavigation}
         onContributeClicked={handleContributeClick}
         isSignedIn={!!userProfile}
-        isLoading={contributing}
+        isLoading={contributing || isWithdrawing}
         canContribute={userProfile?.wallet !== flow.creator}
       />
 
       {/* Sign-in Dialog */}
-      <Dialog open={signInDialogOpen} onOpenChange={(open) => !isSigningIn && setSignInDialogOpen(open)}>
+      <SignInDialog
+        open={signInDialogOpen}
+        onOpenChange={(open) => !isSigningIn && setSignInDialogOpen(open)}
+        onSignIn={handleSignIn}
+        isSigningIn={isSigningIn}
+      />
+
+      {/* AI Assistant Dialog */}
+      <AIAssistantDialog
+        open={agentDialogOpen}
+        onOpenChange={setAgentDialogOpen} />
+
+      {/* Withdraw Dialog */}
+      <Dialog open={withdrawDialogOpen} onOpenChange={setWithdrawDialogOpen}>
         <DialogContent className="sm:max-w-[425px]">
           <DialogHeader>
-            <DialogTitle>Sign in required</DialogTitle>
+            <DialogTitle>Withdraw Funds</DialogTitle>
             <DialogDescription>
-              You need to sign in before you can contribute to this funding flow.
+              Enter the amount you would like to withdraw from this flow.
             </DialogDescription>
           </DialogHeader>
+          <div className="grid gap-4 py-3">
+            <div className="">
+              <Input
+                id="amount"
+                type="number"
+                value={withdrawAmount}
+                onChange={(e) => setWithdrawAmount(e.target.value)}
+                placeholder="0.00"
+                className="col-span-3"
+                min="0"
+                step="0.01"
+              />
+            </div>
+            <div className="text-sm text-muted-foreground">
+              Available: {formatCurrency(((activeFlowOnchainData?.available ?? activeFlowOnchainData?.raised) / Math.pow(10, AppConstants.SUPPORTEDCURRENCIES.find((curr) => curr.name == flow.currency)!.decimals)) || 0)} {flow?.currency}
+            </div>
+          </div>
           <DialogFooter>
             <Button
               variant="outline"
-              onClick={() => setSignInDialogOpen(false)}
-              disabled={isSigningIn}
+              onClick={() => setWithdrawDialogOpen(false)}
+              disabled={isWithdrawing}
             >
               Cancel
             </Button>
             <Button
-              onClick={handleSignIn}
-              disabled={isSigningIn}
+              onClick={async () => {
+                const available = activeFlowOnchainData?.available ?? activeFlowOnchainData?.raised;
+
+                if (!withdrawAmount || parseFloat(withdrawAmount) <= 0) {
+                  toast.error("Please enter a valid amount");
+                  return;
+                }
+                if (parseFloat(withdrawAmount) > (available || 0)) {
+                  toast.error("Amount exceeds available funds");
+                  return;
+                }
+
+                setIsWithdrawing(true);
+                try {
+                  setWithdrawDialogOpen(false);
+                  await withDrawFromFlow(
+                    walletInstance!,
+                    parseFloat(withdrawAmount),
+                    flow?.address!,
+                    flow?.currency!,
+                    userProfile!.wallet
+                  );
+                  fetchFlowOC(flow?.address!);
+                  setWithdrawAmount("");
+                  toast.success(`Successfully withdrew ${withdrawAmount} ${flow?.currency}`);
+                } catch (error) {
+                  console.error("Withdrawal failed:", error);
+                  toast.error("Failed to withdraw funds. Please try again.");
+                } finally {
+                  setIsWithdrawing(false);
+                }
+              }}
+              disabled={isWithdrawing}
             >
-              {isSigningIn ? (
+              {isWithdrawing ? (
                 <>
                   <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                  Signing In...
+                  Withdrawing...
                 </>
               ) : (
-                "Sign In"
+                "Withdraw"
               )}
-            </Button>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
-
-      {/* AI Assistant Dialog */}
-      <Dialog open={agentDialogOpen} onOpenChange={setAgentDialogOpen}>
-        <DialogContent className="sm:max-w-md">
-          <DialogHeader>
-            <DialogTitle className="flex items-center">
-              <Sparkles className="h-5 w-5 mr-2 text-primary" />
-              Meet Leah, Your Project Guide
-            </DialogTitle>
-            <DialogDescription>
-              Your personal project assistant with answers to all your questions.
-            </DialogDescription>
-          </DialogHeader>
-
-          <div className="py-4">
-            <div className="space-y-4">
-              <p>
-                Leah AI is designed to help you understand this project better by:
-              </p>
-
-              <ul className="list-disc pl-5 space-y-2">
-                <li>Answering questions about project goals and milestones</li>
-                <li>Providing context on updates and progress</li>
-                <li>Explaining technical aspects in simple terms</li>
-                <li>Summarizing key information for quick understanding</li>
-              </ul>
-
-              <div className="bg-muted p-4 rounded-md flex items-start">
-                <div className="bg-primary/10 p-2 rounded-full mr-3">
-                  <InfoIcon className="h-5 w-5 text-primary" />
-                </div>
-                <p className="text-sm">
-                  <strong>Coming Soon:</strong> We're currently teaching Leah everything about this project. She'll be ready to assist you in the next update!
-                </p>
-              </div>
-            </div>
-          </div>
-
-          <DialogFooter>
-            <Button onClick={() => setAgentDialogOpen(false)}>
-              Got it
             </Button>
           </DialogFooter>
         </DialogContent>

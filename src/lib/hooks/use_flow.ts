@@ -8,7 +8,7 @@ import { getTitaFlowProgram } from "@project/anchor";
 import { AppConstants } from "../app_constants";
 import { PublicKey, SystemProgram, Transaction } from "@solana/web3.js";
 import BN from "bn.js";
-import { TOKEN_PROGRAM_ID } from "@solana/spl-token";
+import { getAssociatedTokenAddress, TOKEN_PROGRAM_ID } from "@solana/spl-token";
 import { SolanaWallet } from "@civic/auth-web3";
 import { FundingFlowResponse } from "../types/funding_flow.response";
 
@@ -37,8 +37,9 @@ export default function useFlow() {
     const fetchFlowOC = async (address: string) => {
         try {
             const flow = await program.account.flow.fetch(new PublicKey(address));
-             
+            
             setActiveFlowOnChainData(flow);
+            
             return flow;
         }catch (error) {
             console.error("Error fetching flow:", error);
@@ -50,8 +51,6 @@ export default function useFlow() {
         const mediaUploadRes = (formValues.media && formValues.media.length > 0)
             ? await uploadMediaFiles(formValues)
             : { imageUrls: [], videoUrl: "" };
-
-        const now = new Date().toISOString()
 
         // Format dates properly for database compatibility
         const formatDate = (dateValue: string | Date | undefined | null): string | null => {
@@ -339,21 +338,47 @@ export default function useFlow() {
         }
     };
 
-    // Fetch a flow's on-chain data and return it (instead of setting state)
-    // const fetchFlowOnChainData = async (address: string) => {
-    //     try {
-    //         const flow = await program.account.flow.fetch(new PublicKey(address));
-    //         let completedMilestones = !flow.milestones ? 0 : flow.milestones.filter((m: any) => m.completed).length;
-    //         return {
-    //             raised: flow.raised.toString(),
-    //             goal: flow.goal.toString(),
-    //             completedMilestones: completedMilestones,
-    //         };
-    //     } catch (error) {
-    //         console.error(`Error fetching on-chain data for flow ${address}:`, error);
-    //         return null;
-    //     }
-    // };
+    const withDrawFromFlow = async (solanaWallet: SolanaWallet, amount: number, flowAddress: string, flowCurrency: string,  creator: string)=> {
+        // Milestone based flow and the available amount is the only thing to be tracked
+        if (activeFlowOnchainData.milestones) {
+            toast.success("Milestone based Withdrawal still in the works");
+
+        }else{
+            // Direct flow, withdraw the amount raised
+            const amountInBn = new BN(amount * Math.pow(10, AppConstants.SUPPORTEDCURRENCIES.find(curr => curr.name == flowCurrency)!.decimals));
+
+            const creatorPublicKey = new PublicKey(creator);
+            //get public key
+            const creatorTokenAccount = await getAssociatedTokenAddress(
+                activeFlowOnchainData.tokenMint,
+                creatorPublicKey,
+                false // allowOwnerOffCurve - typically false for normal wallets
+            );
+
+            const withdrawInx = await program.methods
+            .withdraw(amountInBn)
+            .accountsPartial({
+                creator: creatorPublicKey,
+                flow: new PublicKey(flowAddress),
+                flowTokenAccount: activeFlowOnchainData.flowTa,
+                recipientTokenAccount: creatorTokenAccount,
+                tokenMint: activeFlowOnchainData.tokenMint,
+                tokenProgram: TOKEN_PROGRAM_ID,
+                systemProgram: SystemProgram.programId
+            }).instruction();
+
+            const blockhash = await connection.getLatestBlockhash();
+
+            const trx = new Transaction({
+                ...blockhash,
+                feePayer: creatorPublicKey,
+            }).add(withdrawInx);
+
+            const signature = await solanaWallet.sendTransaction(trx, connection);
+
+            await connection.confirmTransaction({ signature, ...blockhash });
+        }
+    }
 
     return {
         getUserFlows, 
@@ -362,8 +387,9 @@ export default function useFlow() {
         createFlowTransaction, 
         saveFlowToStore, 
         fetchFlowOC,
+        withDrawFromFlow,
         activeFlowOnchainData,
-        loading, 
+        loading,
         error, 
         flows, 
         pagination,

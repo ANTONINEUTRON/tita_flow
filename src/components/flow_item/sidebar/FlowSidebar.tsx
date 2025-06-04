@@ -14,8 +14,6 @@ interface FlowSidebarProps {
   flow: FundingFlowResponse;
   activeView: string;
   navItems: NavItem[];
-  progress: number;
-  remainingDays: number | null;
   isSignedIn: boolean;
   canContribute: boolean;
   isLoading: boolean;
@@ -29,7 +27,6 @@ export function FlowSidebar({
   activeView,
   navItems,
   activeFlowOnchainData,
-  remainingDays,
   isSignedIn,
   canContribute,
   isLoading,
@@ -46,7 +43,6 @@ export function FlowSidebar({
         <FlowProgress
           flow={flow}
           activeFlowOnchainData={activeFlowOnchainData}
-          remainingDays={remainingDays}
         />
 
         <CardContent className="pt-0">
