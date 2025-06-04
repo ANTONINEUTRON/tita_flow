@@ -37,7 +37,7 @@ export default function useFlow() {
     const fetchFlowOC = async (address: string) => {
         try {
             const flow = await program.account.flow.fetch(new PublicKey(address));
-            
+
             setActiveFlowOnChainData(flow);
             
             return flow;
@@ -164,7 +164,7 @@ export default function useFlow() {
             milestones = fundingFlow?.milestones!.map((milestone) => {
                 return {
                     id: milestone.id,
-                    amount: new BN(milestone.amount),
+                    amount: new BN(milestone.amount * Math.pow(10, selectedCurrency.decimals)),
                     deadline: new BN(new Date(milestone.deadline).getTime() / 1000),
                     completed: false,
                 };
@@ -338,21 +338,23 @@ export default function useFlow() {
         }
     };
 
-    const withDrawFromFlow = async (solanaWallet: SolanaWallet, amount: number, flowAddress: string, flowCurrency: string,  creator: string)=> {
+    const withDrawFromFlow = async (
+        solanaWallet: SolanaWallet, 
+        amount: number, 
+        flowAddress: string, 
+        flowCurrency: string,  
+        creator: string
+    )=> {
         // Milestone based flow and the available amount is the only thing to be tracked
-        if (activeFlowOnchainData.milestones) {
-            toast.success("Milestone based Withdrawal still in the works");
-
-        }else{
-            // Direct flow, withdraw the amount raised
+        
             const amountInBn = new BN(amount * Math.pow(10, AppConstants.SUPPORTEDCURRENCIES.find(curr => curr.name == flowCurrency)!.decimals));
 
             const creatorPublicKey = new PublicKey(creator);
-            //get public key
+            
             const creatorTokenAccount = await getAssociatedTokenAddress(
                 activeFlowOnchainData.tokenMint,
                 creatorPublicKey,
-                false // allowOwnerOffCurve - typically false for normal wallets
+                false 
             );
 
             const withdrawInx = await program.methods
@@ -377,7 +379,7 @@ export default function useFlow() {
             const signature = await solanaWallet.sendTransaction(trx, connection);
 
             await connection.confirmTransaction({ signature, ...blockhash });
-        }
+        
     }
 
     return {

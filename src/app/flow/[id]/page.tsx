@@ -463,7 +463,7 @@ export default function FlowDetailPage() {
                     flow?.currency!,
                     userProfile!.wallet
                   );
-                  fetchFlowOC(flow?.address!);
+                  await fetchFlowOC(flow?.address!);
                   setWithdrawAmount("");
                   toast.success(`Successfully withdrew ${withdrawAmount} ${flow?.currency}`);
                 } catch (error) {

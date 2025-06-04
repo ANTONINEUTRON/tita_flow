@@ -18,7 +18,7 @@ export function FlowProgress({ flow, activeFlowOnchainData }: FlowProgressProps)
   const goal = activeFlowOnchainData?.goal ? Number(activeFlowOnchainData.goal) / Math.pow(10, decimals) : Number(flow?.goal || 0);
   const raised = activeFlowOnchainData?.raised ? Number(activeFlowOnchainData.raised) / Math.pow(10, decimals) : 0;
   const available = activeFlowOnchainData?.available ? Number(activeFlowOnchainData.available) / Math.pow(10, decimals) : 0;
-  const withdrawn = raised - available;
+  const withdrawn = activeFlowOnchainData?.withdrawn ? Number(activeFlowOnchainData.withdrawn) / Math.pow(10, decimals) : 0; //raised - available;
 
   // Calculate percentages based on adjusted goal
   const availablePercentage = goal > 0 ? (available / goal) * 100 : 0;
@@ -58,8 +58,8 @@ export function FlowProgress({ flow, activeFlowOnchainData }: FlowProgressProps)
           {/* Available funds segment */}
           <div 
             className="h-full bg-primary transition-all duration-500 ease-in-out absolute left-0"
-            style={{ width: `${Math.min(availablePercentage, 100)}%` }}
-            aria-label={`Available: ${availablePercentage.toFixed(1)}%`}
+            style={{ width: `${Math.min(totalPercentage, 100)}%` }}
+            aria-label={`Available: ${totalPercentage.toFixed(1)}%`}
           />
           
           {/* Withdrawn funds segment - make it clickable */}
