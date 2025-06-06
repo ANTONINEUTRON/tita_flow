@@ -19,8 +19,11 @@ export async function GET(req: NextRequest) {
         const userRecord = userId
             ? await userService.getUserRecord(userId ?? "")
             : await userService.getUserRecordByEmail(userEmail ?? "");
-            
-        return NextResponse.json(userRecord);
+
+            if(!userRecord) {
+                return NextResponse.json({ message: "User not found" });
+            }
+        return NextResponse.json({ user: userRecord });
     } catch (error) {
         console.log(error)
         return NextResponse.error();

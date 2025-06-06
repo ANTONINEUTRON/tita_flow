@@ -178,26 +178,37 @@ export default function useProfile() {
         try {
             const response = await axios.get(`/api/user?userId=${userId}`);
 
-            return response.data as AppUser;
+            let data = response.data;
+
+            if (data && data.user) {
+                return data.user as AppUser;
+            } else {
+                return null;
+            }
         } catch (error) {
             setError("An error occurred while fetching user profile");
             console.error(error);
+            throw Error("An error occurred while fetching user profile");
         }
-
-        return null
     }
 
     const fetchProfileWithEmail = async (userEmail: string): Promise<AppUser | null> => {
         try {
             // fetch user record using axios from api/user?userId=[userId]
             const response = await axios.get(`/api/user?userEmail=${userEmail}`);
+            
+            
+            let data = response.data ;
 
-            return response.data as AppUser;
+            if (data && data.user) {
+                return data.user as AppUser;
+            } else {
+                return null;
+            }
         } catch (error) {
             console.error(error);
-            // throw Error("An error occurred while fetching user profile");
+            throw Error("An error occurred while fetching user profile");
         }
-        return null
     }
 
     const saveUserProfile = async (userProfile: AppUser) => {
@@ -254,7 +265,6 @@ export default function useProfile() {
 
             // Update the user profile state
             fetchProfile(userProfile!.id).then((profile) => {
-                console.log(profile)
                 if (profile) {
                     setUserProfile(profile);
                 }

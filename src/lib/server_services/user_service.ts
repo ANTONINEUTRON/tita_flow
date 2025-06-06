@@ -57,7 +57,7 @@ export class UserService {
         }
     }
 
-    public async getUserRecord(userId: string): Promise<AppUser> {
+    public async getUserRecord(userId: string): Promise<AppUser | null> {
         try {
             const { data: user, error } = await (await this.client)
                 .from(AppConstants.USER_TABLE)
@@ -68,6 +68,10 @@ export class UserService {
                 throw error;
             }
 
+            if (!user || user.length === 0) {
+                return null
+            }
+
             return user[0];
         } catch (error) {
             console.error("Error fetching user record:", error);
@@ -75,7 +79,7 @@ export class UserService {
         }
     }
 
-    public async getUserRecordByEmail(userEmail: string): Promise<AppUser> {
+    public async getUserRecordByEmail(userEmail: string): Promise<AppUser | null> {
         try {
             const { data: user, error } = await (await this.client)
                 .from(AppConstants.USER_TABLE)
@@ -84,6 +88,10 @@ export class UserService {
 
             if (error) {
                 throw error;
+            }
+
+            if (!user || user.length === 0) {
+                return null
             }
 
             return user[0];

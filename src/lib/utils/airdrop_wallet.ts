@@ -8,7 +8,7 @@ export default async function airdropWallet(walletAddress: string){
         // Airdrop SOL
         const airdropSignature = await connection.requestAirdrop(
             new PublicKey(walletAddress),
-            3 * LAMPORTS_PER_SOL // 1 SOL in lamports (1 SOL = 1,000,000,000 lamports)
+            1 * LAMPORTS_PER_SOL // 1 SOL in lamports (1 SOL = 1,000,000,000 lamports)
         );
 
         // Wait for 2 seconds to allow the transaction to be processed
