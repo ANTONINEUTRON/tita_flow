@@ -11,8 +11,8 @@ export function HeroSection() {
   const [scrollY, setScrollY] = useState(0);
 
   const [stats, setStats] = useState({
-    amountRaised: 1400,
-    flowsCreated: 28
+    amountRaised: 1600,
+    flowsCreated: 30
   });
 
   useEffect(() => {

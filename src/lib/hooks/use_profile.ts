@@ -195,8 +195,9 @@ export default function useProfile() {
             return response.data as AppUser;
         } catch (error) {
             console.error(error);
-            throw Error("An error occurred while fetching user profile");
+            // throw Error("An error occurred while fetching user profile");
         }
+        return null
     }
 
     const saveUserProfile = async (userProfile: AppUser) => {
