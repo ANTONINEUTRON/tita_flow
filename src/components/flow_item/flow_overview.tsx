@@ -64,20 +64,6 @@ export function FlowOverview({ flow }: FlowOverviewProps) {
     setMediaItems(media);
   }, [flow]);
 
-  // Get voting power model display name
-  const getVotingPowerModelName = (model: VotingPowerModel) => {
-    switch (model) {
-      case VotingPowerModel.TOKEN_WEIGHTED:
-        return "Token Weighted";
-      case VotingPowerModel.QUADRATIC_VOTING:
-        return "Quadratic Voting";
-      case VotingPowerModel.INDIVIDUAL_VOTING:
-        return "Individual Voting";
-      default:
-        return "Unknown";
-    }
-  };
-
   // Get milestone status color
   const getStatusColor = (index: number) => {
     if (!flow.completed_milestones) return "bg-gray-400";
@@ -150,7 +136,7 @@ export function FlowOverview({ flow }: FlowOverviewProps) {
                       <Badge variant="outline">Milestone Based</Badge>
                     )}
                     {flow.rules.governance && (
-                      <Badge variant="outline">Weighted Distribution</Badge>
+                      <Badge variant="outline">{getVotingPowerModelDisplayName(flow.voting_power_model)}</Badge>
                     )}
                     {!flow.rules.milestone && !flow.rules.governance && (
                       <Badge variant="outline">No Rules configured</Badge>

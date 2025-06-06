@@ -95,23 +95,25 @@ export function FlowProgress({ flow, activeFlowOnchainData }: FlowProgressProps)
 
         {/* Withdrawal breakdown - shown when toggled */}
         {showWithdrawn && withdrawn > 0 && (
-          <div className="mt-3 p-3 bg-muted/50 rounded-md space-y-2">
+          <div className="mt-3 p-3 text-xs bg-muted/50 rounded-md space-y-2">
             <div className="flex justify-between text-sm">
-              <span className="text-muted-foreground">Available:</span>
+              <span className="text-muted-foreground text-xs">Available:</span>
               <span className="font-medium text-primary">
-                {formattedAvailable} {currencySymbol}
+                {formattedAvailable} 
+                {/* {currencySymbol} */}
               </span>
             </div>
             <div className="flex justify-between text-sm">
-              <span className="text-muted-foreground">Withdrawn:</span>
+              <span className="text-muted-foreground text-xs">Withdrawn:</span>
               <span className="font-medium text-green-600">
-                {formattedWithdrawn} {currencySymbol}
+                {formattedWithdrawn} 
+                {/* {currencySymbol} */}
               </span>
             </div>
             <div className="h-px bg-border my-2" />
             <div className="flex justify-between text-sm font-medium">
-              <span>Total Raised:</span>
-              <span>{formattedRaised} {currencySymbol}</span>
+              <span className="text-xs">Raised:</span>
+              <span>{formattedRaised} {currencySymbol}</span> 
             </div>
           </div>
         )}

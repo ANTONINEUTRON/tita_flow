@@ -4,10 +4,10 @@ import { FlowStatus, MilestoneStatus } from "./types/typesbbbb";
 import { Badge } from "@/components/ui/badge";
 
 export function formatCurrency(amount: number, symbol: string = "$"): string {
-  return `${symbol}${amount.toLocaleString(undefined, { 
+  return `${amount.toLocaleString(undefined, { 
     minimumFractionDigits: 2, 
     maximumFractionDigits: 2 
-  })}`;
+  })}${" "+symbol}`;
 }
 export function formatDate(dateString: string): string {
   const date = new Date(dateString);
