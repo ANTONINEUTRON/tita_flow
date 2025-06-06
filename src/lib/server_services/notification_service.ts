@@ -34,19 +34,22 @@ export class NotificationService {
             const user = await UserService.getInstance().getUserRecord(
                 notificationObj.user_id
             );
-                //fetch userId from the request
-                const userPreference: UserPreferences = user.preferences!;
-                
-                // if userPresence is set, send notification through selected channels to the user
-                //Send notification to the user through the notification channel
-                if(userPreference.notifications?.email){
-                    // call email service
-                    EmailService.getInstance().sendNotificationEmail(
-                        user.email,
-                        user.username,
-                        notificationObj
-                    );
-                }
+            if (!user) {
+                throw new Error("User not found for the given user_id");
+            }
+            //fetch userId from the request
+            const userPreference: UserPreferences = user.preferences!;
+
+            // if userPresence is set, send notification through selected channels to the user
+            //Send notification to the user through the notification channel
+            if (userPreference.notifications?.email) {
+                // call email service
+                EmailService.getInstance().sendNotificationEmail(
+                    user.email,
+                    user.username,
+                    notificationObj
+                );
+            }
 
             if (error) {
                 throw error;
